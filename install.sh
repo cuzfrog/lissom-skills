@@ -38,7 +38,7 @@ if [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
              "$SCRIPT_DIR/skills/task-research" \
              "$SCRIPT_DIR/skills/task-review" \
              "$SCRIPT_DIR/templates"
-    for agent in code-reviewer task-implementer task-planner task-researcher; do
+    for agent in task-implementer task-planner task-researcher task-reviewer; do
         curl -fsSL "$REPO/agents/$agent.md" -o "$SCRIPT_DIR/agents/$agent.md"
     done
     for skill in task-auto task-impl task-plan task-research task-review; do
