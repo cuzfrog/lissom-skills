@@ -18,7 +18,7 @@ steps (`Step-<N>-fix-<M>.md`) listed under `## Fix cycle <M>` sections:
 
 1. Identify the next incomplete step (check git log / existing code to skip
    already-done steps).
-2. Spawn **`task-implementer`**, passing it the task ID and step file name
+2. Spawn **`task-implementer`**, passing it the task ID, step file name, and mode
    (e.g. `T1 Step-2-fix-1`).
 3. Verify the step's acceptance criterion is met (tests pass, files exist,
    etc.) before moving to the next step.
