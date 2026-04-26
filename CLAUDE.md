@@ -1,6 +1,7 @@
 # Project - Lissom-Skills
 
 A set of Skills and Agents that power a simple, clean, and reliable task resolution process.
+My purpose is to built a simple, easy, and most importantly, a neat skill set that can run well on even mundane AI models.
 
 ## Project structure
 For development:
