@@ -4,10 +4,14 @@ Super simple Claude Code Skills and Agents to automate daily tasks and protect t
 
 ## Installation
 
-Install into your project's `.claude/` or home directory (`~/.claude/`):
+Install into your project's `.claude/`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --project
+```
+
+or home directory (`~/.claude/`):
+```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --user
 ```
 
