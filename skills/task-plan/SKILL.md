@@ -3,11 +3,16 @@ name: task-plan
 description: Generate concrete implementation instructions, and split tasks into steps.
 ---
 
-You are invoked with a task ID (e.g. `T1`).
+You are invoked with a task ID (e.g. `T1`) and an optional mode.
+
+## Inputs
+
+- `task_id`: The task identifier (e.g. `T1`)
+- `mode`: Operation mode — `interview` (default) or `auto`
 
 ## What you do
 
-Spawn the **`task-planner`** agent, passing it the task ID.
+Spawn the **`task-planner`** agent, passing it the task ID and mode.
 
 The agent will:
 - Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if absent)
