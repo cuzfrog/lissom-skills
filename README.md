@@ -46,7 +46,7 @@ This bundle includes 5 skills:
 | **task-research** | Spawns task-researcher agent to explore codebase and produce Research.md | When you need to understand the codebase before planning |
 | **task-plan** | Spawns task-planner agent to create Plan.md with ordered steps | When you have research and need a detailed implementation plan |
 | **task-impl** | Spawns task-implementer agent to execute steps from Plan.md | When you have a plan and need to implement it |
-| **task-review** | Spawns code-reviewer agent to examine changes and produce Review.md | When you want to review changes before considering a task complete |
+| **task-review** | Spawns task-reviewer agent to examine changes and produce Review.md | When you want to review changes before considering a task complete |
 
 ### Workflow
 
@@ -65,7 +65,7 @@ This bundle includes 4 sub-agents invoked by the skills:
 | **task-researcher** | Claude Opus | Explore codebase, understand requirements, gather context | `.dev/tasks/<ID>/Research.md` |
 | **task-planner** | Claude Sonnet | Create step-by-step implementation plan with acceptance criteria | `.dev/tasks/<ID>/Plan.md` |
 | **task-implementer** | Claude Haiku | Execute plan steps, write code, run tests, commit changes | Commits per step |
-| **code-reviewer** | Claude Sonnet | Review git diffs, identify issues, categorize findings | `.dev/tasks/<ID>/Review.md` |
+| **task-reviewer** | Claude Sonnet | Review git diffs, identify issues, categorize findings | `.dev/tasks/<ID>/Review.md` |
 
 Agents are automatically invoked by skills — you don't call them directly.
 
