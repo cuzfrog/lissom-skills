@@ -23,6 +23,30 @@ fi
 # Get script directory (where agents/, skills/, templates/ are located)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# When piped via curl, BASH_SOURCE[0] is empty so SCRIPT_DIR falls back to CWD.
+# If the repo files aren't present, download them from GitHub into a temp dir.
+REPO="https://raw.githubusercontent.com/cuzfrog/lissom-skills/main"
+CLEANUP_TMPDIR=""
+if [[ ! -d "$SCRIPT_DIR/agents" ]]; then
+    SCRIPT_DIR="$(mktemp -d)"
+    CLEANUP_TMPDIR="$SCRIPT_DIR"
+    echo "Fetching files from GitHub..."
+    mkdir -p "$SCRIPT_DIR/agents" \
+             "$SCRIPT_DIR/skills/task-auto" \
+             "$SCRIPT_DIR/skills/task-impl" \
+             "$SCRIPT_DIR/skills/task-plan" \
+             "$SCRIPT_DIR/skills/task-research" \
+             "$SCRIPT_DIR/skills/task-review" \
+             "$SCRIPT_DIR/templates"
+    for agent in code-reviewer task-implementer task-planner task-researcher; do
+        curl -fsSL "$REPO/agents/$agent.md" -o "$SCRIPT_DIR/agents/$agent.md"
+    done
+    for skill in task-auto task-impl task-plan task-research task-review; do
+        curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
+    done
+    curl -fsSL "$REPO/templates/CLAUDE.md" -o "$SCRIPT_DIR/templates/CLAUDE.md"
+fi
+
 # Create directory structure
 echo "Installing to $TARGET..."
 mkdir -p "$TARGET/agents"
@@ -103,3 +127,8 @@ echo "Next steps:"
 echo "- Edit $TARGET/CLAUDE.md to describe your project"
 echo "- Create .dev/tasks/<ID>/Specs.md for your first task"
 echo "- Invoke the task-auto skill to run the full dev cycle"
+
+# Clean up temp directory used when fetching from GitHub
+if [[ -n "$CLEANUP_TMPDIR" ]]; then
+    rm -rf "$CLEANUP_TMPDIR"
+fi
