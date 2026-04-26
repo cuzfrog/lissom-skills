@@ -60,11 +60,11 @@ SKIPPED=0
 prompt_overwrite() {
     local file="$1"
     REPLY="n"
-    if { read -p "File $file already exists. Overwrite? [y/N] " -n 1 -r < /dev/tty; } 2>/dev/null; then
-        echo
-    else
-        echo "File $file already exists. Skipping."
-    fi
+    {
+        printf "File %s already exists. Overwrite? [y/N] " "$file" > /dev/tty \
+        && read -n 1 -r < /dev/tty \
+        && echo > /dev/tty
+    } 2>/dev/null || { echo "File $file already exists. Skipping."; return; }
     [[ $REPLY =~ ^[Yy]$ ]]
 }
 
