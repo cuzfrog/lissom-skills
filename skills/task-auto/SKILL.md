@@ -1,5 +1,6 @@
 ---
 name: task-auto
+version: 2026-04-26T00:00:00
 description: Coordinate task skills to finish a dev cycle.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: task-research
+version: 2026-04-26T00:00:00
 description: To understand the task and user's intention. Generate enough information for planning the implementation.
 ---
 

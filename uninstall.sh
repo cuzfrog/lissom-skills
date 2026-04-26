@@ -58,16 +58,6 @@ uninstall_from() {
         rmdir "$TARGET/skills"
     fi
 
-    # Remove CLAUDE.md template
-    dest="$TARGET/CLAUDE.md"
-    if [[ -f "$dest" ]]; then
-        rm "$dest"
-        echo "  Removed $dest"
-        REMOVED=$((REMOVED + 1))
-    else
-        SKIPPED=$((SKIPPED + 1))
-    fi
-
     # Remove empty target directory
     if [[ -d "$TARGET" ]] && [[ -z "$(ls -A "$TARGET")" ]]; then
         rmdir "$TARGET"
