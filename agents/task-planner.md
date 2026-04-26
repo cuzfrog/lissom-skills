@@ -13,8 +13,9 @@ saved in the task directory (`.dev/tasks/<ID>/Plan.md`).
 
 ## Inputs
 
-The caller supplies a task ID. Read `.dev/tasks/<ID>/Research.md` (fall back
-to `Specs.md` if research does not exist yet).
+The caller supplies:
+- A task ID. Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if research does not exist yet).
+- `mode`: `interview` (default) or `auto` — acknowledge only; planner behavior does not change based on mode.
 
 ## Process
 

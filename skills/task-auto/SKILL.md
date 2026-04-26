@@ -10,28 +10,38 @@ always delegate to the appropriate skill/agent, except trivial changes.
 
 ## Inputs
 
-The user supplies a task ID (e.g. `T1`). Locate specs at
-`.dev/tasks/<ID>/Specs.md`.
+The user supplies a task ID (e.g. `T1`) and an optional mode flag.
+
+**Parsing mode from user arguments:**
+- If the user's message contains `auto` or `no interview`, set `mode = auto`.
+- Otherwise, default to `mode = interview`.
+
+Examples:
+- `/task-auto T1` → mode is `interview`
+- `/task-auto T1, auto` → mode is `auto`
+- `/task-auto T1, no interview` → mode is `auto`
+
+Locate specs at `.dev/tasks/<ID>/Specs.md`.
 
 ## Chain
 
-Execute the following skills **in order**, passing the task ID each time:
+Execute the following skills **in order**, passing the task ID and `mode` each time:
 
-1. **`task-research`** → produces `.dev/tasks/<ID>/Research.md`
-2. **`task-plan`** → produces `.dev/tasks/<ID>/Plan.md` (and optional `Step-<N>.md`)
-3. **`task-impl`** → implements all steps, produces `.dev/tasks/<ID>/Impl-summary.md`
-4. **`task-review`** → produces `.dev/tasks/<ID>/Review.md`
+1. **`task-research`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Research.md`
+2. **`task-plan`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Plan.md` (and optional `Step-<N>.md`)
+3. **`task-impl`** → pass task ID and `mode`; implements all steps, produces `.dev/tasks/<ID>/Impl-summary.md`
+4. **`task-review`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Review.md`
 
 ## Fix loop
 
 If `task-review` reports critical issues, do **not** fix code yourself. Instead,
 run a fix cycle:
 
-1. Invoke **`task-plan`** with the task ID and the instruction:
+1. Invoke **`task-plan`** with the task ID, `mode`, and the instruction:
    _"Fix cycle <M>: read Review.md and produce fix step files."_
    The planner writes `Step-<N>-fix-<M>.md` files (one per critical issue).
-2. Invoke **`task-impl`** to execute all new fix steps.
-3. Invoke **`task-review`** again.
+2. Invoke **`task-impl`** with the task ID and `mode` to execute all new fix steps.
+3. Invoke **`task-review`** with the task ID and `mode`.
 
 Repeat the fix cycle up to **3 times**. If critical issues persist after 3
 cycles, escalate to the user with a summary of unresolved findings.
@@ -51,6 +61,7 @@ After invoking a skill, check that its expected artifact exists:
   the user** before continuing.
 - If a skill is interrupted mid-run (e.g. model cut-off), re-invoke it; skills
   are idempotent and safe to resume.
+- Do **not** conduct user Q&A yourself. If a sub-skill escalates a question, relay it to the user and then pass the answer back to the sub-skill. You are a coordinator, not an interviewer.
 
 ## Definition of done
 
