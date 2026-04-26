@@ -2,8 +2,34 @@
 
 Simple and reliable Claude Code Skills and Agents to automate daily tasks and protect the context.
 
-Tested on both **advanced** and **mundane** models, see also:
+#### Why? How this is different from GSD, SuperPower?
+
+They are powerful skill sets. But I also noticed a sharp drop in coding quality from many projects. PRs have become hard to read, code base exploding, walls of documents and texts occupying dirs probably no one would dive into.
+
+They require powerful AI models. Pressure on the model needs more care from developers. I see unit tests be added with no coverage on the prod code, but testing duplicated logic. I see a single input prompt from CLI reach 50k+ or even more tokens. It feels like a cauldron we throw everthing into.
+
+This skill set provides the minimal skills to improve context efficiency while respect the foundamental high-quality dev cycles.
+
+Working on mundane models, see also:
 **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
+
+I use Lissom-Skills to develop Lissom-Skills, and other projects and tasks.
+
+### Basic Workflow
+```
+              ┌─ interview user ─┐
+              │                  ▼
+research ─────┘           ──► plan ──► impl ──► review ──► done
+  ▲         Research.md  /    Plan.md         Review.md     │
+  │                     /                                   │ critical?
+  │                     └──────────── fix cycle (max 3) ◄──┘
+  │                                          │
+  └──────────────── fix cycles exhausted ────┘
+```
+Why there is no `explore` stage? It's essentially duplicate with `research`.
+The simplifiy of `lissom-skills` gives users the control on the task scope and level.
+For a fine-grind task, knowing the whole picture, usually a large doc, is not necessary.
+For a high-level task, the user can define a dedicated explore task.
 
 ## Installation
 
@@ -45,6 +71,10 @@ EOF
 ```claude
 /task-auto T1
 ```
+or, with best effort:
+```claude
+/task-auto T1, no interview
+```
 
 ## Uninstallation
 
@@ -68,23 +98,16 @@ This bundle includes 5 skills:
 | **task-impl** | Spawns task-implementer agent to execute steps from Plan.md | When you have a plan and need to implement it |
 | **task-review** | Spawns task-reviewer agent to examine changes and produce Review.md | When you want to review changes before considering a task complete |
 
-### Workflow
-
-1. **Research phase**: Explores relevant code, reads specs, produces `Research.md`
-2. **Planning phase**: Creates `Plan.md` with ordered steps and acceptance criteria
-3. **Implementation phase**: Executes each step, runs tests, commits changes
-4. **Review phase**: Examines git diffs, reports critical/warning/suggestion findings
-5. **Fix cycle** (if needed): Planner creates fix steps, implementer executes, review re-runs (max 3 cycles)
-
 ## Agents
 
 This bundle includes 4 sub-agents invoked by the skills:
 
 | Agent | Model | Purpose | Output |
 |-------|-------|---------|--------|
-| **task-researcher** | Claude Opus | Explore codebase, understand requirements, gather context | `.dev/tasks/<ID>/Research.md` |
-| **task-planner** | Claude Sonnet | Create step-by-step implementation plan with acceptance criteria | `.dev/tasks/<ID>/Plan.md` |
-| **task-implementer** | Claude Haiku | Execute plan steps, write code, run tests, commit changes | Commits per step |
-| **task-reviewer** | Claude Sonnet | Review git diffs, identify issues, categorize findings | `.dev/tasks/<ID>/Review.md` |
+| **task-researcher** | Opus | Explore codebase, understand requirements, gather context, interviews | `.dev/tasks/<ID>/Research.md` |
+| **task-planner** | Sonnet | Create step-by-step implementation plan with acceptance criteria | `.dev/tasks/<ID>/Plan.md` |
+| **task-implementer** | Haiku | Execute plan steps, write code, run tests, commit changes | Commits per step |
+| **task-reviewer** | Sonnet | Review git diffs, identify issues, categorize findings | `.dev/tasks/<ID>/Review.md` |
 
-Agents are automatically invoked by skills — you don't call them directly.
+Model names here represent their strongth only, it can be any models you config. see also:
+**[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**

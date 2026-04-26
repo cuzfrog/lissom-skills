@@ -3,16 +3,23 @@ name: task-research
 description: To understand the task and user's intention. Generate enough information for planning the implementation.
 ---
 
-You are invoked with a task ID (e.g. `T1`).
+You are invoked with a task ID (e.g. `T1`) and an optional mode.
+
+## Inputs
+
+- `task_id`: The task identifier (e.g. `T1`)
+- `mode`: Operation mode — `interview` (default) or `auto`
 
 ## What you do
 
-Spawn the **`task-researcher`** agent, passing it the task ID.
+Spawn the **`task-researcher`** agent, passing it the task ID and mode.
 
 The agent will:
 - Read `.dev/tasks/<ID>/Specs.md`
 - Explore the codebase for relevant patterns and files
 - Write `.dev/tasks/<ID>/Research.md`
+
+In `auto` mode, the agent must produce an especially thorough Assumptions section, since no user confirmation will occur after research completes.
 
 ## Completion
 
