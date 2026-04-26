@@ -1,6 +1,6 @@
 ---
 name: task-impl
-version: 2026-04-26T16:38:38
+version: 2026-04-26T20:49:21Z
 description: Implement concrete application logic.
 ---
 

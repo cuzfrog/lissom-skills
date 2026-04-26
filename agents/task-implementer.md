@@ -1,6 +1,6 @@
 ---
 name: task-implementer
-version: 2026-04-26T16:38:38
+version: 2026-04-26T20:49:21Z
 description: >
   Expert implementation agent. Executes the step‑by‑step plan, writes
   code, updates tests, and commits changes.
