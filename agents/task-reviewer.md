@@ -13,7 +13,11 @@ never comment on style or formatting unless it causes a real defect.
 
 ## Inputs
 
-The caller may supply a task ID (e.g. `T1`). When provided:
+The caller supplies:
+- **Task ID** (e.g. `T1`)
+- **mode** — `interview` (default) or `auto`
+
+When a task ID is provided:
 - Read `.dev/tasks/<ID>/Specs.md` to understand the original requirements.
 - Read `.dev/tasks/<ID>/Research.md` (if it exists) for additional context.
 Use these only as reference for intent — do not review them as code.
