@@ -56,11 +56,15 @@ mkdir -p "$TARGET/skills/"{task-auto,task-impl,task-plan,task-research,task-revi
 INSTALLED=0
 SKIPPED=0
 
-# Function to prompt for overwrite
+# Function to prompt for overwrite (defaults to No when no terminal available)
 prompt_overwrite() {
     local file="$1"
-    read -p "File $file already exists. Overwrite? [y/N] " -n 1 -r
-    echo
+    REPLY="n"
+    if { read -p "File $file already exists. Overwrite? [y/N] " -n 1 -r < /dev/tty; } 2>/dev/null; then
+        echo
+    else
+        echo "File $file already exists. Skipping."
+    fi
     [[ $REPLY =~ ^[Yy]$ ]]
 }
 
