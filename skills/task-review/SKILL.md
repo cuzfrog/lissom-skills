@@ -3,7 +3,12 @@ name: task-review
 description: Review the implementation.
 ---
 
-You are invoked with a task ID (e.g. `T1`).
+You are invoked with a task ID (e.g. `T1`) and an optional mode.
+
+## Inputs
+
+- `task_id`: The task identifier (e.g. `T1`)
+- `mode`: Operation mode — `interview` (default) or `auto`
 
 ## What you do
 
