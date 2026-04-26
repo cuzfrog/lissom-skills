@@ -24,6 +24,10 @@ research ─────┘           ──► plan ──► impl ──► re
   │                                          │
   └──────────────── fix cycles exhausted ────┘
 ```
+Why there is no `explore` stage? It's essentially duplicate with `research`.
+The simplifiy of `lissom-skills` gives users the control on the task scope and level.
+For a fine-grind task, knowing the whole picture, usually a large doc, is not necessary.
+For a high-level task, the user can define a dedicated explore task.
 
 ## Installation
 
