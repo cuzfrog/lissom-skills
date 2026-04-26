@@ -12,7 +12,9 @@ keep it simple and readable, and verify correctness with tests.
 
 ## Inputs
 
-The caller supplies a task ID and optionally a step number (e.g. `T1 Step 2`).
+The caller supplies:
+- A task ID and optionally a step number (e.g. `T1 Step 2`).
+- `mode`: `interview` (default) or `auto` — controls whether the implementer pauses for user confirmation or runs autonomously.
 
 ## Process
 
@@ -35,6 +37,7 @@ After tests pass:
   ```
   Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
   ```
+- If creating `Impl-summary.md`, copy the Assumptions section from `Research.md` into it so the user is informed of any assumptions made during the run (especially important in `auto` mode).
 
 ## Constraints
 
