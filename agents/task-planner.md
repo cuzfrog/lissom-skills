@@ -1,5 +1,6 @@
 ---
 name: task-planner
+version: 2026-04-26T20:49:21Z
 description: >
   Expert planning agent. Takes the research summary and produces a
   concrete, step‑by‑step implementation plan ready for the implementation
