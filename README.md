@@ -13,6 +13,8 @@ This skill set provides the minimal skills to improve context efficiency while r
 Working on mundane models, see also:
 **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
 
+I use Lissom-Skills to develop Lissom-Skills, and other projects and tasks.
+
 ### Basic Workflow
 ```
               ┌─ interview user ─┐
@@ -68,6 +70,10 @@ EOF
 3. **Run your first task** - and wait for the job done!
 ```claude
 /task-auto T1
+```
+or, with best effort:
+```claude
+/task-auto T1, no interview
 ```
 
 ## Uninstallation
