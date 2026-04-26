@@ -18,9 +18,11 @@ Working on mundane models, see also:
               ┌─ interview user ─┐
               │                  ▼
 research ─────┘           ──► plan ──► impl ──► review ──► done
-(Specs)     Research.md  /    Plan.md         Review.md     │
-                        /                                   │ critical?
-                        └──────────── fix cycle (max 3) ◄──┘
+  ▲         Research.md  /    Plan.md         Review.md     │
+  │                     /                                   │ critical?
+  │                     └──────────── fix cycle (max 3) ◄──┘
+  │                                          │
+  └──────────────── fix cycles exhausted ────┘
 ```
 
 ## Installation
