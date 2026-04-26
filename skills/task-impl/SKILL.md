@@ -8,10 +8,7 @@ You are invoked with a task ID (e.g. `T1`).
 ## Inputs
 
 - **task_id**: The task identifier (required)
-- **mode**: Execution mode
-  - Values: `interview` (default) | `auto`
-  - In `interview` mode, you iterate through steps with full user interaction
-  - In `auto` mode, you proceed without waiting for user confirmation between steps
+- **mode**: Execution mode — `interview` (default) or `auto`
 
 ## What you do
 
