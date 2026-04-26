@@ -14,7 +14,7 @@ keep it simple and readable, and verify correctness with tests.
 
 The caller supplies:
 - A task ID and optionally a step number (e.g. `T1 Step 2`).
-- `mode`: `interview` (default) or `auto` — controls whether the implementer pauses for user confirmation or runs autonomously.
+- `mode`: `interview` (default) or `auto` — passed through from the calling skill; does not affect implementer behavior.
 
 ## Process
 
