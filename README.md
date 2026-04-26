@@ -15,6 +15,34 @@ or home directory (`~/.claude/`):
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --user
 ```
 
+## Here We Go!
+
+1. (Optional) **Customize CLAUDE.md**
+   - Edit `.claude/CLAUDE.md` (or `~/.claude/CLAUDE.md`)
+   - Document your project structure, coding conventions, and off-limits directories
+
+2. **Set up task structure**
+```bash
+# 1. Create a task spec
+mkdir -p .dev/tasks/T1
+cat > .dev/tasks/T1/Specs.md << 'EOF'
+# T1 — Add user authentication
+
+Implement JWT-based authentication for the API.
+
+## Requirements
+- POST /auth/login endpoint
+- JWT token generation with 24h expiry
+- Middleware to verify tokens on protected routes
+- Unit tests for auth logic
+EOF
+```
+
+3. **Run your first task** - and wait for the job done!
+```claude
+/task-auto T1
+```
+
 ## Uninstallation
 
 Remove all installed files from the target directory:
@@ -24,21 +52,6 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/uninstal
 ```
 
 Removes from both `./.claude/` and `~/.claude/`. Pass `--project` or `--user` to target only one. Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
-
-## After installation
-
-1. **Customize CLAUDE.md**
-   - Edit `.claude/CLAUDE.md` (or `~/.claude/CLAUDE.md`)
-   - Document your project structure, coding conventions, and off-limits directories
-
-2. **Set up task structure**
-   - Create `.dev/tasks/<ID>/` directories for each task
-   - Write task specifications in `.dev/tasks/<ID>/Specs.md`
-
-3. **Run your first task**
-   - Open Claude Code in VS Code
-   - Use the `task-auto` skill with your task ID: "Run task-auto for task T1"
-   - The workflow will research, plan, implement, and review automatically
 
 ## Skills
 
@@ -72,41 +85,6 @@ This bundle includes 4 sub-agents invoked by the skills:
 | **task-reviewer** | Claude Sonnet | Review git diffs, identify issues, categorize findings | `.dev/tasks/<ID>/Review.md` |
 
 Agents are automatically invoked by skills — you don't call them directly.
-
-## Example workflow
-
-```bash
-# 1. Create a task spec
-mkdir -p .dev/tasks/T1
-cat > .dev/tasks/T1/Specs.md << 'EOF'
-# T1 — Add user authentication
-
-Implement JWT-based authentication for the API.
-
-## Requirements
-- POST /auth/login endpoint
-- JWT token generation with 24h expiry
-- Middleware to verify tokens on protected routes
-- Unit tests for auth logic
-EOF
-
-# 2. Run the automated workflow
-# Open Claude Code in VS Code and say:
-# "Run task-auto for task T1"
-
-# The skill will:
-# - Research: Explore your codebase, identify auth patterns
-# - Plan: Create a step-by-step implementation plan
-# - Implement: Execute each step, run tests, commit changes
-# - Review: Examine the diff, report any issues
-# - Fix (if needed): Create fix steps, re-implement, re-review
-
-# 3. Review the outputs
-ls .dev/tasks/T1/
-# Research.md  - Context and exploration notes
-# Plan.md      - Implementation steps
-```
-
 ---
 
 ## See also
