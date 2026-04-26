@@ -1,5 +1,6 @@
 ---
 name: task-reviewer
+version: 2026-04-26T20:49:21Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,
   security, and maintainability. Use immediately after writing or modifying
