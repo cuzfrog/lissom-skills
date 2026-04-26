@@ -1,6 +1,8 @@
 # Lissom Skills
 
-Super simple Claude Code Skills and Agents to automate daily tasks and protect the context.
+Simple and reliable Claude Code Skills and Agents to automate daily tasks and protect the context.
+Tested on mundane models, see also:
+**[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
 
 ## Installation
 
@@ -85,8 +87,3 @@ This bundle includes 4 sub-agents invoked by the skills:
 | **task-reviewer** | Claude Sonnet | Review git diffs, identify issues, categorize findings | `.dev/tasks/<ID>/Review.md` |
 
 Agents are automatically invoked by skills — you don't call them directly.
----
-
-## See also
-
-**[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
