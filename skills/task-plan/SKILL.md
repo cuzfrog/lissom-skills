@@ -1,6 +1,6 @@
 ---
 name: task-plan
-version: 2026-04-26T00:00:00
+version: 2026-04-26T16:38:38
 description: Generate concrete implementation instructions, and split tasks into steps.
 ---
 

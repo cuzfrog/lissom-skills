@@ -1,3 +1,4 @@
 .dev/
 .claude/
 
+__pycache__/

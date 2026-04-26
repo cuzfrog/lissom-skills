@@ -1,6 +1,6 @@
 ---
 name: task-researcher
-version: 2026-04-26T00:00:00
+version: 2026-04-26T16:38:38
 description: >
   Expert research agent. Explores the repository, reads spec files,
   gathers context, and produces a concise research summary for the
