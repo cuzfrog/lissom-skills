@@ -1,57 +1,30 @@
-# Lissom Skills — Claude Code task workflow system
+# Lissom Skills
 
-A reusable bundle of Claude Code skills and agents that implement a structured development workflow: **research → plan → implement → review**.
-
-This package helps teams:
-- Break down complex tasks into verifiable steps
-- Maintain consistent code quality with automated reviews
-- Document decisions and context for each task
-- Iterate quickly with structured fix cycles
-
-## Requirements
-
-- [Claude Code CLI](https://docs.github.com/en/copilot/using-github-copilot/using-claude-in-vs-code) installed
-- Git (for the workflow; not required for installation)
-- Bash shell (for the install script)
+Super simple Claude Code Skills and Agents to automate daily tasks and protect the context.
 
 ## Installation
 
-### Option 1: Project-local install (recommended)
-
-Install into your project's `.claude/` directory:
-
-```bash
-git clone https://github.com/cuzfrog/lissom-skills.git
-cd lissom-skills
-./install.sh --project
-```
-
-### Option 2: Global install
-
-Install into your home directory (`~/.claude/`) to use across all projects:
-
-```bash
-git clone https://github.com/cuzfrog/lissom-skills.git
-cd lissom-skills
-./install.sh --user
-```
-
-### Option 3: One-line install (project-local)
+Install into your project's `.claude/` or home directory (`~/.claude/`):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --project
-```
-
-### Option 4: One-line install (global)
-
-```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --user
 ```
+
+## Uninstallation
+
+Remove all installed files from the target directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/uninstall.sh | bash
+```
+
+Removes from both `./.claude/` and `~/.claude/`. Pass `--project` or `--user` to target only one. Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
 
 ## After installation
 
 1. **Customize CLAUDE.md**
-   - Edit `.claude/CLAUDE.md` (or `~/.claude/CLAUDE.md`) to describe your project
+   - Edit `.claude/CLAUDE.md` (or `~/.claude/CLAUDE.md`)
    - Document your project structure, coding conventions, and off-limits directories
 
 2. **Set up task structure**
@@ -128,9 +101,10 @@ EOF
 ls .dev/tasks/T1/
 # Research.md  - Context and exploration notes
 # Plan.md      - Implementation steps
-# Review.md    - Code review findings
-
-# 4. Check the commits
-git log --oneline
-# Each step creates a commit with "Co-authored-by: Copilot"
 ```
+
+---
+
+## See also
+
+**[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
