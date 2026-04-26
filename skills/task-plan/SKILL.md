@@ -13,7 +13,6 @@ The agent will:
 - Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if absent)
 - Produce `.dev/tasks/<ID>/Plan.md` with ordered, verifiable steps
 - Produce `.dev/tasks/<ID>/Step-<N>.md` for any step too complex for one edit pass
-- Interview the user if there are open questions, assumptions, or ambiguities in the research/specs, and incorporate their answers into the plan.
 
 ## Completion
 
