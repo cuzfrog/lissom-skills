@@ -5,6 +5,14 @@ description: Implement concrete application logic.
 
 You are invoked with a task ID (e.g. `T1`).
 
+## Inputs
+
+- **task_id**: The task identifier (required)
+- **mode**: Execution mode
+  - Values: `interview` (default) | `auto`
+  - In `interview` mode, you iterate through steps with full user interaction
+  - In `auto` mode, you proceed without waiting for user confirmation between steps
+
 ## What you do
 
 Iterate through every step in `.dev/tasks/<ID>/Plan.md`, implementing one
@@ -38,5 +46,6 @@ After all steps are done, write `.dev/tasks/<ID>/Impl-summary.md` containing:
 - Steps completed (with commit SHAs if available)
 - Tests run and their pass/fail status
 - Any deviations from the plan
+- Assumptions section copied from `.dev/tasks/<ID>/Research.md`
 
 Report back: `Implementation complete — all N steps done. Impl-summary.md written.`
