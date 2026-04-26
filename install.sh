@@ -48,13 +48,13 @@ for agent in "$SCRIPT_DIR/agents"/*.md; do
     if [[ -f "$dest" ]]; then
         if prompt_overwrite "$dest"; then
             cp "$agent" "$dest"
-            ((INSTALLED++))
+            INSTALLED=$((INSTALLED + 1))
         else
-            ((SKIPPED++))
+            SKIPPED=$((SKIPPED + 1))
         fi
     else
         cp "$agent" "$dest"
-        ((INSTALLED++))
+        INSTALLED=$((INSTALLED + 1))
     fi
 done
 
@@ -67,13 +67,13 @@ for skill_dir in "$SCRIPT_DIR/skills"/*/; do
     if [[ -f "$dest" ]]; then
         if prompt_overwrite "$dest"; then
             cp "$src" "$dest"
-            ((INSTALLED++))
+            INSTALLED=$((INSTALLED + 1))
         else
-            ((SKIPPED++))
+            SKIPPED=$((SKIPPED + 1))
         fi
     else
         cp "$src" "$dest"
-        ((INSTALLED++))
+        INSTALLED=$((INSTALLED + 1))
     fi
 done
 
@@ -84,13 +84,13 @@ dest="$TARGET/CLAUDE.md"
 if [[ -f "$dest" ]]; then
     if prompt_overwrite "$dest"; then
         cp "$src" "$dest"
-        ((INSTALLED++))
+        INSTALLED=$((INSTALLED + 1))
     else
-        ((SKIPPED++))
+        SKIPPED=$((SKIPPED + 1))
     fi
 else
     cp "$src" "$dest"
-    ((INSTALLED++))
+    INSTALLED=$((INSTALLED + 1))
 fi
 
 # Print summary
