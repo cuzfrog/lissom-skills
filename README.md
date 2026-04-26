@@ -1,7 +1,8 @@
 # Lissom Skills
 
 Simple and reliable Claude Code Skills and Agents to automate daily tasks and protect the context.
-Tested on mundane models, see also:
+
+Tested on both **advanced** and **mundane** models, see also:
 **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
 
 ## Installation
