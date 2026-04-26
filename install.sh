@@ -164,11 +164,13 @@ if [[ "$MODE" == "project" ]]; then
     fi
 fi
 
-# Append .dev/ to .gitignore if not already present
+# Add .dev/ to .gitignore if not already present (create file if absent)
 gitignore=".gitignore"
 if ! grep -qF ".dev/" "$gitignore" 2>/dev/null; then
+    if [[ -f "$gitignore" ]]; then
+        echo "" >> "$gitignore"
+    fi
     {
-        echo ""
         echo "# We recommend doc not be included in code base. Well written code should serve as its own doc. If you still want to include it into VSC, comment .dev/ entry out but do not remove it from .gitignore."
         echo ".dev/"
     } >> "$gitignore"

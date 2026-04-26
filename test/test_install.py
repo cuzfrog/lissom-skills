@@ -244,3 +244,18 @@ def test_gitignore_entry_not_duplicated(tmp_path):
 
     content = (work / ".gitignore").read_text()
     assert content.count(".dev/") == 1
+
+
+def test_gitignore_created_if_absent(tmp_path):
+    """T15: .gitignore is created with .dev/ entry when it does not exist at all."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    run_install(src, work)
+
+    gitignore = work / ".gitignore"
+    assert gitignore.exists()
+    content = gitignore.read_text()
+    assert ".dev/" in content
+    assert not content.startswith("\n")  # no leading blank line when created fresh
