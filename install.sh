@@ -27,7 +27,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # If the repo files aren't present, download them from GitHub into a temp dir.
 REPO="https://raw.githubusercontent.com/cuzfrog/lissom-skills/main"
 CLEANUP_TMPDIR=""
-if [[ ! -d "$SCRIPT_DIR/agents" ]]; then
+if [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
     SCRIPT_DIR="$(mktemp -d)"
     CLEANUP_TMPDIR="$SCRIPT_DIR"
     echo "Fetching files from GitHub..."
