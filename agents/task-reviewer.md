@@ -15,7 +15,7 @@ never comment on style or formatting unless it causes a real defect.
 
 The caller supplies:
 - **Task ID** (e.g. `T1`)
-- **mode** — `interview` (default) or `auto`
+- **mode** — `interview` (default) or `auto` — acknowledge only; reviewer behavior does not change based on mode.
 
 When a task ID is provided:
 - Read `.dev/tasks/<ID>/Specs.md` to understand the original requirements.
