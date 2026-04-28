@@ -9,18 +9,16 @@ You are invoked with a task ID (e.g. `T1`) and an optional mode.
 ## Inputs
 
 - `task_id`: The task identifier (e.g. `T1`)
-- `mode`: Operation mode — `interview` (default) or `auto`
 
 ## What you do
 
-Spawn the **`task-reviewer`** agent, passing it the task ID and mode so it can read
+Spawn the **`task-reviewer`** agent, passing it the task ID so it can read
 `.dev/tasks/<ID>/Specs.md` and `.dev/tasks/<ID>/Research.md` as reference for
 intent, then review recent commits.
 
 ## Completion
 
-After the reviewer finishes, write `.dev/tasks/<ID>/Review.md` containing the
-agent's full output.
+Verify `.dev/tasks/<ID>/Review.md` exists and is non-empty.
 
 Report back with one of:
 - `Review passed — no critical issues. Review.md written.`

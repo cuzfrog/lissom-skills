@@ -26,23 +26,23 @@ Locate specs at `.dev/tasks/<ID>/Specs.md`.
 
 ## Chain
 
-Execute the following skills **in order**, passing the task ID and `mode` each time:
+Execute the following skills **in order**, passing the task ID each time:
 
 1. **`task-research`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Research.md`
-2. **`task-plan`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Plan.md` (and optional `Step-<N>.md`)
-3. **`task-impl`** → pass task ID and `mode`; implements all steps, produces `.dev/tasks/<ID>/Impl-summary.md`
-4. **`task-review`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Review.md`
+2. **`task-plan`** → pass task ID; produces `.dev/tasks/<ID>/Plan.md` (and optional `Step-<N>.md`)
+3. **`task-impl`** → pass task ID; implements all steps, produces `.dev/tasks/<ID>/Impl-summary.md`
+4. **`task-review`** → pass task ID; produces `.dev/tasks/<ID>/Review.md`
 
 ## Fix loop
 
 If `task-review` reports critical issues, do **not** fix code yourself. Instead,
 run a fix cycle:
 
-1. Invoke **`task-plan`** with the task ID, `mode`, and the instruction:
+1. Invoke **`task-plan`** with the task ID and the instruction:
    _"Fix cycle <M>: read Review.md and produce fix step files."_
    The planner writes `Step-<N>-fix-<M>.md` files (one per critical issue).
-2. Invoke **`task-impl`** with the task ID and `mode` to execute all new fix steps.
-3. Invoke **`task-review`** with the task ID and `mode`.
+2. Invoke **`task-impl`** with the task ID to execute all new fix steps.
+3. Invoke **`task-review`** with the task ID.
 
 Repeat the fix cycle up to **3 times**. If critical issues persist after 3
 cycles, escalate to the user with a summary of unresolved findings.

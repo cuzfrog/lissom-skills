@@ -9,7 +9,6 @@ You are invoked with a task ID (e.g. `T1`).
 ## Inputs
 
 - **task_id**: The task identifier (required)
-- **mode**: Execution mode — `interview` (default) or `auto`
 
 ## What you do
 
@@ -19,7 +18,7 @@ steps (`Step-<N>-fix-<M>.md`) listed under `## Fix cycle <M>` sections:
 
 1. Identify the next incomplete step (check git log / existing code to skip
    already-done steps).
-2. Spawn **`task-implementer`**, passing it the task ID, step file name, and mode
+2. Spawn **`task-implementer`**, passing it the task ID and step file name
    (e.g. `T1 Step-2-fix-1`).
 3. Verify the step's acceptance criterion is met (tests pass, files exist,
    etc.) before moving to the next step.

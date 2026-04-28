@@ -16,3 +16,4 @@ Project contents:
 ## General requirements
 - keep text and files concise and simple.
 - After skills and agents definitions are updated, stage the changes but do not commit, I need to review.
+- Do not read `./deprecated/`, `./tmp/`, or `LOCAL_AI.md`.

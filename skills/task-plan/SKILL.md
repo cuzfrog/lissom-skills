@@ -9,16 +9,10 @@ You are invoked with a task ID (e.g. `T1`) and an optional mode.
 ## Inputs
 
 - `task_id`: The task identifier (e.g. `T1`)
-- `mode`: Operation mode — `interview` (default) or `auto`
 
 ## What you do
 
-Spawn the **`task-planner`** agent, passing it the task ID and mode.
-
-The agent will:
-- Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if absent)
-- Produce `.dev/tasks/<ID>/Plan.md` with ordered, verifiable steps
-- Produce `.dev/tasks/<ID>/Step-<N>.md` for any step too complex for one edit pass
+Spawn the **`task-planner`** agent, passing it the task ID.
 
 ## Completion
 

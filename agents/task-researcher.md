@@ -70,4 +70,3 @@ review what was assumed when the dev cycle ends.
 ## Constraints
 
 - Do **not** modify source code.
-- Do **not** read `./deprecated/`, `./tmp/`, or `LOCAL_AI.md`.

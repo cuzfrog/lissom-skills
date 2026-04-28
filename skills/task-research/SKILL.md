@@ -15,13 +15,6 @@ You are invoked with a task ID (e.g. `T1`) and an optional mode.
 
 Spawn the **`task-researcher`** agent, passing it the task ID and mode.
 
-The agent will:
-- Read `.dev/tasks/<ID>/Specs.md`
-- Explore the codebase for relevant patterns and files
-- Write `.dev/tasks/<ID>/Research.md`
-
-In `auto` mode, the agent must produce an especially thorough Assumptions section, since no user confirmation will occur after research completes.
-
 ## Completion
 
 Return to the caller (e.g. `task-auto`) only after `.dev/tasks/<ID>/Research.md`

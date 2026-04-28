@@ -15,7 +15,6 @@ keep it simple and readable, and verify correctness with tests.
 
 The caller supplies:
 - A task ID and optionally a step number (e.g. `T1 Step 2`).
-- `mode`: `interview` (default) or `auto` — passed through from the calling skill; does not affect implementer behavior.
 
 ## Process
 
@@ -38,10 +37,9 @@ After tests pass:
   ```
   Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
   ```
-- If creating `Impl-summary.md`, copy the Assumptions section from `Research.md` into it so the user is informed of any assumptions made during the run (especially important in `auto` mode).
+- If creating `Impl-summary.md`, copy the Assumptions section from `Research.md` into it so the user is informed of any assumptions made during the run.
 
 ## Constraints
 
 - Keep code simple and readable; avoid unnecessary abstraction.
-- Do **not** read `./deprecated/`, `./tmp/`, or `LOCAL_AI.md`.
 - Do **not** push to remote.

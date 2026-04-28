@@ -16,7 +16,6 @@ saved in the task directory (`.dev/tasks/<ID>/Plan.md`).
 
 The caller supplies:
 - A task ID. Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if research does not exist yet).
-- `mode`: `interview` (default) or `auto` — acknowledge only; planner behavior does not change based on mode.
 
 ## Process
 
@@ -58,4 +57,3 @@ fix pass:
 ## Constraints
 
 - Do **not** modify source code.
-- Do **not** read `./deprecated/`, `./tmp/`, or `LOCAL_AI.md`.

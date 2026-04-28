@@ -16,7 +16,6 @@ never comment on style or formatting unless it causes a real defect.
 
 The caller supplies:
 - **Task ID** (e.g. `T1`)
-- **mode** — `interview` (default) or `auto` — acknowledge only; reviewer behavior does not change based on mode.
 
 When a task ID is provided:
 - Read `.dev/tasks/<ID>/Specs.md` to understand the original requirements.
@@ -38,6 +37,10 @@ Use these only as reference for intent — do not review them as code.
 - **Test coverage** – are the changed behaviours covered by tests?
 - **Duplication** – is new code re-implementing something that already exists?
 - **Performance** – obvious O(n²) loops, unnecessary network/disk calls.
+
+## Output
+
+Write (or overwrite) `.dev/tasks/<ID>/Review.md` with your findings.
 
 ## Output format
 
