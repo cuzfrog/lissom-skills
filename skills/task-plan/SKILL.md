@@ -4,7 +4,7 @@ version: 2026-04-26T20:49:21Z
 description: Generate concrete implementation instructions, and split tasks into steps.
 ---
 
-You are invoked with a task ID (e.g. `T1`) and an optional mode.
+You are invoked with a task ID (e.g. `T1`).
 
 ## Inputs
 
@@ -24,8 +24,3 @@ If the plan contains open questions for the user (marked in the plan), pause
 and surface them before reporting back.
 
 Report back: `Plan complete — Plan.md written to .dev/tasks/<ID>/ with N steps.`
-
-## Idempotency
-
-If `Plan.md` already exists, pass it to the agent for review and update only
-if the spec or research has changed since it was written.

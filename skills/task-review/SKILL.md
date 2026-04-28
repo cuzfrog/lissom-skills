@@ -28,9 +28,3 @@ If critical issues are found, **do not mark the task as done** and **do not
 attempt to fix the code yourself**. Escalate to the caller (`task-auto` or
 the user) with a summary of what must be fixed so that `task-plan` can
 generate fix step files and `task-implementer` can apply the actual changes.
-
-## Idempotency
-
-If `Review.md` already exists and the code has not changed since it was
-written (check `git log`), return the existing result without re-running the
-reviewer.

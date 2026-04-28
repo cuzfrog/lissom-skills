@@ -40,11 +40,8 @@ Use these only as reference for intent — do not review them as code.
 
 ## Output
 
-Write (or overwrite) `.dev/tasks/<ID>/Review.md` with your findings.
-
-## Output format
-
-Group findings into three priority levels:
+Write (or overwrite) `.dev/tasks/<ID>/Review.md` with your findings,
+grouped into three priority levels:
 
 **🔴 Critical** (must fix before merge)
 **🟡 Warning** (should fix; explains risk if left)
@@ -57,3 +54,9 @@ For each finding include:
 
 If there are no findings at a given priority level, omit that section.
 End with a one-line overall verdict.
+
+## Idempotency
+
+If `Review.md` already exists and the code has not changed since it was
+written (check `git log`), return the existing result without re-running
+the review.

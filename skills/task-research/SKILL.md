@@ -22,8 +22,3 @@ exists and is non-empty. If it does not exist, re-invoke the agent once before
 escalating.
 
 Report back: `Research complete — Research.md written to .dev/tasks/<ID>/`.
-
-## Idempotency
-
-If `Research.md` already exists, pass it to the agent for review and update
-only if it is stale or incomplete relative to the current spec.

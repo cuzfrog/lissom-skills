@@ -1,7 +1,7 @@
 ---
 name: task-auto
 version: 2026-04-26T20:49:21Z
-description: Coordinate task skills to finish a dev cycle.
+description: Run the full research-plan-impl-review cycle for a task ID, with automatic fix loops on failure.
 ---
 
 You are the coordinator. You own the chain. Sub-skills do **not** chain

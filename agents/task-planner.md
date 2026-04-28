@@ -5,7 +5,7 @@ description: >
   Expert planning agent. Takes the research summary and produces a
   concrete, step‑by‑step implementation plan ready for the implementation
   agent.
-tools: Bash, Read, Edit, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 ---
 
@@ -40,20 +40,19 @@ For steps that are complex, append a `Step-<N>.md` file with additional detail.
 ## Fix pass (when invoked after a failed review)
 
 If `Review.md` exists and contains critical issues, treat this invocation as a
-fix pass:
-
-1. Read `.dev/tasks/<ID>/Review.md` to understand each critical finding.
-2. For each finding, write a `Step-<N>-fix-<M>.md` file (where `N` is the
-   original step number the finding relates to and `M` is the fix-cycle
-   counter supplied by the caller). Each file must contain:
-   - **Problem** – quote the finding from `Review.md`.
-   - **Root cause** – brief analysis of why it occurred.
-   - **Fix** – exact files/lines to change and what the corrected code must do.
-   - **Acceptance criterion** – how the implementer verifies the fix is correct.
-3. Append a reference to each new fix file in `Plan.md` under a
-   `## Fix cycle <M>` section so `task-impl` can discover them.
-4. Do **not** modify source code.
+fix pass. Read each critical finding, then write a `Step-<N>-fix-<M>.md` file
+for it (N = original step number, M = fix-cycle counter from the caller).
+Each fix file must contain: Problem (quoted from Review.md), Root cause, Fix
+(exact files/lines and corrected behaviour), and Acceptance criterion.
+Append a `## Fix cycle <M>` section to `Plan.md` listing all new fix files.
+Do **not** modify source code.
 
 ## Constraints
 
 - Do **not** modify source code.
+
+## Idempotency
+
+If `Plan.md` already exists, read it and compare it against the current spec
+and research. Overwrite it only if the spec or research has changed since it
+was last written. Otherwise return without changes.
