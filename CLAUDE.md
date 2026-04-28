@@ -17,3 +17,4 @@ Project contents:
 - keep text and files concise and simple.
 - After skills and agents definitions are updated, stage the changes but do not commit, I need to review.
 - Do not read `./deprecated/`, `./tmp/`.
+- When editing Skill/Agent defs, refer to @Guidelines.md
