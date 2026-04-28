@@ -3,7 +3,7 @@
 ## Skill responsibilities (thin dispatcher)
 - Declare inputs, spawn the partner agent, verify the output artifact exists, report back.
 - Escalate on missing artifacts after one retry; do not retry indefinitely.
-- Do not contain domain logic (iteration, judgment calls, format details).
+- Do not contain domain logic.
 - Completion section owns lifecycle checkpoints (e.g., writing summary files).
 
 ## Agent responsibilities (rich domain logic)

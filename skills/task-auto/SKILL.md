@@ -51,17 +51,14 @@ cycles, escalate to the user with a summary of unresolved findings.
 
 After invoking a skill, check that its expected artifact exists:
 - If the artifact is **missing**, invoke the skill again.
-- If the artifact is still missing after a retry, escalate to the user with a
-  clear description of what failed.
+- If the artifact is still missing after a retry, escalate to the user with a clear description of what failed.
 
 ## Rules
 
 - You coordinate; you do **not** write code, plans, or research yourself.
 - Pass the task ID explicitly when invoking each skill.
-- If a skill reports ambiguity or a blocking question, **pause and escalate to
-  the user** before continuing.
-- If a skill is interrupted mid-run (e.g. model cut-off), re-invoke it; skills
-  are idempotent and safe to resume.
+- If a skill reports ambiguity or a blocking question, **pause and escalate to the user** before continuing.
+- If a skill is interrupted mid-run (e.g. model cut-off), re-invoke it; skills are idempotent and safe to resume.
 - Do **not** conduct user Q&A yourself. If a sub-skill escalates a question, relay it to the user and then pass the answer back to the sub-skill. You are a coordinator, not an interviewer.
 
 ## Definition of done

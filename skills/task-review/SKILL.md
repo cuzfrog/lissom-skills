@@ -12,9 +12,7 @@ You are invoked with a task ID (e.g. `T1`) and an optional mode.
 
 ## What you do
 
-Spawn the **`task-reviewer`** agent, passing it the task ID so it can read
-`.dev/tasks/<ID>/Specs.md` and `.dev/tasks/<ID>/Research.md` as reference for
-intent, then review recent commits.
+Spawn the **`task-reviewer`** agent, passing it the task ID.
 
 ## Completion
 

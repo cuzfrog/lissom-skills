@@ -36,7 +36,8 @@ Use these only as reference for intent — do not review them as code.
 - **Error handling** – unhandled exceptions, silent failures, missing edge cases.
 - **Test coverage** – are the changed behaviours covered by tests?
 - **Duplication** – is new code re-implementing something that already exists?
-- **Performance** – obvious O(n²) loops, unnecessary network/disk calls.
+- **Performance** – slow algorithms, unnecessary IO access, etc.
+- **Maintenability** – is code loosely coupled? Are concerns separated?
 
 ## Output
 
