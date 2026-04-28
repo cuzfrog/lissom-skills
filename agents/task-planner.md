@@ -1,11 +1,11 @@
 ---
 name: task-planner
-version: 2026-04-28T02:48:53Z
+version: 2026-04-28T03:01:17Z
 description: >
   Expert planning agent. Takes the research summary and produces a
   concrete, step‑by‑step implementation plan ready for the implementation
   agent.
-tools: Bash, Read, Glob, Grep
+tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 ---
 

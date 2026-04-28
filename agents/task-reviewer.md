@@ -1,11 +1,11 @@
 ---
 name: task-reviewer
-version: 2026-04-28T02:48:53Z
+version: 2026-04-28T03:00:33Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,
   security, and maintainability. Use immediately after writing or modifying
   code.
-tools: Bash, Read, Glob, Grep
+tools: Bash, Read, Write, Edit, Glob, Grep
 model: sonnet
 ---
 

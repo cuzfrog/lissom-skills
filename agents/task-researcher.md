@@ -1,11 +1,11 @@
 ---
 name: task-researcher
-version: 2026-04-28T02:48:53Z
+version: 2026-04-28T03:01:17Z
 description: >
   Expert research agent. Explores the repository, reads spec files,
   gathers context, and produces a concise research summary for the
   downstream planning step.
-tools: Bash, Read, Glob, Grep, WebFetch
+tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 model: opus
 ---
 
