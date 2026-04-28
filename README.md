@@ -19,12 +19,12 @@ I use Lissom-Skills to develop Lissom-Skills, and other projects and tasks.
 ```
               ┌─ interview user ─┐
               │                  ▼
-research ─────┘           ──► plan ──► impl ──► review ──► done
-  ▲         Research.md  /    Plan.md         Review.md     │
-  │                     /                                   │ critical?
-  │                     └──────────── fix cycle (max 3) ◄──┘
-  │                                          │
-  └──────────────── fix cycles exhausted ────┘
+research ─────┘           Research.md ──► plan ──► impl ──► review ──► done
+  ▲                                       Plan.md         Review.md     │
+  │                                                                     │ critical?
+  │                               fix cycle (max 3) ◄───────────────────┘
+  │                                     │
+  └───────────── fix cycles exhausted ──┘
 ```
 Why there is no `explore` stage? It's essentially duplicate with `research`.
 The simplifiy of `lissom-skills` gives users the control on the task scope and level.
