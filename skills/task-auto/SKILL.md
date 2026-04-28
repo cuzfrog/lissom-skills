@@ -1,7 +1,7 @@
 ---
 name: task-auto
-version: 2026-04-26T20:49:21Z
-description: Coordinate task skills to finish a dev cycle.
+version: 2026-04-28T02:48:53Z
+description: Run the full research-plan-impl-review cycle for a task ID, with automatic fix loops on failure.
 ---
 
 You are the coordinator. You own the chain. Sub-skills do **not** chain
@@ -26,23 +26,23 @@ Locate specs at `.dev/tasks/<ID>/Specs.md`.
 
 ## Chain
 
-Execute the following skills **in order**, passing the task ID and `mode` each time:
+Execute the following skills **in order**, passing the task ID each time:
 
 1. **`task-research`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Research.md`
-2. **`task-plan`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Plan.md` (and optional `Step-<N>.md`)
-3. **`task-impl`** → pass task ID and `mode`; implements all steps, produces `.dev/tasks/<ID>/Impl-summary.md`
-4. **`task-review`** → pass task ID and `mode`; produces `.dev/tasks/<ID>/Review.md`
+2. **`task-plan`** → pass task ID; produces `.dev/tasks/<ID>/Plan.md` (and optional `Step-<N>.md`)
+3. **`task-impl`** → pass task ID; implements all steps, produces `.dev/tasks/<ID>/Impl-summary.md`
+4. **`task-review`** → pass task ID; produces `.dev/tasks/<ID>/Review.md`
 
 ## Fix loop
 
 If `task-review` reports critical issues, do **not** fix code yourself. Instead,
 run a fix cycle:
 
-1. Invoke **`task-plan`** with the task ID, `mode`, and the instruction:
+1. Invoke **`task-plan`** with the task ID and the instruction:
    _"Fix cycle <M>: read Review.md and produce fix step files."_
    The planner writes `Step-<N>-fix-<M>.md` files (one per critical issue).
-2. Invoke **`task-impl`** with the task ID and `mode` to execute all new fix steps.
-3. Invoke **`task-review`** with the task ID and `mode`.
+2. Invoke **`task-impl`** with the task ID to execute all new fix steps.
+3. Invoke **`task-review`** with the task ID.
 
 Repeat the fix cycle up to **3 times**. If critical issues persist after 3
 cycles, escalate to the user with a summary of unresolved findings.
@@ -51,17 +51,14 @@ cycles, escalate to the user with a summary of unresolved findings.
 
 After invoking a skill, check that its expected artifact exists:
 - If the artifact is **missing**, invoke the skill again.
-- If the artifact is still missing after a retry, escalate to the user with a
-  clear description of what failed.
+- If the artifact is still missing after a retry, escalate to the user with a clear description of what failed.
 
 ## Rules
 
 - You coordinate; you do **not** write code, plans, or research yourself.
 - Pass the task ID explicitly when invoking each skill.
-- If a skill reports ambiguity or a blocking question, **pause and escalate to
-  the user** before continuing.
-- If a skill is interrupted mid-run (e.g. model cut-off), re-invoke it; skills
-  are idempotent and safe to resume.
+- If a skill reports ambiguity or a blocking question, **pause and escalate to the user** before continuing.
+- If a skill is interrupted mid-run (e.g. model cut-off), re-invoke it; skills are idempotent and safe to resume.
 - Do **not** conduct user Q&A yourself. If a sub-skill escalates a question, relay it to the user and then pass the answer back to the sub-skill. You are a coordinator, not an interviewer.
 
 ## Definition of done

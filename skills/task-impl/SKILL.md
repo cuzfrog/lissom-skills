@@ -1,7 +1,7 @@
 ---
 name: task-impl
-version: 2026-04-26T20:49:21Z
-description: Implement concrete application logic.
+version: 2026-04-28T03:35:17Z
+description: Dispatch to task-implementer agent to execute plan steps and verify completion.
 ---
 
 You are invoked with a task ID (e.g. `T1`).
@@ -9,41 +9,47 @@ You are invoked with a task ID (e.g. `T1`).
 ## Inputs
 
 - **task_id**: The task identifier (required)
-- **mode**: Execution mode — `interview` (default) or `auto`
 
 ## What you do
 
-Iterate through every step in `.dev/tasks/<ID>/Plan.md`, implementing one
-step at a time. This includes regular steps (`Step-<N>.md`) **and** any fix
-steps (`Step-<N>-fix-<M>.md`) listed under `## Fix cycle <M>` sections:
+1. Read `.dev/tasks/<ID>/Impl-record.json` if it exists to find already-completed
+   steps, then resume from the next incomplete step.
+2. Check whether `Step-<N>.md` files exist for the task.
+3. **If step files exist**: iterate through each step in order (including fix
+   steps listed under `## Fix cycle <M>` sections in Plan.md). For each step:
+   - Spawn **`task-implementer`** with the task ID and step name (e.g. `T1 Step-2`).
+   - Verify the step's acceptance criterion is met.
+   - If not met, spawn once more. If still failing, escalate to the user with
+     the step number and a description of what failed.
+   - On success, record the completed step in `Impl-record.json` before moving to the next step.
+4. **If no step files exist**: spawn **`task-implementer`** once with just the
+   task ID, passing Plan.md as the sole guide.
 
-1. Identify the next incomplete step (check git log / existing code to skip
-   already-done steps).
-2. Spawn **`task-implementer`**, passing it the task ID, step file name, and mode
-   (e.g. `T1 Step-2-fix-1`).
-3. Verify the step's acceptance criterion is met (tests pass, files exist,
-   etc.) before moving to the next step.
-4. Repeat until all steps (including fix steps) are done.
+Never apply fixes directly — every fix step must come from a `Step-<N>-fix-<M>.md`
+file written by `task-planner` first.
 
-**Never apply fixes directly** — every fix must be driven by a
-`Step-<N>-fix-<M>.md` file written by `task-planner` first.
+## Impl-record.json format
 
-The implementer commits after each step — do not batch multiple steps into a
-single commit.
+```json
+{
+  "task": "<ID>",
+  "steps": [
+    { "step": "Step-1", "sha": "<commit SHA>" },
+    { "step": "Step-2", "sha": "<commit SHA>" }
+  ]
+}
+```
 
-## Escalation
-
-If a step's acceptance criterion cannot be met after one retry, escalate to
-the user with the step number and a description of what failed.
-
-If `Plan.md` is missing or has no steps, escalate immediately.
+Rewrite the full file after each step completes. Never append.
 
 ## Completion
 
 After all steps are done, write `.dev/tasks/<ID>/Impl-summary.md` containing:
-- Steps completed (with commit SHAs if available)
+- Steps completed (with commit SHAs from `Impl-record.json`)
 - Tests run and their pass/fail status
 - Any deviations from the plan
 - Assumptions section copied from `.dev/tasks/<ID>/Research.md`
+
+Verify the file exists and is non-empty.
 
 Report back: `Implementation complete — all N steps done. Impl-summary.md written.`
