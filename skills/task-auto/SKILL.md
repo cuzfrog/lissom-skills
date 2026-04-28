@@ -1,6 +1,6 @@
 ---
 name: task-auto
-version: 2026-04-26T20:49:21Z
+version: 2026-04-28T02:48:53Z
 description: Run the full research-plan-impl-review cycle for a task ID, with automatic fix loops on failure.
 ---
 

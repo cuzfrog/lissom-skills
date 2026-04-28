@@ -1,6 +1,6 @@
 ---
 name: task-impl
-version: 2026-04-26T20:49:21Z
+version: 2026-04-28T02:48:53Z
 description: Dispatch to task-implementer agent to execute plan steps and verify completion.
 ---
 
