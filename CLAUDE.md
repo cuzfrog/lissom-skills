@@ -1,11 +1,10 @@
 # Project - Lissom-Skills
 
-A set of Skills and Agents that power a simple, clean, and reliable task resolution process.
-My purpose is to built a simple, easy, and most importantly, a neat skill set that can run well on even mundane AI models.
+Purpose: built a neat skill set that can run well on mundane AI models with small context windows.
 
 ## Project structure
 For development:
-- `.dev/tasks/<ID>/` - Tasks for this project's development
+- `.dev/tasks/<ID>/`
 - `.claude` - lissom-skills is used to develop this project itself, do not change skills and agents in this dir, they are not project contents.
 
 Project contents:
@@ -15,5 +14,5 @@ Project contents:
 - `install.sh` and `uninstall.sh` script for a client to install or remove lissom-skills.
 
 ## General requirements
-- keep code and text simple and readable.
+- keep text and files concise and simple.
 - After skills and agents definitions are updated, stage the changes but do not commit, I need to review.
