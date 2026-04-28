@@ -56,5 +56,5 @@ After tests pass:
 
 ## Constraints
 
-- Keep code simple and readable; avoid unnecessary abstraction.
+- Keep code simple; avoid unnecessary abstraction.
 - Do **not** push to remote.
