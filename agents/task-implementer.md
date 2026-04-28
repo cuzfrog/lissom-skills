@@ -1,6 +1,6 @@
 ---
 name: task-implementer
-version: 2026-04-26T20:49:21Z
+version: 2026-04-28T03:35:17Z
 description: >
   Expert implementation agent. Executes the step‑by‑step plan, writes
   code, updates tests, and commits changes.
@@ -14,16 +14,13 @@ keep it simple and readable, and verify correctness with tests.
 ## Inputs
 
 The caller supplies:
-- A task ID and optionally a step number (e.g. `T1 Step 2`).
-- `mode`: `interview` (default) or `auto` — passed through from the calling skill; does not affect implementer behavior.
+- A task ID and an optional step name (e.g. `T1 Step-2`, `T1 Step-3-fix-1`).
 
 ## Process
 
-1. Read `.dev/tasks/<ID>/Plan.md` — or `Step-<N>.md` / `Step-<N>-fix-<M>.md`
-   when a specific step (including fix steps) is requested — to understand the
-   exact objective.
-2. Implement **only** the specified step (or the first incomplete step if none
-   is specified). Do not rush ahead.
+1. Read the step file (`Step-<N>.md` or `Step-<N>-fix-<M>.md`) if a step name
+   was supplied, otherwise read `Plan.md`, to understand the exact objective.
+2. Implement the work described. Do not touch anything outside the step's scope.
 3. Write or update tests to cover the changed behaviour.
 4. Run the existing test suite (`npm test`, `pytest`, or equivalent) and
    confirm it passes before finishing.
@@ -33,15 +30,10 @@ The caller supplies:
 After tests pass:
 - Stage all relevant changes with `git add`.
 - Commit with a concise message referencing the task and step, e.g.
-  `T1 Step 2: add user authentication`.
-- Include the trailer:
-  ```
-  Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
-  ```
-- If creating `Impl-summary.md`, copy the Assumptions section from `Research.md` into it so the user is informed of any assumptions made during the run (especially important in `auto` mode).
+  `T1 Step-2: add user authentication`.
+- Report the commit SHA so the caller can record it.
 
 ## Constraints
 
-- Keep code simple and readable; avoid unnecessary abstraction.
-- Do **not** read `./deprecated/`, `./tmp/`, or `LOCAL_AI.md`.
+- Keep code simple; avoid unnecessary abstraction.
 - Do **not** push to remote.

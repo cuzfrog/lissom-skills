@@ -1,24 +1,18 @@
 ---
 name: task-plan
-version: 2026-04-26T20:49:21Z
+version: 2026-04-28T02:48:53Z
 description: Generate concrete implementation instructions, and split tasks into steps.
 ---
 
-You are invoked with a task ID (e.g. `T1`) and an optional mode.
+You are invoked with a task ID (e.g. `T1`).
 
 ## Inputs
 
 - `task_id`: The task identifier (e.g. `T1`)
-- `mode`: Operation mode — `interview` (default) or `auto`
 
 ## What you do
 
-Spawn the **`task-planner`** agent, passing it the task ID and mode.
-
-The agent will:
-- Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if absent)
-- Produce `.dev/tasks/<ID>/Plan.md` with ordered, verifiable steps
-- Produce `.dev/tasks/<ID>/Step-<N>.md` for any step too complex for one edit pass
+Spawn the **`task-planner`** agent, passing it the task ID.
 
 ## Completion
 
@@ -30,8 +24,3 @@ If the plan contains open questions for the user (marked in the plan), pause
 and surface them before reporting back.
 
 Report back: `Plan complete — Plan.md written to .dev/tasks/<ID>/ with N steps.`
-
-## Idempotency
-
-If `Plan.md` already exists, pass it to the agent for review and update only
-if the spec or research has changed since it was written.

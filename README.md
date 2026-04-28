@@ -6,14 +6,12 @@ Simple and reliable Claude Code Skills and Agents to automate daily tasks and pr
 
 They are powerful skill sets. But I also noticed a sharp drop in coding quality from many projects. PRs have become hard to read, code base exploding, walls of documents and texts occupying dirs probably no one would dive into.
 
-They require powerful AI models. Pressure on the model needs more care from developers. I see unit tests be added with no coverage on the prod code, but testing duplicated logic. I see a single input prompt from CLI reach 50k+ or even more tokens. It feels like a cauldron we throw everthing into.
+They require powerful AI models. Pressure on the model needs more care from developers. I see a single input prompt from CLI reach 50k+ or even more tokens. It feels like a cauldron we throw everthing into.
 
 This skill set provides the minimal skills to improve context efficiency while respect the foundamental high-quality dev cycles.
-
-Working on mundane models, see also:
-**[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)** — Route Claude Code requests through LiteLLM to mix models and providers.
-
-I use Lissom-Skills to develop Lissom-Skills, and other projects and tasks.
+- Thin-skill dispatcher pattern (lifecycle in skill, domain logic in agent) to ensure minimal coordinator context requirement.
+- Idempotency of each stage and step to provide resume ability.
+- Work on mundane models, see also: **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**.
 
 ### Basic Workflow
 ```

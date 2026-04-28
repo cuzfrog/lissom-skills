@@ -16,3 +16,6 @@ Project contents:
 ## General requirements
 - keep text and files concise and simple.
 - After skills and agents definitions are updated, stage the changes but do not commit, I need to review.
+- After editing Skill/Agent defs, update the version to editing timestamp.
+- Do not read `./deprecated/`, `./tmp/`.
+- When editing Skill/Agent defs, refer to @Guidelines.md
