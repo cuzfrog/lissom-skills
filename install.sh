@@ -36,13 +36,15 @@ if [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
              "$SCRIPT_DIR/skills/task-impl" \
              "$SCRIPT_DIR/skills/task-plan" \
              "$SCRIPT_DIR/skills/task-research" \
-             "$SCRIPT_DIR/skills/task-review"
+             "$SCRIPT_DIR/skills/task-review" \
+             "$SCRIPT_DIR/templates"
     for agent in task-implementer task-planner task-researcher task-reviewer; do
         curl -fsSL "$REPO/agents/$agent.md" -o "$SCRIPT_DIR/agents/$agent.md"
     done
     for skill in task-auto task-impl task-plan task-research task-review; do
         curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
     done
+    curl -fsSL "$REPO/templates/Specs.md" -o "$SCRIPT_DIR/templates/Specs.md"
 fi
 
 # Extract the `version:` value from a file's YAML frontmatter.
@@ -142,6 +144,17 @@ else
     SKIPPED=$((SKIPPED + ${#OLDER_SRC[@]}))
 fi
 
+# Create sample Specs.md only in project mode and only if absent
+if [[ "$MODE" == "project" ]]; then
+    specs_dir=".dev/tasks/T1"
+    specs_dest="$specs_dir/Specs.md"
+    if [[ ! -f "$specs_dest" ]]; then
+        mkdir -p "$specs_dir"
+        cp "$SCRIPT_DIR/templates/Specs.md" "$specs_dest"
+        echo "Created sample $specs_dest"
+    fi
+fi
+
 # Print summary
 echo ""
 echo "Installation complete!"
@@ -149,6 +162,9 @@ echo "Installed $INSTALLED files to $TARGET"
 echo "Skipped $SKIPPED existing files"
 echo ""
 echo "Next steps:"
+if [[ "$MODE" == "project" ]]; then
+    echo "- A sample Specs.md has been created at .dev/tasks/T1/Specs.md"
+fi
 echo "- Invoke the task-auto skill to run the full dev cycle"
 
 # Clean up temp directory used when fetching from GitHub
