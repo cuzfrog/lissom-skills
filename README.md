@@ -11,16 +11,16 @@ They require powerful AI models. Pressure on the model needs more care from deve
 This skill set provides the minimal skills to improve context efficiency while respect the foundamental high-quality dev cycles.
 - Thin-skill dispatcher pattern (lifecycle in skill, domain logic in agent) to ensure minimal coordinator context requirement.
 - Idempotency of each stage and step to provide resume ability.
-- Work on mundane models, see also: **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**.
+- Works on mundane models, see also: **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**.
 
 ### Basic Workflow
 ```
           ┌─ interview ─┐
           │             /
-research ─┘            +   ──► plan ──► impl ──► review ──► done
+research ─┘ auto ──►   +   ──► plan ──► impl ──► review ──► done
   ▲         Research.md  /    Plan.md         Review.md     │
   │                     /                                   │ critical?
-  │                     └──────────── fix cycle (max 3) ◄──┘
+  │                     └──────────── fix cycle (max 3)  ◄──┘
   │                                          │
   └──────────────── fix cycles exhausted ────┘
 ```
@@ -65,7 +65,7 @@ Implement JWT-based authentication for the API.
 EOF
 ```
 
-3. **Run your first task** - and wait for the job done!
+3. **Run your first task** - interview and wait for the job done!
 ```claude
 /task-auto T1
 ```
