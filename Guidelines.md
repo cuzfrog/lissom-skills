@@ -16,3 +16,6 @@
 - Skill descriptions must say what the skill does (dispatches, coordinates), not what the agent does (implements, reviews).
 - Agent descriptions name the output artifact and the consumer of that artifact.
 
+## Checklist
+- Is idempotency handled?
+- Is there duplicate info?

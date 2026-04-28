@@ -1,6 +1,6 @@
 ---
 name: task-implementer
-version: 2026-04-28T03:18:59Z
+version: 2026-04-28T03:35:17Z
 description: >
   Expert implementation agent. Executes the step‑by‑step plan, writes
   code, updates tests, and commits changes.
@@ -30,7 +30,8 @@ The caller supplies:
 After tests pass:
 - Stage all relevant changes with `git add`.
 - Commit with a concise message referencing the task and step, e.g.
-  `T1 Step 2: add user authentication`.
+  `T1 Step-2: add user authentication`.
+- Report the commit SHA so the caller can record it.
 
 ## Constraints
 
