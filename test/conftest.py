@@ -30,8 +30,3 @@ def make_src_tree(src: Path, version: str) -> None:
         (src / "skills" / skill / "SKILL.md").write_text(
             f"---\nname: {skill}\nversion: {version}\ndescription: fixture\n---\nbody\n"
         )
-    (src / "templates").mkdir(parents=True, exist_ok=True)
-    (src / "templates" / "CLAUDE.md").write_text("# Project context\n")
-    (src / "templates" / "Specs.md").write_text(
-        "# Task <ID> - <Title>\n\n## Requirements\n1. ...\n\n## Notes\n- ...\n"
-    )
