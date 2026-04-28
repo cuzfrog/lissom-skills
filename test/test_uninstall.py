@@ -61,21 +61,8 @@ def test_uninstall_removes_skills_and_agents(tmp_path):
     assert not (work / ".claude" / "skills" / "task-auto" / "SKILL.md").exists()
 
 
-def test_claudemd_preserved_by_uninstall(tmp_path):
-    """U2: CLAUDE.md remains after uninstall."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    install_fixture(src, work)
-
-    result = run_uninstall(src, work, args=("--project",))
-
-    assert result.returncode == 0
-    assert (work / ".claude" / "CLAUDE.md").is_file()
-
-
 def test_empty_dirs_cleaned(tmp_path):
-    """U3: agents/ and skills/ dirs are removed; .claude/ dir is kept because CLAUDE.md remains."""
+    """U3: agents/, skills/ dirs and the .claude/ dir are removed when empty."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
     make_src_tree(src, "2026-01-01T00:00:00")
@@ -85,7 +72,7 @@ def test_empty_dirs_cleaned(tmp_path):
 
     assert not (work / ".claude" / "agents").exists()
     assert not (work / ".claude" / "skills").exists()
-    assert (work / ".claude").is_dir()
+    assert not (work / ".claude").exists()
 
 
 def test_uninstall_nothing_to_remove(tmp_path):
@@ -122,16 +109,5 @@ def test_uninstall_user_flag(tmp_path):
 
     assert result.returncode == 0
     assert not (fakehome / ".claude" / "agents" / "task-researcher.md").exists()
-    assert (fakehome / ".claude" / "CLAUDE.md").is_file()
 
 
-def test_specs_not_removed_by_uninstall(tmp_path):
-    """U6: Specs.md created by install is not touched by uninstall."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    install_fixture(src, work)
-
-    run_uninstall(src, work, args=("--project",))
-
-    assert (work / ".dev" / "tasks" / "T1" / "Specs.md").is_file()

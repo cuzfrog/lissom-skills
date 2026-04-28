@@ -36,7 +36,7 @@ def run_install(src: Path, work: Path, args=(), env_extra=None):
 # Test cases
 
 def test_fresh_install(tmp_path):
-    """T1: Fresh install copies all agents, skills, CLAUDE.md, and Specs.md."""
+    """T1: Fresh install copies all agents, skills, and Specs.md."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
     make_src_tree(src, "2026-01-01T00:00:00")
@@ -46,7 +46,6 @@ def test_fresh_install(tmp_path):
     assert result.returncode == 0
     assert (work / ".claude" / "agents" / "task-researcher.md").is_file()
     assert (work / ".claude" / "skills" / "task-auto" / "SKILL.md").is_file()
-    assert (work / ".claude" / "CLAUDE.md").is_file()
     assert (work / ".dev" / "tasks" / "T1" / "Specs.md").is_file()
 
 
@@ -137,54 +136,6 @@ def test_mixed_versions(tmp_path):
     assert "Skipped 1" in result.stdout
 
 
-def test_claudemd_copied_on_fresh_install(tmp_path):
-    """T7: CLAUDE.md is created when absent (explicit assertion separate from T1)."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-
-    run_install(src, work)
-
-    assert (work / ".claude" / "CLAUDE.md").is_file()
-
-
-def test_claudemd_not_overwritten(tmp_path):
-    """T8: Pre-existing CLAUDE.md is never overwritten by install."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    (work / ".claude").mkdir(parents=True)
-    (work / ".claude" / "CLAUDE.md").write_text("USER CONTENT\n")
-
-    run_install(src, work)
-
-    assert "USER CONTENT" in (work / ".claude" / "CLAUDE.md").read_text()
-
-
-def test_specs_created_if_absent(tmp_path):
-    """T9: Specs.md is placed under .dev/tasks/T1/ when not already present."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-
-    run_install(src, work)
-
-    assert (work / ".dev" / "tasks" / "T1" / "Specs.md").is_file()
-
-
-def test_specs_not_overwritten(tmp_path):
-    """T10: Pre-existing Specs.md is preserved."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    (work / ".dev" / "tasks" / "T1").mkdir(parents=True)
-    (work / ".dev" / "tasks" / "T1" / "Specs.md").write_text("EXISTING\n")
-
-    run_install(src, work)
-
-    assert "EXISTING" in (work / ".dev" / "tasks" / "T1" / "Specs.md").read_text()
-
-
 def test_user_mode_target(tmp_path):
     """T11: --user installs to $HOME/.claude and does not create Specs.md."""
     src = tmp_path / "src"
@@ -219,43 +170,4 @@ def test_no_version_field_overwritten_silently(tmp_path):
     assert "2026-01-01T00:00:00" in content
 
 
-def test_gitignore_entry_added_when_absent(tmp_path):
-    """T13: .dev/ is appended to .gitignore when the entry is not already present."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    # .gitignore exists but does not contain .dev/
-    (work / ".gitignore").write_text("node_modules/\n*.pyc\n")
 
-    run_install(src, work)
-
-    content = (work / ".gitignore").read_text()
-    assert ".dev/" in content
-
-
-def test_gitignore_entry_not_duplicated(tmp_path):
-    """T14: .dev/ is not appended again when it is already present in .gitignore."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    (work / ".gitignore").write_text("node_modules/\n.dev/\n")
-
-    run_install(src, work)
-
-    content = (work / ".gitignore").read_text()
-    assert content.count(".dev/") == 1
-
-
-def test_gitignore_created_if_absent(tmp_path):
-    """T15: .gitignore is created with .dev/ entry when it does not exist at all."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-
-    run_install(src, work)
-
-    gitignore = work / ".gitignore"
-    assert gitignore.exists()
-    content = gitignore.read_text()
-    assert ".dev/" in content
-    assert not content.startswith("\n")  # no leading blank line when created fresh

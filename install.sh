@@ -44,7 +44,6 @@ if [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
     for skill in task-auto task-impl task-plan task-research task-review; do
         curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
     done
-    curl -fsSL "$REPO/templates/CLAUDE.md" -o "$SCRIPT_DIR/templates/CLAUDE.md"
     curl -fsSL "$REPO/templates/Specs.md" -o "$SCRIPT_DIR/templates/Specs.md"
 fi
 
@@ -145,14 +144,6 @@ else
     SKIPPED=$((SKIPPED + ${#OLDER_SRC[@]}))
 fi
 
-# Copy CLAUDE.md only if absent
-src="$SCRIPT_DIR/templates/CLAUDE.md"
-dest="$TARGET/CLAUDE.md"
-if [[ ! -f "$dest" ]]; then
-    cp "$src" "$dest"
-    INSTALLED=$((INSTALLED + 1))
-fi
-
 # Create sample Specs.md only in project mode and only if absent
 if [[ "$MODE" == "project" ]]; then
     specs_dir=".dev/tasks/T1"
@@ -164,18 +155,6 @@ if [[ "$MODE" == "project" ]]; then
     fi
 fi
 
-# Add .dev/ to .gitignore if not already present (create file if absent)
-gitignore=".gitignore"
-if ! grep -qF ".dev/" "$gitignore" 2>/dev/null; then
-    if [[ -f "$gitignore" ]]; then
-        echo "" >> "$gitignore"
-    fi
-    {
-        echo "# We recommend doc not be included in code base. Well written code should serve as its own doc. If you still want to include it into VSC, comment .dev/ entry out but do not remove it from .gitignore."
-        echo ".dev/"
-    } >> "$gitignore"
-fi
-
 # Print summary
 echo ""
 echo "Installation complete!"
@@ -183,7 +162,6 @@ echo "Installed $INSTALLED files to $TARGET"
 echo "Skipped $SKIPPED existing files"
 echo ""
 echo "Next steps:"
-echo "- Edit $TARGET/CLAUDE.md to describe your project"
 if [[ "$MODE" == "project" ]]; then
     echo "- A sample Specs.md has been created at .dev/tasks/T1/Specs.md"
 fi
