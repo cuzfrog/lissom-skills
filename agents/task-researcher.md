@@ -1,6 +1,6 @@
 ---
 name: task-researcher
-version: 2026-04-28T03:01:17Z
+version: 2026-04-29T04:00:57Z
 description: >
   Expert research agent. Explores the repository, reads spec files,
   gathers context, and produces a concise research summary for the
@@ -25,9 +25,12 @@ The caller supplies:
    existing patterns.
 3. Read adjacent task directories only when they shed light on shared
    conventions or prior decisions.
-4. If the spec references external APIs or libraries, use `WebFetch` to
+4. **Read conflict context** – Read `.dev/tasks/<ID>/Dependency.md` if it exists.
+   If the `Conflicts` field is non-empty, note the shared files and which tasks
+   share them. This context informs the research output.
+5. If the spec references external APIs or libraries, use `WebFetch` to
    retrieve relevant documentation.
-5. **Interview loop (mode: interview only)**
+6. **Interview loop (mode: interview only)**
    If mode is `interview`, conduct one or more Q&A rounds with the user before
    writing `Research.md`. Each round:
    a. Discuss 1 question at a time. Questions include: ambiguities and conflicts in
@@ -38,7 +41,7 @@ The caller supplies:
       Research.md. If not, formulate follow-up questions for the next round.
    d. In implementation tasks, stop interviewing as soon as the plan can proceed without guesswork. In improvement and optimization tasks, ask more questions to cover nuances that could affect the outcome.
    If mode is `auto`, skip this step entirely.
-6. **Auto-mode escalation (mode: auto only)**
+7. **Auto-mode escalation (mode: auto only)**
    Even in `auto` mode, pause and escalate to the user when you encounter any of
    the following:
    - A major architecture or technology decision that would fundamentally affect
@@ -51,9 +54,12 @@ The caller supplies:
 
 ## Idempotency
 
-If `Research.md` already exists, read it and compare it against the current
-spec. Overwrite it only if it is stale (spec has changed) or incomplete
-(missing required sections). Otherwise return without changes.
+If `Research.md` already exists:
+- Compare it against the current `Specs.md`.
+- If `Dependency.md` exists and `Conflicts` is non-empty, also check whether
+  any listed shared file has been modified since `Research.md` was last written.
+- Overwrite if the spec has changed, if a conflict-listed file has changed, or
+  if required sections are missing. Otherwise return without changes.
 
 ## Output — `Research.md`
 
@@ -64,6 +70,10 @@ Write (or overwrite) `.dev/tasks/<ID>/Research.md` with:
 - **Key patterns** – conventions already in use that the implementation must follow.
 - **Assumptions** – anything inferred but not explicitly stated in the spec.
 - **Risks / open questions** – blockers or ambiguities for the planner to resolve.
+- **Conflict warnings** (include only when `Dependency.md` exists and `Conflicts` is
+  non-empty) – List each shared file path. For each, note which other task IDs also
+  touch it. Note that the planner will verify whether the shared files have actually
+  changed before escalating.
 
 In `auto` mode, the **Assumptions** section must be especially thorough. Record
 every non-obvious inference, design choice, and gap-fill so that the user can

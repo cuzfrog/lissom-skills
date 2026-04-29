@@ -1,6 +1,6 @@
 ---
 name: task-reviewer
-version: 2026-04-28T03:00:33Z
+version: 2026-04-29T04:00:57Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,
   security, and maintainability. Use immediately after writing or modifying
@@ -41,8 +41,17 @@ Use these only as reference for intent — do not review them as code.
 
 ## Output
 
-Write (or overwrite) `.dev/tasks/<ID>/Review.md` with your findings,
-grouped into three priority levels:
+Write (or overwrite) `.dev/tasks/<ID>/Review.md` with a YAML frontmatter
+header followed by your findings:
+
+```
+---
+reviewed-timestamp: <System UTC time when updated>
+reviewed-commit: <output of `git rev-parse HEAD`>
+---
+```
+
+Group findings into three priority levels:
 
 **🔴 Critical** (must fix before merge)
 **🟡 Warning** (should fix; explains risk if left)
@@ -58,6 +67,6 @@ End with a one-line overall verdict.
 
 ## Idempotency
 
-If `Review.md` already exists and the code has not changed since it was
-written (check `git log`), return the existing result without re-running
-the review.
+If `Review.md` already exists, read its `reviewed-commit` frontmatter field
+and compare it to `git rev-parse HEAD`. If they match, return the existing
+result without re-running the review.
