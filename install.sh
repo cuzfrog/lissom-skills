@@ -2,6 +2,9 @@
 
 set -e  # Exit on error
 
+AGENTS=(task-implementer task-planner task-researcher task-reviewer task-specs-reviewer)
+SKILLS=(task-auto task-impl task-plan task-research task-review)
+
 # Parse arguments
 MODE="project"
 if [[ "$1" == "--user" ]]; then
@@ -31,17 +34,12 @@ if [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
     SCRIPT_DIR="$(mktemp -d)"
     CLEANUP_TMPDIR="$SCRIPT_DIR"
     echo "Fetching files from GitHub..."
-    mkdir -p "$SCRIPT_DIR/agents" \
-             "$SCRIPT_DIR/skills/task-auto" \
-             "$SCRIPT_DIR/skills/task-impl" \
-             "$SCRIPT_DIR/skills/task-plan" \
-             "$SCRIPT_DIR/skills/task-research" \
-             "$SCRIPT_DIR/skills/task-review" \
-             "$SCRIPT_DIR/templates"
-    for agent in task-implementer task-planner task-researcher task-reviewer; do
+    mkdir -p "$SCRIPT_DIR/agents" "$SCRIPT_DIR/templates"
+    for skill in "${SKILLS[@]}"; do mkdir -p "$SCRIPT_DIR/skills/$skill"; done
+    for agent in "${AGENTS[@]}"; do
         curl -fsSL "$REPO/agents/$agent.md" -o "$SCRIPT_DIR/agents/$agent.md"
     done
-    for skill in task-auto task-impl task-plan task-research task-review; do
+    for skill in "${SKILLS[@]}"; do
         curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
     done
     curl -fsSL "$REPO/templates/Specs.md" -o "$SCRIPT_DIR/templates/Specs.md"

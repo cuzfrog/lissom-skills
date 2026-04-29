@@ -2,6 +2,9 @@
 
 set -e  # Exit on error
 
+AGENTS=(task-implementer task-planner task-researcher task-reviewer task-specs-reviewer)
+SKILLS=(task-auto task-impl task-plan task-research task-review)
+
 # Get script directory (where agents/, skills/, templates/ are located)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -17,10 +20,9 @@ uninstall_from() {
 
     echo "Uninstalling from $TARGET..."
 
-    # Remove agents
-    for agent in "$SCRIPT_DIR/agents"/*.md; do
-        name=$(basename "$agent")
-        dest="$TARGET/agents/$name"
+    # Remove agents (only lissom-skills' own agents)
+    for agent in "${AGENTS[@]}"; do
+        dest="$TARGET/agents/$agent.md"
         if [[ -f "$dest" ]]; then
             rm "$dest"
             echo "  Removed $dest"
@@ -35,10 +37,9 @@ uninstall_from() {
         rmdir "$TARGET/agents"
     fi
 
-    # Remove skills
-    for skill_dir in "$SCRIPT_DIR/skills"/*/; do
-        skill_name=$(basename "$skill_dir")
-        dest="$TARGET/skills/$skill_name/SKILL.md"
+    # Remove skills (only lissom-skills' own skills)
+    for skill in "${SKILLS[@]}"; do
+        dest="$TARGET/skills/$skill/SKILL.md"
         if [[ -f "$dest" ]]; then
             rm "$dest"
             echo "  Removed $dest"
@@ -46,8 +47,7 @@ uninstall_from() {
         else
             SKIPPED=$((SKIPPED + 1))
         fi
-        # Remove empty skill subdirectory
-        skill_target_dir="$TARGET/skills/$skill_name"
+        skill_target_dir="$TARGET/skills/$skill"
         if [[ -d "$skill_target_dir" ]] && [[ -z "$(ls -A "$skill_target_dir")" ]]; then
             rmdir "$skill_target_dir"
         fi
