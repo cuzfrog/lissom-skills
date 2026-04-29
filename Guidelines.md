@@ -18,4 +18,5 @@
 
 ## Checklist
 - Is idempotency handled?
-- Is there duplicate info?
+- Is there duplicate info? Is info on need-to-know basis?
+-

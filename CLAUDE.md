@@ -1,6 +1,6 @@
 # Project - Lissom-Skills
 
-Purpose: built a neat skill set that can run well on mundane AI models with small context windows.
+Purpose: built a neat Claude Code skill set that can run well on mundane AI models.
 
 ## Project structure
 For development:
@@ -14,9 +14,5 @@ Project production contents:
 - `install.sh` and `uninstall.sh` scripts for a client to install or remove lissom-skills.
 
 ## General requirements
-- keep text and files concise and simple.
-- After skills and agents definitions are updated, stage the changes but do not commit, I need to review.
-- After editing Skill/Agent defs, update the version to editing timestamp.
-- Do not read `./deprecated/`, `./tmp/`.
-- When editing Skill/Agent defs, refer to @Guidelines.md
-- if files of "Project production contents" get added or removed, review and update `install.sh` and `uninstall.sh` scripts.
+- When editing Skill/Agent definitions, refer to @Guidelines.md
+
