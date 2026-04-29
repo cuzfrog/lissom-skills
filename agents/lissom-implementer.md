@@ -1,5 +1,5 @@
 ---
-name: task-implementer
+name: lissom-implementer
 version: 2026-04-28T03:35:17Z
 description: >
   Expert implementation agent. Executes the step‑by‑step plan, writes

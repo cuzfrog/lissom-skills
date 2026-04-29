@@ -1,5 +1,5 @@
 ---
-name: task-planner
+name: lissom-planner
 version: 2026-04-29T04:00:57Z
 description: >
   Expert planning agent. Takes the research summary and produces a

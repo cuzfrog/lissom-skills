@@ -1,5 +1,5 @@
 ---
-name: task-reviewer
+name: lissom-reviewer
 version: 2026-04-29T04:00:57Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,

@@ -1,10 +1,10 @@
 ---
-name: task-specs-reviewer
+name: lissom-specs-reviewer
 version: 2026-04-29T04:00:57Z
 description: >
   Spec quality gate. Evaluates Specs.md for completeness and clarity, then
   refines it in place (backing up the original). Output: reviewed/refined
-  Specs.md consumed by the task-researcher agent.
+  Specs.md consumed by the lissom-researcher agent.
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 ---

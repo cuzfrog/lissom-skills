@@ -51,16 +51,16 @@ or home directory (`~/.claude/`) with `--user`
 
 2. **Run your first task** - get interviewed and wait for the job done!
 ```claude
-/task-auto T1
+/lissom-auto T1
 ```
 or, with best effort:
 ```claude
-/task-auto T1, no interview
+/lissom-auto T1, no interview
 ```
 
 #### Multi-tasking
 ```claude
-/task-auto T1 T2 T3
+/lissom-auto T1 T2 T3
 ```
 Dependency analysis and reordering included.
 
