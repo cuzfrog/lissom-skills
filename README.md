@@ -1,6 +1,15 @@
 # Lissom Skills
 
-Simple and reliable Claude Code Skills and Agents to automate daily tasks and protect the context.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/cuzfrog/lissom-skills)](https://github.com/cuzfrog/lissom-skills/stargazers)
+[![GitHub last commit](https://img.shields.io/github/last-commit/cuzfrog/lissom-skills/main)](https://github.com/cuzfrog/lissom-skills/commits/main)
+[![GitHub repo size](https://img.shields.io/github/repo-size/cuzfrog/lissom-skills)](https://github.com/cuzfrog/lissom-skills)
+
+```
+┌─┐
+│L│░ LISSOM  —  Simple, reliable Claude Code skills & agents
+└─┘  SKILLS     for daily dev automation and context protection.
+```
 
 #### Why? How this is different from GSD, SuperPower?
 They are complex tool sets that require powerful AI models. Pressure on the model needs more care from developers. I see a single input prompt from CLI reach 50k+ or even more tokens. It feels like a cauldron we throw everthing into.
@@ -30,25 +39,15 @@ For a fine-grind task, knowing the whole picture, usually a large doc, is not ne
 For a high-level task, the user can define a dedicated explore task.
 
 ## Installation
-
 Install into your project's `.claude/`:
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --project
 ```
-
-or home directory (`~/.claude/`):
-```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --user
-```
+or home directory (`~/.claude/`) with `--user`
 
 ## Here We Go!
 
-1. **Set up task structure**
-```bash
-# 1. Create a task spec
-.dev/tasks/T1/Specs.md
-```
+1. Update your specs at `.dev/tasks/T1/Specs.md`
 
 2. **Run your first task** - get interviewed and wait for the job done!
 ```claude
