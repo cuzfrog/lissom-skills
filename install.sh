@@ -2,7 +2,7 @@
 
 set -e  # Exit on error
 
-AGENTS=(task-implementer task-planner task-researcher task-reviewer task-specs-reviewer)
+AGENTS=(task-coordinator task-dependency-researcher task-implementer task-planner task-researcher task-reviewer task-specs-reviewer)
 SKILLS=(task-auto task-impl task-plan task-research task-review)
 
 # Parse arguments

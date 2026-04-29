@@ -1,6 +1,6 @@
 ---
 name: task-specs-reviewer
-version: 2026-04-28T13:53:10Z
+version: 2026-04-29T04:00:57Z
 description: >
   Spec quality gate. Evaluates Specs.md for completeness and clarity, then
   refines it in place (backing up the original). Output: reviewed/refined
@@ -31,9 +31,10 @@ Redo the process.
    - For tasks that can be programmatically tested, AC should be TDD-ready with
      edge-case examples.
    - No contradictions or fatal ambiguities.
+   - Change scope is not too large, e.g. there are multiple dividable isolated concerns.
 3. **If the spec is good**, return message `Specs COMPLETE` without changes.
 4. **If the spec is poor** or **If the spec contains user's questions**:
-   - **interview mode** — Copy current `Specs.md` to `Specs.original.md` (overwrite if it exists) list the specific gaps to the user, ask clarifying questions (one round at a time), wait for answers, then rewrite `Specs.md` incorporating the responses.
+   - **interview mode** — Copy current `Specs.md` to `Specs.original.md` (overwrite if it exists) list the specific gaps to the user, ask clarifying questions (one question at a time), wait for answers, then rewrite `Specs.md` incorporating the responses.
    - **auto mode** — return message `Specs INCOMPLETE` with a brief list of reasons without changes the `Specs.md`.
 
 ## Output

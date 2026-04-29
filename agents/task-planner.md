@@ -1,6 +1,6 @@
 ---
 name: task-planner
-version: 2026-04-28T03:01:17Z
+version: 2026-04-29T04:00:57Z
 description: >
   Expert planning agent. Takes the research summary and produces a
   concrete, step‑by‑step implementation plan ready for the implementation
@@ -18,6 +18,19 @@ The caller supplies:
 - A task ID. Read `.dev/tasks/<ID>/Research.md` (fall back to `Specs.md` if research does not exist yet).
 
 ## Process
+
+0. **Conflict check**
+   1. Read `.dev/tasks/<ID>/Dependency.md` if it exists.
+   2. If `Conflicts` is non-empty, for each listed shared file, use the `Read` tool
+      to read the file's current content.
+   3. Compare the current file content against what `Research.md` describes for that
+      file (description, interfaces, exports, structure).
+   4. If the content has changed in a way that materially affects this task's plan
+      (e.g., an interface the task relies on has been removed or renamed), emit the
+      following structured escalation and stop:
+      `ESCALATE: stale-conflict <file-path> — <one-line reason>`
+   5. If no breaking change is detected, or if `Dependency.md` does not exist,
+      proceed normally.
 
 1. Identify every artefact that must be created or modified: source files,
    tests, and documentation.

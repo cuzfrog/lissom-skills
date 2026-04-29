@@ -1,7 +1,7 @@
 ---
 name: task-research
-version: 2026-04-28T14:30:00Z
-description: To understand the task and user's intention, review the specs. Generate enough information for planning the implementation.
+version: 2026-04-29T04:00:57Z
+description: Dispatches to task-specs-reviewer then task-researcher to produce Research.md for a given task ID.
 ---
 
 You are invoked with a task ID (e.g. `T1`) and an optional mode.
