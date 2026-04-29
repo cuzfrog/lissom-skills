@@ -2,8 +2,8 @@
 
 set -e  # Exit on error
 
-AGENTS=(task-coordinator task-dependency-researcher task-implementer task-planner task-researcher task-reviewer task-specs-reviewer)
-SKILLS=(task-auto task-impl task-plan task-research task-review)
+AGENTS=(lissom-coordinator lissom-dependency-researcher lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
+SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 
 # Parse arguments
 MODE="project"
@@ -30,7 +30,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # If the repo files aren't present, download them from GitHub into a temp dir.
 REPO="https://raw.githubusercontent.com/cuzfrog/lissom-skills/main"
 CLEANUP_TMPDIR=""
-if [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
+if [[ ! -f "$SCRIPT_DIR/agents/lissom-researcher.md" ]]; then
     SCRIPT_DIR="$(mktemp -d)"
     CLEANUP_TMPDIR="$SCRIPT_DIR"
     echo "Fetching files from GitHub..."
@@ -88,7 +88,7 @@ classify_file() {
 # Create directory structure
 echo "Installing to $TARGET..."
 mkdir -p "$TARGET/agents"
-mkdir -p "$TARGET/skills/"{task-auto,task-impl,task-plan,task-research,task-review}
+mkdir -p "$TARGET/skills/"{lissom-auto,lissom-impl,lissom-plan,lissom-research,lissom-review}
 
 # Array declarations
 SILENT_SRC=(); SILENT_DEST=()
@@ -163,7 +163,7 @@ echo "Next steps:"
 if [[ "$MODE" == "project" ]]; then
     echo "- A sample Specs.md has been created at .dev/tasks/T1/Specs.md"
 fi
-echo "- Invoke the task-auto skill to run the full dev cycle"
+echo "- Invoke the lissom-auto skill to run the full dev cycle"
 
 # Clean up temp directory used when fetching from GitHub
 if [[ -n "$CLEANUP_TMPDIR" ]]; then

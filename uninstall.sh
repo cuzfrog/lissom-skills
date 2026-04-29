@@ -2,8 +2,8 @@
 
 set -e  # Exit on error
 
-AGENTS=(task-coordinator task-dependency-researcher task-implementer task-planner task-researcher task-reviewer task-specs-reviewer)
-SKILLS=(task-auto task-impl task-plan task-research task-review)
+AGENTS=(lissom-coordinator lissom-dependency-researcher lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
+SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 
 # Get script directory (where agents/, skills/, templates/ are located)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

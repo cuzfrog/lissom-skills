@@ -1,5 +1,5 @@
 ---
-name: task-researcher
+name: lissom-researcher
 version: 2026-04-29T04:00:57Z
 description: >
   Expert research agent. Explores the repository, reads spec files,

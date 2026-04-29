@@ -1,7 +1,7 @@
 ---
-name: task-plan
+name: lissom-plan
 version: 2026-04-29T04:00:57Z
-description: Dispatches to task-planner to produce Plan.md for a given task ID.
+description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
 ---
 
 You are invoked with a task ID (e.g. `T1`).
@@ -9,11 +9,11 @@ You are invoked with a task ID (e.g. `T1`).
 ## Inputs
 
 - `task_id`: The task identifier (e.g. `T1`)
-- `fix_cycle` (optional): Fix-cycle counter supplied by task-coordinator during the fix loop.
+- `fix_cycle` (optional): Fix-cycle counter supplied by lissom-coordinator during the fix loop.
 
 ## What you do
 
-Spawn the **`task-planner`** agent, passing it the task ID and, if present, the fix-cycle counter.
+Spawn the **`lissom-planner`** agent, passing it the task ID and, if present, the fix-cycle counter.
 
 ## Completion
 
