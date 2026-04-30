@@ -46,21 +46,15 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.
 or home directory (`~/.claude/`) with `--user`
 
 ## Here We Go!
-
 1. Update your specs at `.lissom/tasks/T1/Specs.md`
-
-2. **Run your first task** - get interviewed and wait for the job done!
+2. **Run** - get interviewed and wait for the job done!
 ```claude
 /lissom-auto T1
-```
-or, with best effort:
-```claude
-/lissom-auto T1, no interview
 ```
 
 ## Configuration
 
-Set these environment variables to control skill behavior:
+Set these environment variables to avoid questions:
 
 | Variable | Options |
 |---|---|
