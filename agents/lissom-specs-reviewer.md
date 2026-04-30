@@ -1,11 +1,11 @@
 ---
 name: lissom-specs-reviewer
-version: 2026-04-29T15:08:29Z
+version: 2026-04-29T16:00:07Z
 description: >
   Spec quality gate. Evaluates Specs.md for completeness and clarity, then
   refines it in place (backing up the original). Output: reviewed/refined
   Specs.md consumed by the lissom-researcher agent.
-tools: Read, Write, Edit, Glob, Grep
+tools: Read, Write, Edit, Glob, Grep, AskUserQuestion
 model: sonnet
 ---
 
@@ -34,7 +34,7 @@ Redo the process.
    - Change scope is not too large, e.g. there are multiple dividable isolated concerns.
 3. **If the spec is good**, return message `Specs COMPLETE` without changes.
 4. **If the spec is poor** or **If the spec contains user's questions**:
-   - **interview mode** — Copy current `Specs.md` to `Specs.original.md` (overwrite if it exists) list the specific gaps to the user, ask clarifying questions (one question at a time), wait for answers, then rewrite `Specs.md` incorporating the responses.
+   - **interview mode** — Use `AskUserQuestion` to ask clarifying questions (one at a time), wait for answers, then rewrite `Specs.md` to close gaps, backup original specs to `Specs.original.md` (overwrite if it exists).
    - **auto mode** — return message `Specs INCOMPLETE` with a brief list of reasons without changes the `Specs.md`.
 
 ## Output

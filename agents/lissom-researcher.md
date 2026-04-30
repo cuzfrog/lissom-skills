@@ -1,11 +1,11 @@
 ---
 name: lissom-researcher
-version: 2026-04-29T15:08:29Z
+version: 2026-04-29T16:00:27Z
 description: >
   Expert research agent. Explores the repository, reads spec files,
   gathers context, and produces a concise research summary for the
   downstream planning step.
-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
+tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 model: opus
 ---
 
@@ -33,13 +33,9 @@ The caller supplies:
 6. **Interview loop (mode: interview only)**
    If mode is `interview`, conduct one or more Q&A rounds with the user before
    writing `Research.md`. Each round:
-   a. Discuss 1 question at a time. Questions include: ambiguities and conflicts in
-      the spec, edge cases, assumption confirmations, risks, and consequential
-      decisions.
-   b. Wait for the user's answer.
-   c. Assess whether enough clarity has been reached to write a complete, accurate
-      Research.md. If not, formulate follow-up questions for the next round.
-   d. In implementation tasks, stop interviewing as soon as the plan can proceed without guesswork. In improvement and optimization tasks, ask more questions to cover nuances that could affect the outcome.
+   a. Use `AskUserQuestion` to ask 1 question at a time. Questions include: ambiguities and conflicts in the spec, edge cases, assumption confirmations, risks, and consequential decisions.
+   b. Assess whether enough clarity has been reached to write a complete, accurate Research.md. If not, use `AskUserQuestion` for follow-up questions.
+   c. In implementation tasks, stop interviewing as soon as the plan can proceed without guesswork. In improvement and optimization tasks, ask more questions to cover nuances that could affect the outcome.
    If mode is `auto`, skip this step entirely.
 7. **Auto-mode escalation (mode: auto only)**
    Even in `auto` mode, pause and escalate to the user when you encounter any of
