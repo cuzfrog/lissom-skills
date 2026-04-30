@@ -1,6 +1,6 @@
 ---
 name: lissom-specs-reviewer
-version: 2026-04-30T02:34:20Z
+version: 2026-04-30T02:39:50Z
 description: Evaluates and helps user refine specs.
 tools: Read, Write, Edit, Glob, Grep, AskUserQuestion
 model: sonnet
@@ -32,7 +32,7 @@ Redo the process.
 3. **Terminology scan** — While reviewing the spec, note every term that is domain-specific, ambiguous, or has common synonyms where the preferred form matters.
    - **default / focused** — For each unresolved term (batch close synonyms into one question), use `AskUserQuestion` to ask the user for the canonical meaning or preferred wording. Continue until no unresolved terms remain.
    - **auto** — Do not ask; record best-guess meanings as assumptions.
-   - After the loop (or immediately in `auto` mode), if any terms were identified write `.lissom/tasks/<ID>/Terminology.md` listing each term and its agreed or assumed definition. If no terms were identified, skip writing the file.
+   - After the loop (or immediately in `auto` mode), if any terms were identified write `.lissom/tasks/<ID>/Terminology.md` (overwrite if it exists) listing each term and its agreed or assumed definition. If no terms were identified and the file already exists, delete it.
 4. **If the spec is good**, return message `Specs COMPLETE` without changes.
 5. **If the spec is poor** or **If the spec contains user's questions**:
    - **default** —  List the specific gaps, then use `AskUserQuestion` to ask clarifying questions (1 at a time). Rewrite `Specs.md` to close gaps.
