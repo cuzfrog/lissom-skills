@@ -2,7 +2,6 @@
 name: lissom-impl
 version: 2026-04-30T02:15:25Z
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
-disable-model-invocation: true
 ---
 
 You are invoked with a task ID (e.g. `T1`).

@@ -2,7 +2,6 @@
 name: lissom-research
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
-disable-model-invocation: true
 ---
 
 You are invoked with a task ID (e.g. `T1`) and an optional user_attention.
