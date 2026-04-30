@@ -18,12 +18,12 @@ You are invoked with a task ID (e.g. `T1`).
 2. Check whether `Step-<N>.md` files exist for the task.
 3. **If step files exist**: iterate through each step in order (including fix
    steps listed under `## Fix cycle <M>` sections in Plan.md). For each step:
-   - Spawn **`lissom-implementer`** with the task ID and step name (e.g. `T1 Step-2`).
+   - Use Tool `Agent` to spawn `lissom-implementer` with the task ID and step name (e.g. `T1 Step-2`).
    - Verify the step's acceptance criterion is met.
-   - If not met, spawn once more. If still failing, escalate to the user with
+   - If not met, use Tool `Agent` to spawn `lissom-implementer` once more. If still failing, escalate to the user with
      the step number and a description of what failed.
    - On success, record the completed step in `Impl-record.json` before moving to the next step.
-4. **If no step files exist**: spawn **`lissom-implementer`** with the task ID, passing Plan.md as the sole guide.
+4. **If no step files exist**: use Tool `Agent` to spawn `lissom-implementer` with the task ID, passing Plan.md as the sole guide.
 
 Never apply fixes directly — every fix step must come from a `Step-<N>-fix-<M>.md`
 file written by `lissom-planner` first.
