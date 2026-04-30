@@ -1,6 +1,6 @@
 ---
 name: lissom-impl
-version: 2026-04-29T17:08:04Z
+version: 2026-04-30T02:15:25Z
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
 disable-model-invocation: true
 ---
@@ -13,6 +13,7 @@ You are invoked with a task ID (e.g. `T1`).
 
 ## What you do
 
+0. Use `TodoWrite` tool to help user track progress.
 1. Read `.lissom/tasks/<ID>/Impl-record.json` if it exists to find already-completed
    steps, then resume from the next incomplete step.
 2. Check whether `Step-<N>.md` files exist for the task.
@@ -51,5 +52,3 @@ After all steps are done, write `.lissom/tasks/<ID>/Impl-summary.md` containing:
 - Assumptions section copied from `.lissom/tasks/<ID>/Research.md`
 
 Verify the file exists and is non-empty.
-
-Report back: `Implementation complete — all N steps done. Impl-summary.md written.`

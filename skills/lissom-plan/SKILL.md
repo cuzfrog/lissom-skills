@@ -1,6 +1,6 @@
 ---
 name: lissom-plan
-version: 2026-04-29T16:57:03Z
+version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
 disable-model-invocation: true
 ---
@@ -25,5 +25,3 @@ before escalating.
 
 If the plan contains open questions for the user (marked in the plan), pause
 and surface them before reporting back.
-
-Report back: `Plan complete — Plan.md written to .lissom/tasks/<ID>/ with N steps.`
