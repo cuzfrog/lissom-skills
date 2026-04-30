@@ -1,6 +1,6 @@
 ---
 name: lissom-plan
-version: 2026-04-29T04:00:57Z
+version: 2026-04-29T15:08:41Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
 ---
 
@@ -21,11 +21,11 @@ If the agent emits `ESCALATE: stale-conflict <file> — <reason>` (Plan.md was
 intentionally not written), relay that exact token to the caller unchanged —
 do not retry.
 
-Otherwise, return to the caller only after `.dev/tasks/<ID>/Plan.md` exists
+Otherwise, return to the caller only after `.lissom/tasks/<ID>/Plan.md` exists
 and contains at least one step. If it does not exist, re-invoke the agent once
 before escalating.
 
 If the plan contains open questions for the user (marked in the plan), pause
 and surface them before reporting back.
 
-Report back: `Plan complete — Plan.md written to .dev/tasks/<ID>/ with N steps.`
+Report back: `Plan complete — Plan.md written to .lissom/tasks/<ID>/ with N steps.`

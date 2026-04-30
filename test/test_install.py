@@ -46,7 +46,7 @@ def test_fresh_install(tmp_path):
     assert result.returncode == 0
     assert (work / ".claude" / "agents" / "task-researcher.md").is_file()
     assert (work / ".claude" / "skills" / "task-auto" / "SKILL.md").is_file()
-    assert (work / ".dev" / "tasks" / "T1" / "Specs.md").is_file()
+    assert (work / ".lissom" / "tasks" / "T1" / "Specs.md").is_file()
 
 
 def test_reinstall_same_version(tmp_path):
@@ -148,7 +148,7 @@ def test_user_mode_target(tmp_path):
 
     assert result.returncode == 0
     assert (fakehome / ".claude" / "agents" / "task-researcher.md").is_file()
-    assert not (work / ".dev" / "tasks" / "T1" / "Specs.md").exists()
+    assert not (work / ".lissom" / "tasks" / "T1" / "Specs.md").exists()
 
 
 def test_no_version_field_overwritten_silently(tmp_path):

@@ -1,16 +1,16 @@
 ---
 name: lissom-dependency-researcher
-version: 2026-04-29T04:00:57Z
+version: 2026-04-29T15:08:29Z
 description: Reads Specs.md for each supplied task ID, infers execution order from conflicts (shared output targets, explicit cross-task references), writes Dependency.md to each task dir, and asks the user to confirm if inferred order differs from input order. Consumed by lissom-coordinator.
 ---
 
 ## Inputs
 - List of task IDs (provided by lissom-coordinator).
-- Task specs are at `.dev/tasks/<ID>/Specs.md`.
+- Task specs are at `.lissom/tasks/<ID>/Specs.md`.
 
 ## Process
 
-1. For each task ID, read `.dev/tasks/<ID>/Specs.md`.
+1. For each task ID, read `.lissom/tasks/<ID>/Specs.md`.
 2. Detect dependency signals:
    - Shared output file paths (e.g. two tasks writing to `math-utils.js`).
    - Explicit references to another task's output (e.g. "import from X").

@@ -1,6 +1,6 @@
 ---
 name: lissom-research
-version: 2026-04-29T04:00:57Z
+version: 2026-04-29T15:08:48Z
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
 ---
 
@@ -23,8 +23,8 @@ You are invoked with a task ID (e.g. `T1`) and an optional mode.
 
 ## Completion
 
-Return to the caller only after `.dev/tasks/<ID>/Research.md` exists and is
+Return to the caller only after `.lissom/tasks/<ID>/Research.md` exists and is
 non-empty. If it does not exist, re-invoke `lissom-researcher` once before
 escalating.
 
-Report back: `Research complete — Research.md written to .dev/tasks/<ID>/`.
+Report back: `Research complete — Research.md written to .lissom/tasks/<ID>/`.

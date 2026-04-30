@@ -1,6 +1,6 @@
 ---
 name: lissom-reviewer
-version: 2026-04-29T04:00:57Z
+version: 2026-04-29T15:08:41Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,
   security, and maintainability. Use immediately after writing or modifying
@@ -18,8 +18,8 @@ The caller supplies:
 - **Task ID** (e.g. `T1`)
 
 When a task ID is provided:
-- Read `.dev/tasks/<ID>/Specs.md` to understand the original requirements.
-- Read `.dev/tasks/<ID>/Research.md` (if it exists) for additional context.
+- Read `.lissom/tasks/<ID>/Specs.md` to understand the original requirements.
+- Read `.lissom/tasks/<ID>/Research.md` (if it exists) for additional context.
 Use these only as reference for intent — do not review them as code.
 
 ## Process
@@ -41,7 +41,7 @@ Use these only as reference for intent — do not review them as code.
 
 ## Output
 
-Write (or overwrite) `.dev/tasks/<ID>/Review.md` with a YAML frontmatter
+Write (or overwrite) `.lissom/tasks/<ID>/Review.md` with a YAML frontmatter
 header followed by your findings:
 
 ```
