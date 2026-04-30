@@ -2,7 +2,7 @@
 
 set -e  # Exit on error
 
-AGENTS=(lissom-coordinator lissom-dependency-researcher lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
+AGENTS=(lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
 SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 
 # Get script directory (where agents/, skills/, templates/ are located)
@@ -46,6 +46,15 @@ uninstall_from() {
             REMOVED=$((REMOVED + 1))
         else
             SKIPPED=$((SKIPPED + 1))
+        fi
+        # Also remove supporting files for lissom-auto
+        if [[ "$skill" == "lissom-auto" ]]; then
+            pref_dest="$TARGET/skills/$skill/user_preference_questions.json"
+            if [[ -f "$pref_dest" ]]; then
+                rm "$pref_dest"
+                echo "  Removed $pref_dest"
+                REMOVED=$((REMOVED + 1))
+            fi
         fi
         skill_target_dir="$TARGET/skills/$skill"
         if [[ -d "$skill_target_dir" ]] && [[ -z "$(ls -A "$skill_target_dir")" ]]; then

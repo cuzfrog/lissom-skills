@@ -1,6 +1,6 @@
 ---
 name: lissom-reviewer
-version: 2026-04-29T15:08:41Z
+version: 2026-04-29T17:07:51Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,
   security, and maintainability. Use immediately after writing or modifying

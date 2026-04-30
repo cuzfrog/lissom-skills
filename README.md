@@ -27,8 +27,8 @@ Lissom-skills is developed by Lissom-skills.
           ┌─ interview ─┐
           │             /
 research ─┘ auto ──►   +   ──► plan ──► impl ──► review ──► done
-  ▲         Research.md  /    Plan.md         Review.md     │
-  │                     /                                   │ critical?
+ Specs.md    Research.md /    Plan.md         Review.md     │
+  ▲                     /                                   │ critical?
   │                     └──────────── fix cycle (max 3)  ◄──┘
   │                                          │
   └──────────────── fix cycles exhausted ────┘
@@ -58,11 +58,14 @@ or, with best effort:
 /lissom-auto T1, no interview
 ```
 
-#### Multi-tasking
-```claude
-/lissom-auto T1 T2 T3
-```
-Dependency analysis and reordering included.
+## Configuration
+
+Set these environment variables to control skill behavior:
+
+| Variable | Options |
+|---|---|
+| `LISSOM_SKILLS_USER_ATTENTION` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
+| `LISSOM_SKILLS_FIX_THRESHOLD` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
 
 ## Uninstallation
 

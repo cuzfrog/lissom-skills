@@ -1,10 +1,7 @@
 ---
 name: lissom-specs-reviewer
-version: 2026-04-29T16:00:07Z
-description: >
-  Spec quality gate. Evaluates Specs.md for completeness and clarity, then
-  refines it in place (backing up the original). Output: reviewed/refined
-  Specs.md consumed by the lissom-researcher agent.
+version: 2026-04-29T16:28:27Z
+description: Evaluates and helps user refine specs.
 tools: Read, Write, Edit, Glob, Grep, AskUserQuestion
 model: sonnet
 ---
@@ -16,7 +13,7 @@ is clear and complete enough for downstream research and planning.
 
 The caller supplies:
 - **Task ID** (e.g. `T1`)
-- **mode** — `interview` (default) or `auto`
+- **user_attention** — `auto`, `default` (default), or `focused`
 
 ## Idempotency
 
@@ -34,8 +31,10 @@ Redo the process.
    - Change scope is not too large, e.g. there are multiple dividable isolated concerns.
 3. **If the spec is good**, return message `Specs COMPLETE` without changes.
 4. **If the spec is poor** or **If the spec contains user's questions**:
-   - **interview mode** — Use `AskUserQuestion` to ask clarifying questions (one at a time), wait for answers, then rewrite `Specs.md` to close gaps, backup original specs to `Specs.original.md` (overwrite if it exists).
-   - **auto mode** — return message `Specs INCOMPLETE` with a brief list of reasons without changes the `Specs.md`.
+   - **default** —  List the specific gaps, then use `AskUserQuestion` to ask clarifying questions (1 at a time). Rewrite `Specs.md` to close gaps.
+   - **focused** — In addition to `default`, cover edge cases, contradictions, testability, and scope. Ensure all acceptance criteria are explicit.
+   - **auto** — return message `Specs INCOMPLETE` with a brief list of reasons without changes to `Specs.md`.
+   - Backup original `Specs.md` to `Specs.original.md` (overwrite if it exists).
 
 ## Output
 

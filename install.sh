@@ -2,7 +2,7 @@
 
 set -e  # Exit on error
 
-AGENTS=(lissom-coordinator lissom-dependency-researcher lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
+AGENTS=(lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
 SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 
 # Parse arguments
@@ -41,6 +41,10 @@ if [[ ! -f "$SCRIPT_DIR/agents/lissom-researcher.md" ]]; then
     done
     for skill in "${SKILLS[@]}"; do
         curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
+        # Download supporting files for lissom-auto
+        if [[ "$skill" == "lissom-auto" ]]; then
+            curl -fsSL "$REPO/skills/$skill/user_preference_questions.json" -o "$SCRIPT_DIR/skills/$skill/user_preference_questions.json" || true
+        fi
     done
     curl -fsSL "$REPO/templates/Specs.md" -o "$SCRIPT_DIR/templates/Specs.md"
 fi
@@ -106,6 +110,10 @@ done
 for skill_dir in "$SCRIPT_DIR/skills"/*/; do
     skill_name=$(basename "$skill_dir")
     classify_file "$skill_dir/SKILL.md" "$TARGET/skills/$skill_name/SKILL.md"
+    # Also classify supporting files for lissom-auto
+    if [[ "$skill_name" == "lissom-auto" ]]; then
+        [[ -f "$skill_dir/user_preference_questions.json" ]] && classify_file "$skill_dir/user_preference_questions.json" "$TARGET/skills/$skill_name/user_preference_questions.json"
+    fi
 done
 
 # Downgrade prompt (single, covering all older-source files)
