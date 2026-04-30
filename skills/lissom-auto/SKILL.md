@@ -11,10 +11,11 @@ argument-hint: <taskId>
 
 ## Preference resolution
 
-1. Load `user_preference_questions.json` in this skill's directory. Each entry has `preference_arg` (the preference name) and `env_var` (the corresponding environment variable).
-2. For each preference, check its `env_var`. If set, use it.
-3. For any preference not set via environment variable:
-    - inform user: "Preferences can be set via environment variables, see README."
+1. Load `.lissom/settings.local.json` from the project root. It may be absent or empty — treat either as no preferences set.
+2. Load `user_preference_questions.json` from this skill's directory. Each entry has a `preference_arg` key (the preference name).
+3. For each preference, check if it is present in `settings.local.json`. If set, use it.
+4. For any preference not found in `settings.local.json`:
+    - inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."
     - use `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
 
 ## Execution
