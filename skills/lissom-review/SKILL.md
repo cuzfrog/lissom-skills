@@ -12,7 +12,7 @@ You are invoked with a task ID (e.g. `T1`) and an optional mode.
 
 ## What you do
 
-Spawn the **`lissom-reviewer`** agent, passing it the task ID.
+Use Tool `Agent` to spawn `lissom-reviewer`, passing it the task ID.
 
 ## Completion
 

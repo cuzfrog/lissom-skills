@@ -14,7 +14,7 @@ You are invoked with a task ID (e.g. `T1`).
 
 ## What you do
 
-Spawn the **`lissom-planner`** agent, passing it the task ID, user_attention (if provided), and fix-cycle counter (if present).
+Use Tool `Agent` to spawn `lissom-planner`, passing it the task ID, user_attention (if provided), and fix-cycle counter (if present).
 
 ## Completion
 
