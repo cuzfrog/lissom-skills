@@ -1,6 +1,6 @@
 ---
 name: lissom-review
-version: 2026-04-29T04:00:57Z
+version: 2026-04-29T15:08:41Z
 description: Dispatches to lissom-reviewer and relays the pass/fail verdict to lissom-coordinator.
 ---
 
@@ -16,7 +16,7 @@ Spawn the **`lissom-reviewer`** agent, passing it the task ID.
 
 ## Completion
 
-Verify `.dev/tasks/<ID>/Review.md` exists and is non-empty.
+Verify `.lissom/tasks/<ID>/Review.md` exists and is non-empty.
 
 Report back with one of:
 - `Review passed — no critical issues. Review.md written.`

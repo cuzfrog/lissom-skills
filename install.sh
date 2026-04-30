@@ -144,12 +144,30 @@ fi
 
 # Create sample Specs.md only in project mode and only if absent
 if [[ "$MODE" == "project" ]]; then
-    specs_dir=".dev/tasks/T1"
+    specs_dir=".lissom/tasks/T1"
     specs_dest="$specs_dir/Specs.md"
     if [[ ! -f "$specs_dest" ]]; then
         mkdir -p "$specs_dir"
         cp "$SCRIPT_DIR/templates/Specs.md" "$specs_dest"
         echo "Created sample $specs_dest"
+    fi
+
+    # Add .lissom/ to .gitignore if not already present
+    if [[ -f ".gitignore" ]]; then
+        if ! grep -q "^\.lissom/" ".gitignore"; then
+            {
+                echo ""
+                echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
+                echo ".lissom/"
+            } >> ".gitignore"
+            echo "Added .lissom/ to .gitignore"
+        fi
+    else
+        {
+            echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
+            echo ".lissom/"
+        } > ".gitignore"
+        echo "Created .gitignore with .lissom/"
     fi
 fi
 
@@ -161,7 +179,7 @@ echo "Skipped $SKIPPED existing files"
 echo ""
 echo "Next steps:"
 if [[ "$MODE" == "project" ]]; then
-    echo "- A sample Specs.md has been created at .dev/tasks/T1/Specs.md"
+    echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
 fi
 echo "- Invoke the lissom-auto skill to run the full dev cycle"
 

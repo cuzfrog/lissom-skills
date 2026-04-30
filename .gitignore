@@ -1,4 +1,4 @@
-.dev/
+.lissom/
 .claude/*
 !.claude/settings.json
 

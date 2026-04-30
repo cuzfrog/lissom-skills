@@ -47,7 +47,7 @@ or home directory (`~/.claude/`) with `--user`
 
 ## Here We Go!
 
-1. Update your specs at `.dev/tasks/T1/Specs.md`
+1. Update your specs at `.lissom/tasks/T1/Specs.md`
 
 2. **Run your first task** - get interviewed and wait for the job done!
 ```claude

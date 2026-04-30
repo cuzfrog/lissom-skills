@@ -1,6 +1,6 @@
 ---
 name: lissom-impl
-version: 2026-04-28T03:35:17Z
+version: 2026-04-29T15:08:41Z
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
 ---
 
@@ -12,7 +12,7 @@ You are invoked with a task ID (e.g. `T1`).
 
 ## What you do
 
-1. Read `.dev/tasks/<ID>/Impl-record.json` if it exists to find already-completed
+1. Read `.lissom/tasks/<ID>/Impl-record.json` if it exists to find already-completed
    steps, then resume from the next incomplete step.
 2. Check whether `Step-<N>.md` files exist for the task.
 3. **If step files exist**: iterate through each step in order (including fix
@@ -44,11 +44,11 @@ Rewrite the full file after each step completes. Never append.
 
 ## Completion
 
-After all steps are done, write `.dev/tasks/<ID>/Impl-summary.md` containing:
+After all steps are done, write `.lissom/tasks/<ID>/Impl-summary.md` containing:
 - Steps completed (with commit SHAs from `Impl-record.json`)
 - Tests run and their pass/fail status
 - Any deviations from the plan
-- Assumptions section copied from `.dev/tasks/<ID>/Research.md`
+- Assumptions section copied from `.lissom/tasks/<ID>/Research.md`
 
 Verify the file exists and is non-empty.
 
