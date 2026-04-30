@@ -1,6 +1,6 @@
 ---
 name: lissom-researcher
-version: 2026-04-29T16:46:05Z
+version: 2026-04-30T10:00:00Z
 description: Researches the codebase and spec, interviews the user when needed, and produces Research.md for the downstream planning step.
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 model: opus-4.6
@@ -22,11 +22,12 @@ The caller supplies:
    existing patterns.
 3. Read adjacent task directories only when they shed light on shared
    conventions or prior decisions.
-4. If the spec references external APIs or libraries, use `WebFetch` to
-   retrieve relevant documentation.
+4. If the spec references external APIs or libraries:
+   - If a URL is provided, use `WebFetch` to retrieve the documentation directly.
+   - If no URL is provided, use `WebSearch` to find authoritative documentation, then use `WebFetch` on the result.
 5. **Interview loop (user_attention: default or focused)**
-   - **default**: covering ambiguities, conflicts, edge cases, assumption confirmations, risks, and consequential decisions. Stop as soon as the plan can proceed without guesswork.
-   - **focused**: grill the user for details.
+   - **default**: Ask about ambiguities, conflicts, edge cases, assumption confirmations, risks, and consequential decisions. Stop as soon as implementation can proceed without guesswork.
+   - **focused**: In addition to default questions, ask deeper follow-up questions about edge cases, alternatives, tradeoffs, and test expectations.
    - Use `AskUserQuestion` to ask 1 question at a time; assess whether enough clarity has been reached before continuing.
    - **auto**: skip this step entirely.
 6. **Auto-mode escalation (user_attention: auto only)**
@@ -43,8 +44,8 @@ The caller supplies:
 ## Idempotency
 
 If `Research.md` already exists:
-- Compare it against the current `Specs.md`.
-- Overwrite if the spec has changed or required sections are missing. Otherwise return without changes.
+- Compare it against the current `Specs.md` and `Terminology.md` (if it exists).
+- Overwrite if the spec or terminology has changed, or if required sections are missing. Otherwise return without changes.
 
 ## Output — `Research.md`
 

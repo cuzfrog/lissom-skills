@@ -1,6 +1,6 @@
 ---
 name: lissom-reviewer
-version: 2026-04-29T17:07:51Z
+version: 2026-04-30T10:00:00Z
 description: >
   Expert code review specialist. Proactively reviews code for quality,
   security, and maintainability. Use immediately after writing or modifying
@@ -24,10 +24,11 @@ Use these only as reference for intent — do not review them as code.
 
 ## Process
 
-1. Run `git log --oneline -10` to identify recent commits related to the task.
-2. Run `git diff HEAD~<N>` (where N covers the task's commits) to see all changes.
-3. Read each modified file to understand full context before forming an opinion.
-4. Focus your review on the changed lines; do not audit unrelated code.
+1. Read `.lissom/tasks/<ID>/Impl-record.json` if it exists. If it contains commit SHAs, use those to determine the diff range.
+2. If `Impl-record.json` is missing or empty, run `git log --oneline -10` and identify task-related commits by message. If still ambiguous, report the ambiguity in `Review.md` instead of guessing.
+3. Run `git diff` for the identified commit range to see all changes.
+4. Read each modified file to understand full context before forming an opinion.
+5. Focus your review on the changed lines; do not audit unrelated code.
 
 ## Review criteria
 
@@ -37,7 +38,7 @@ Use these only as reference for intent — do not review them as code.
 - **Test coverage** – are the changed behaviours covered by tests?
 - **Duplication** – is new code re-implementing something that already exists?
 - **Performance** – slow algorithms, unnecessary IO access, etc.
-- **Maintenability** – is code loosely coupled? Are concerns separated?
+- **Maintainability** – is code loosely coupled? Are concerns separated?
 
 ## Output
 
@@ -51,7 +52,7 @@ reviewed-commit: <output of `git rev-parse HEAD`>
 ---
 ```
 
-Group findings into three priority levels:
+Group findings into three priority levels. These heading labels must be exact — downstream skills parse them to decide whether to run the fix loop:
 
 **🔴 Critical** (must fix before merge)
 **🟡 Warning** (should fix; explains risk if left)
@@ -64,6 +65,10 @@ For each finding include:
 
 If there are no findings at a given priority level, omit that section.
 End with a one-line overall verdict.
+
+## Constraints
+
+- Do **not** modify source code or any file other than `Review.md`.
 
 ## Idempotency
 

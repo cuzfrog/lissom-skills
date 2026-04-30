@@ -12,7 +12,7 @@ You are invoked with a task ID (e.g. `T1`) and an optional user_attention.
 - `user_attention`: Operation mode — `default` (default), `auto`, or `focused`
 
 ## What you do
-
+Do below sequentially:
 1. Use Tool `Agent` to spawn `lissom-specs-reviewer`, passing it the task ID and `user_attention`.
    - If it returns `Specs COMPLETE`, proceed.
    - If it returns `Specs INCOMPLETE` (auto mode only), relay the reasons to the
