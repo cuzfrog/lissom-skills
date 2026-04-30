@@ -16,7 +16,11 @@
 - Skill descriptions must say what the skill does (dispatches, coordinates), not what the agent does (implements, reviews).
 - Agent descriptions summarize the logic.
 
+## Format standard
+- Remove unnecessary styling or format in text to keep a small file size. E.g. no need to add newlines and spaces to make a long statement multiline.
+
 ## Checklist
 - Is idempotency handled?
 - Is there duplicate info? Is info on need-to-know basis?
--
+- Is input and output contract specific and accurate?
+- Is `AskUserQuestion` Tool used for user interaction?
