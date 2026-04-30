@@ -61,6 +61,12 @@ Set these environment variables to avoid questions:
 | `LISSOM_SKILLS_USER_ATTENTION` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
 | `LISSOM_SKILLS_FIX_THRESHOLD` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
 
+**Example:**
+```bash
+export LISSOM_SKILLS_USER_ATTENTION=auto
+export LISSOM_SKILLS_FIX_THRESHOLD=warning
+```
+
 ## Uninstallation
 
 Remove all installed files from the target directory:
