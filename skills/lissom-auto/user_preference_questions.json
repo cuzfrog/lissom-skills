@@ -1,0 +1,50 @@
+[
+  {
+    "question": "How much would you like me to interact with you?",
+    "header": "User Attention",
+    "multiSelect": false,
+    "preference_arg": "user_attention",
+    "env_var": "LISSOM_SKILLS_USER_ATTENTION",
+    "options": [
+      {
+        "label": "Default",
+        "description": "Interview me for any major concerns and blocking issues.",
+        "value": "default"
+      },
+      {
+        "label": "Auto",
+        "description": "No, try your best to auto solve the problem.",
+        "value": "auto"
+      },
+      {
+        "label": "Focused",
+        "description": "Grill me until we've gone through every nook and cranny.",
+        "value": "focused"
+      }
+    ]
+  },
+  {
+    "question": "How should I fix review issues?",
+    "header": "Fix Threshold",
+    "multiSelect": false,
+    "preference_arg": "fix_threshold",
+    "env_var": "LISSOM_SKILLS_FIX_THRESHOLD",
+    "options": [
+      {
+        "label": "Warning",
+        "description": "Fix critical and warning issues",
+        "value": "warning"
+      },
+      {
+        "label": "Critical only",
+        "description": "Only fix critical issues",
+        "value": "critical"
+      },
+      {
+        "label": "Suggestion",
+        "description": "Nit-picking.",
+        "value": "suggestion"
+      }
+    ]
+  }
+]

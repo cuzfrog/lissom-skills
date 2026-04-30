@@ -20,7 +20,9 @@
 - Remove unnecessary styling or format in text to keep a small file size. E.g. no need to add newlines and spaces to make a long statement multiline.
 
 ## Checklist
-- Is idempotency handled?
-- Is there duplicate info? Is info on need-to-know basis?
-- Is input and output contract specific and accurate?
-- Is `AskUserQuestion` Tool used for user interaction?
+1. Is idempotency handled?
+2. Is there duplicate info? Is info on need-to-know basis?
+3. Is input and output contract specific and accurate?
+4. Is `AskUserQuestion` Tool used for user interaction?
+5. Is tool or hook or anything else can be used to avoid an LLM call?
+6. Is `TodoWrite` tool used to report divided tasks and steps for better user observability?

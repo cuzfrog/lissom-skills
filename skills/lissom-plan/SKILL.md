@@ -1,7 +1,8 @@
 ---
 name: lissom-plan
-version: 2026-04-29T15:08:41Z
+version: 2026-04-29T16:57:03Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
+disable-model-invocation: true
 ---
 
 You are invoked with a task ID (e.g. `T1`).
@@ -9,17 +10,14 @@ You are invoked with a task ID (e.g. `T1`).
 ## Inputs
 
 - `task_id`: The task identifier (e.g. `T1`)
-- `fix_cycle` (optional): Fix-cycle counter supplied by lissom-coordinator during the fix loop.
+- `user_attention` (optional): Control questioning depth — `auto`, `default`, or `focused`.
+- `fix_cycle` (optional): Fix-cycle counter for the fix loop.
 
 ## What you do
 
-Spawn the **`lissom-planner`** agent, passing it the task ID and, if present, the fix-cycle counter.
+Spawn the **`lissom-planner`** agent, passing it the task ID, user_attention (if provided), and fix-cycle counter (if present).
 
 ## Completion
-
-If the agent emits `ESCALATE: stale-conflict <file> — <reason>` (Plan.md was
-intentionally not written), relay that exact token to the caller unchanged —
-do not retry.
 
 Otherwise, return to the caller only after `.lissom/tasks/<ID>/Plan.md` exists
 and contains at least one step. If it does not exist, re-invoke the agent once

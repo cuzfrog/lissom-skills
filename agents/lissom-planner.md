@@ -1,6 +1,6 @@
 ---
 name: lissom-planner
-version: 2026-04-29T15:08:29Z
+version: 2026-04-29T16:59:37Z
 description: >
   Expert planning agent. Takes the research summary and produces a
   concrete, step‑by‑step implementation plan ready for the implementation
@@ -16,26 +16,18 @@ saved in the task directory (`.lissom/tasks/<ID>/Plan.md`).
 
 The caller supplies:
 - A task ID. Read `.lissom/tasks/<ID>/Research.md` (fall back to `Specs.md` if research does not exist yet).
+- **user_attention** (optional) — `auto`, `default`, or `focused`. Determines questioning depth during planning. Pass as a separate parameter alongside task ID.
 
 ## Process
-
-0. **Conflict check**
-   1. Read `.lissom/tasks/<ID>/Dependency.md` if it exists.
-   2. If `Conflicts` is non-empty, for each listed shared file, use the `Read` tool
-      to read the file's current content.
-   3. Compare the current file content against what `Research.md` describes for that
-      file (description, interfaces, exports, structure).
-   4. If the content has changed in a way that materially affects this task's plan
-      (e.g., an interface the task relies on has been removed or renamed), emit the
-      following structured escalation and stop:
-      `ESCALATE: stale-conflict <file-path> — <one-line reason>`
-   5. If no breaking change is detected, or if `Dependency.md` does not exist,
-      proceed normally.
 
 1. Identify every artefact that must be created or modified: source files,
    tests, and documentation.
 2. Order the work so each step has no unresolved dependencies on later steps.
 3. Keep each step small enough for a single focused edit pass.
+4. **Interview loop (if user_attention: default or focused)**
+   - **default**: Ask clarifying questions about major architectural decisions or ambiguities that would affect step ordering or complexity estimation. Stop when plan can proceed.
+   - **focused**: In addition to default, probe for edge cases and alternative approaches.
+   - **auto**: Skip this step entirely.
 
 ## Output — `Plan.md`
 
