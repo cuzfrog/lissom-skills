@@ -4,7 +4,6 @@
     "header": "User Attention",
     "multiSelect": false,
     "preference_arg": "user_attention",
-    "env_var": "LISSOM_SKILLS_USER_ATTENTION",
     "options": [
       {
         "label": "Default",
@@ -28,7 +27,6 @@
     "header": "Fix Threshold",
     "multiSelect": false,
     "preference_arg": "fix_threshold",
-    "env_var": "LISSOM_SKILLS_FIX_THRESHOLD",
     "options": [
       {
         "label": "Warning",

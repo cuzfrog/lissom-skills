@@ -54,18 +54,19 @@ or home directory (`~/.claude/`) with `--user`
 
 ## Configuration
 
-Set these environment variables to avoid questions:
+Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 
-| Variable | Options |
-|---|---|
-| `LISSOM_SKILLS_USER_ATTENTION` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
-| `LISSOM_SKILLS_FIX_THRESHOLD` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
-
-**Example:**
-```bash
-export LISSOM_SKILLS_USER_ATTENTION=auto
-export LISSOM_SKILLS_FIX_THRESHOLD=warning
+```json
+{
+  "user_attention": "default",
+  "fix_threshold": "warning"
+}
 ```
+
+| Key | Options |
+|---|---|
+| `user_attention` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
+| `fix_threshold` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
 
 ## Uninstallation
 
