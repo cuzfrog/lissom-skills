@@ -2,7 +2,6 @@
 name: lissom-review
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-reviewer and relays the pass/fail verdict to the caller.
-disable-model-invocation: true
 ---
 
 You are invoked with a task ID (e.g. `T1`) and an optional mode.

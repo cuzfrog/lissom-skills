@@ -2,7 +2,6 @@
 name: lissom-plan
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
-disable-model-invocation: true
 ---
 
 You are invoked with a task ID (e.g. `T1`).
