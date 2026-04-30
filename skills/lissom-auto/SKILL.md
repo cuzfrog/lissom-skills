@@ -13,7 +13,9 @@ argument-hint: <taskId>
 
 1. Load `user_preference_questions.json` in this skill's directory. Each entry has `preference_arg` (the preference name) and `env_var` (the corresponding environment variable).
 2. For each preference, check its `env_var`. If set, use it.
-3. For any preference not set via environment variable, use `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one. Then inform user: "Preferences can be set via environment variables, see README."
+3. For any preference not set via environment variable:
+    - inform user: "Preferences can be set via environment variables, see README."
+    - use `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
 
 ## Execution
 0. Use `TodoWrite` tool to help user track progress.

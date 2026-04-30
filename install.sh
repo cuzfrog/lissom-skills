@@ -181,6 +181,10 @@ fi
 
 # Print summary
 echo ""
+echo "┌─┐"
+echo "│L│░ LISSOM"
+echo "└─┘  SKILLS"
+echo ""
 echo "Installation complete!"
 echo "Installed $INSTALLED files to $TARGET"
 echo "Skipped $SKIPPED existing files"
@@ -189,7 +193,7 @@ echo "Next steps:"
 if [[ "$MODE" == "project" ]]; then
     echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
 fi
-echo "- Invoke the lissom-auto skill to run the full dev cycle"
+echo "- Invoke '/lissom-auto T1', get interviewed and wait for the job to be done!"
 
 # Clean up temp directory used when fetching from GitHub
 if [[ -n "$CLEANUP_TMPDIR" ]]; then
