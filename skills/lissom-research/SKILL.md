@@ -1,6 +1,6 @@
 ---
 name: lissom-research
-version: 2026-04-29T16:20:07Z
+version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
 disable-model-invocation: true
 ---
@@ -27,5 +27,3 @@ You are invoked with a task ID (e.g. `T1`) and an optional user_attention.
 Return to the caller only after `.lissom/tasks/<ID>/Research.md` exists and is
 non-empty. If it does not exist, re-invoke `lissom-researcher` once before
 escalating.
-
-Report back: `Research complete — Research.md written to .lissom/tasks/<ID>/`.

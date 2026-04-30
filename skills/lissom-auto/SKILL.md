@@ -1,6 +1,6 @@
 ---
 name: lissom-auto
-version: 2026-04-29T20:19:20Z
+version: 2026-04-30T02:15:06Z
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
 argument-hint: <taskId>
 ---
@@ -16,7 +16,7 @@ argument-hint: <taskId>
 3. For any preference not set via environment variable, use `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one. Then inform user: "Preferences can be set via environment variables, see README."
 
 ## Execution
-
+0. Use `TodoWrite` tool to help user track progress.
 1. Invoke `lissom-research` with task ID and `user_attention`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
 2. Invoke `lissom-plan` with task ID and `user_attention`. Verify `Plan.md` exists; retry once on missing.
 3. Invoke `lissom-impl` with task ID. Verify `Impl-summary.md` exists; retry once on missing.
@@ -26,6 +26,7 @@ argument-hint: <taskId>
    - `warning` (default) → enter fix loop if 🔴 Critical or 🟡 Warning sections are non-empty.
    - `suggestion` → enter fix loop if any finding exists.
    If no issues at or above threshold → report success to the user.
+6. Summarize the outcome for the user.
 
 ## Fix loop
 
@@ -43,3 +44,7 @@ After 3 cycles with persistent issues, report failure and direct the user to `Re
 - Pass task ID explicitly in every skill invocation.
 - If a sub-skill escalates a blocking question, use `AskUserQuestion` to relay it to the user and pass the answer back.
 - If a skill is interrupted mid-run, re-invoke it (skills are idempotent).
+
+## Definition of done
+- All four artifacts exist in `.lissom/tasks/<ID>/`
+- `Review.md` contains no issues within `fix_threshold` unless fix loop exhausts.
