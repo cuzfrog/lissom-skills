@@ -1,18 +1,24 @@
-# Project - Lissom-Skills
+# Project — Lissom-Skills
 
-Purpose: built a neat Claude Code skill set that can run well on mundane AI models.
+## Purpose
 
-## Project structure
-For development:
-- `.lissom/tasks/<ID>/`
-- `.claude` - lissom-skills is used to develop this project itself, do not change skills and agents in this dir, they are not project contents.
+A Claude Code skill and agent set designed to specific and reliable.
 
-Project production contents:
-- `skills/` - skills definitions
-- `agents/` - agents definitions
-- `templates/` - for installing into a client dir.
-- `install.sh` and `uninstall.sh` scripts for a client to install or remove lissom-skills.
+## Production contents (edit these)
 
-## General requirements
-- When editing Skill/Agent definitions, refer to @Guidelines.md
+- `skills/` — skill definitions (thin dispatchers)
+- `agents/` — agent definitions (rich domain logic)
+- `templates/` — files installed into a client project
+- `install.sh` / `uninstall.sh` — client install/remove scripts
+
+## Development workspace
+
+- `test/` - unit test dir.
+- `scripts/` - hook scripts or developer scripts.
+- `.claude/` — internal dev-time skills and agents used to build this project. **Do not edit** — these are not production contents.
+- all dirs in @.gitignore
+
+## Rules
+
+- When editing skill or agent definitions, follow `Guidelines.md`.
 

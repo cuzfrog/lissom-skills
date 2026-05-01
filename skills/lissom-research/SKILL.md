@@ -2,22 +2,23 @@
 name: lissom-research
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
+argument-hint: <task_id> [user_attention]
 ---
-
-You are invoked with a task ID (e.g. `T1`) and an optional user_attention.
 
 ## Inputs
 
-- `task_id`: The task identifier (e.g. `T1`)
-- `user_attention`: Operation mode — `default` (default), `auto`, or `focused`
+- `task_id`
+- `user_attention`: (optional) `default` (default), `auto`, or `focused`
 
-## What you do
+## Process
+
+Execute sequentially:
 
 1. Use Tool `Agent` to spawn `lissom-specs-reviewer`, passing it the task ID and `user_attention`.
-   - If it returns `Specs COMPLETE`, proceed.
    - If it returns `Specs INCOMPLETE` (auto mode only), relay the reasons to the
      user as a warning, then proceed.
-   - If `Specs.md` does not exist after the agent returns, escalate immediately.
+   - Any other return value: treat as success and proceed.
+   - If `.lissom/tasks/<ID>/Specs.md` does not exist or is empty after the agent returns, escalate immediately.
 
 2. Use Tool `Agent` to spawn `lissom-researcher`, passing it the task ID and `user_attention`.
 
