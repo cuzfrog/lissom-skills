@@ -2,6 +2,7 @@
 name: lissom-impl
 version: 2026-04-30T02:15:25Z
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
+argument-hint: <task_id>
 ---
 
 ## Inputs

@@ -2,12 +2,13 @@
 name: lissom-research
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
+argument-hint: <task_id> [user_attention]
 ---
 
 ## Inputs
 
 - `task_id`
-- `user_attention`: `default`, `auto`, or `focused`
+- `user_attention`: (optional) `default` (default), `auto`, or `focused`
 
 ## Process
 

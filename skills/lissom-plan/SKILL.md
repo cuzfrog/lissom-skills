@@ -2,6 +2,7 @@
 name: lissom-plan
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
+argument-hint: <task_id> [fix_cycle] [fix_threshold]
 ---
 
 ## Inputs
