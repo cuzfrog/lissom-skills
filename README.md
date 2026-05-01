@@ -25,9 +25,9 @@ Lissom-skills is developed by Lissom-skills.
 When you have something relatively clear in mind and need to refine the specs and execute.
 
 #### When not to use?
-- Trivial tasks without the need to call a subagent.
+- Trivial tasks.
 - Exploratory tasks with vague or evolving requirements.
-- Huge scale tasks that require massive parallel processing.
+- Huge scale tasks that require parallel processing.
 
 ### Basic Workflow
 ```
