@@ -14,11 +14,10 @@
 #### Why? How this is different from GSD, SuperPower?
 They are complex tool sets that require powerful AI models. Pressure on the model needs more care from developers. I see a single input prompt from CLI reach 50k+ or even more tokens. It feels like a cauldron we throw everthing into.
 
-This skill set provides the minimal skills to relentlessly protect the context while respect the foundamental high-quality dev cycles.
-- Thin-skill dispatcher pattern (lifecycle in skill, domain logic in agent) to ensure minimal coordinator context requirement.
-- Idempotency of each stage and step to provide resume ability.
-- Unequivocal logic that works on mundane models. See also: **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**.
-- Reinforced specs to eliminate any surprises.
+This skill set features:
+- Thin-skill dispatcher pattern - relentless context protection.
+- Idempotency - hussle-free resume with minimal state.
+- Reinforced Specs - no surprise dev experience.
 
 Lissom-skills is developed by Lissom-skills.
 
@@ -33,10 +32,6 @@ research ─┘ auto ──►   +   ──► plan ──► impl ──► rev
   │                                          │
   └──────────────── fix cycles exhausted ────┘
 ```
-Why there is no `explore` stage? It's essentially duplicate with `research`.
-The simplifiy of `lissom-skills` gives users the control on the task scope and level.
-For a fine-grind task, knowing the whole picture, usually a large doc, is not necessary.
-For a high-level task, the user can define a dedicated explore task.
 
 ## Installation
 Install into your project's `.claude/`:
@@ -47,10 +42,7 @@ or home directory (`~/.claude/`) with `--user`
 
 ## Here We Go!
 1. Update your specs at `.lissom/tasks/T1/Specs.md`
-2. **Run** - get interviewed and wait for the job done!
-```claude
-/lissom-auto T1
-```
+2. **Run** `/lissom-auto T1` - get interviewed and wait for the job done!
 
 ## Configuration
 
@@ -79,4 +71,6 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/uninstal
 Removes from both `./.claude/` and `~/.claude/`. Pass `--project` or `--user` to target only one. Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
 
 ## Author
-Cause Chung <cuzfrog@gmail.com>
+Cause Chung <cuzfrog@gmail.com> (Claude Certified)
+
+See also: **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**

@@ -6,5 +6,5 @@
 ## AC
 1. ..
 
-## Notes
+## Out of scope
 - ...
