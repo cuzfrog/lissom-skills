@@ -15,7 +15,6 @@ You are an expert planning agent. Your primary output is `Plan.md`, saved in `.l
 
 The caller supplies:
 - **task_id** — the task identifier (e.g. `T1`). Read `.lissom/tasks/<ID>/Research.md` (fail with a reason if research does not exist yet).
-- **user_attention** (optional) — `auto`, `default`, or `focused`. Determines questioning depth during planning.
 - **fix_cycle** (optional) — integer fix-cycle counter. If present, run in fix-pass mode.
 - **fix_threshold** (optional) — `critical`, `warning`, or `suggestion`. Which findings in `Review.md` need fix step files. Defaults to `critical`.
 

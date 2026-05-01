@@ -4,23 +4,18 @@ version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task ID.
 ---
 
-You are invoked with a task ID (e.g. `T1`).
-
 ## Inputs
 
-- `task_id`: The task identifier (e.g. `T1`)
-- `user_attention` (optional): Control questioning depth — `auto`, `default`, or `focused`.
+- `task_id`: The task identifier.
 - `fix_cycle` (optional): Fix-cycle counter for the fix loop.
+- `fix_threshold` (optional): `critical`, `warning`, or `suggestion`.
 
-## What you do
+## Process
 
-Use Tool `Agent` to spawn `lissom-planner`, passing it the task ID, user_attention (if provided), and fix-cycle counter (if present).
+Use Tool `Agent` to spawn `lissom-planner`, passing: `task_id`, `fix_cycle` (if present), and `fix_threshold` (if present).
 
 ## Completion
 
-Otherwise, return to the caller only after `.lissom/tasks/<ID>/Plan.md` exists
+Return to the caller only after `.lissom/tasks/<ID>/Plan.md` exists
 and contains at least one step. If it does not exist, re-invoke the agent once
 before escalating.
-
-If the plan contains open questions for the user (marked in the plan), pause
-and surface them before reporting back.

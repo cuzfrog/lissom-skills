@@ -3,26 +3,43 @@
 ## Skill responsibilities (thin dispatcher)
 - Declare inputs, spawn the partner agent, verify the output artifact exists, report back.
 - Escalate on missing artifacts after one retry; do not retry indefinitely.
-- Do not contain domain logic. (Stateless looping or branching is not domain logic, they belong to legitimate dispatcher logic.)
-- Completion section owns lifecycle checkpoints (e.g., writing summary files).
+- Do not contain domain logic. Stateless looping or branching is dispatcher logic, not domain logic.
+- The Completion section is where the skill writes lifecycle artifacts (e.g., summary files).
 
 ## Agent responsibilities (rich domain logic)
 - Own all domain logic: format, idempotency, iteration, escalation rules.
-- Idempotency belongs here — the agent knows what "stale" means.
-- Keep tool declarations to only what the agent actually needs.
-- Condense verbose enumerated lists into tight bullets when the model is capable of inference.
+- Idempotency belongs in the agent — the agent knows what "stale" means.
+- Declare only tools the agent actually uses.
 
 ## Descriptions
-- Skill descriptions must say what the skill does (dispatches, coordinates), not what the agent does (implements, reviews).
-- Agent descriptions summarize the logic.
+- Skill descriptions say what the skill does (dispatches, coordinates), not what the agent does.
+- Agent descriptions summarize the domain logic.
 
-## Format standard
-- Remove unnecessary styling or format in text to keep a small file size. E.g. no need to add newlines and spaces to make a long statement multiline.
+## Section order
+Skills: Inputs → Process → Constraints (if any) → Completion.
+Agents: Inputs → Process → Output → Constraints → Idempotency.
+
+## Format
+- Keep files small. Remove decorative formatting that adds no meaning.
+- Prefer single-line statements. Do not break a sentence across lines for visual alignment.
+- Use bold sparingly — for section-internal labels, not emphasis on random words.
+- For tool call, explicitly write: "Use Tool `<ToolName>` to". For example, "Use Tool `AskUserQuestion` to interview user."
+- Arguments must be explicitly declared in **Inputs** section, using "snake_case".
+- Identifiers like arguments, filename, toolname, enums, anchor use apostrophe quotes. E.g. `task_id`.
+- Logic clauses and titles use double star quotes. E.g. **If no step files exist**, **Goal**.
+- Descriptive terms use double quotes when needed.
+
+
+## Frontmatter
+Required fields for all definitions: `name`, `version`, `description`.
+Additional agent fields: `tools`, `model`.
+Optional: `argument-hint` (skills only, shown to the user as invocation hint).
+`description` must be one concise sentence. Multi-line YAML block scalars (`>`) are acceptable if the sentence is long.
 
 ## Checklist
-1. Is idempotency handled?
-2. Is there duplicate info? Is info on need-to-know basis?
-3. Is input and output contract specific and accurate?
-4. Is `AskUserQuestion` Tool used for user interaction?
-5. Is tool or hook or anything else can be used to avoid an LLM call?
-6. Is `TodoWrite` tool used to report divided tasks and steps for better user observability?
+1. Is idempotency handled (in the agent)?
+2. Is information on a need-to-know basis? Are there duplicates across skill and agent?
+3. Are input and output contracts specific and accurate?
+4. Is `AskUserQuestion` used for all user interaction?
+5. Can a tool, hook, or non-LLM mechanism replace an LLM call?
+6. Is `TodoWrite` used to report task progress for user observability?
