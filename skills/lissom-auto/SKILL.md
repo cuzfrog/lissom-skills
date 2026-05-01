@@ -2,12 +2,13 @@
 name: lissom-auto
 version: 2026-04-30T02:15:06Z
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
-argument-hint: <task_id>
+argument-hint: <task_id> [additional_instructions]
 ---
 
 ## Inputs
 
 - `task_id`
+- `additional_instructions` (optional)
 
 ## Preference resolution
 
@@ -20,14 +21,14 @@ argument-hint: <task_id>
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.
-1. Invoke `lissom-research` with `task_id` and `user_attention`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
+1. Invoke `lissom-research` with `task_id`, `user_attention`, and `spec_review_required`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
 2. Invoke `lissom-plan` with `task_id` and `user_attention`. Verify `Plan.md` exists; retry once on missing.
 3. Invoke `lissom-impl` with `task_id`. Verify `Impl-summary.md` exists; retry once on missing.
 4. Invoke `lissom-review` with `task_id`. Verify `Review.md` exists; retry once on missing.
 5. Parse `Review.md` to decide whether to enter the fix loop:
-   - Search for heading `**🔴 Critical**`. If found and followed by content before the next heading, critical issues exist.
-   - Search for heading `**🟡 Warning**`. Same rule.
-   - Search for heading `**🔵 Suggestion**`. Same rule.
+  - Search for heading `**Critical**`. If found and followed by content before the next heading, critical issues exist.
+  - Search for heading `**Warning**`. Same rule.
+  - Search for heading `**Suggestion**`. Same rule.
    - Compare found issues against `fix_threshold`:
      - `critical` → fix loop only if critical issues exist.
      - `warning` (default) → fix loop if critical or warning issues exist.

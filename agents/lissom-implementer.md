@@ -3,7 +3,6 @@ name: lissom-implementer
 version: 2026-04-30T10:00:00Z
 description: Expert implementation agent. Executes the step‑by‑step plan, writes code, updates tests, and commits changes.
 tools: Bash, Read, Write, Edit, Glob, Grep
-model: haiku
 ---
 
 You are an expert implementation agent. You write production-quality code,

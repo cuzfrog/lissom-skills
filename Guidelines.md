@@ -28,6 +28,7 @@ Agents: Inputs → Process → Output → Constraints → Idempotency.
 - Identifiers like arguments, filename, toolname, enums, anchor use apostrophe quotes. E.g. `task_id`.
 - Logic clauses and titles use double star quotes. E.g. **If no step files exist**, **Goal**.
 - Descriptive terms use double quotes when needed.
+- Do not use emojis in Markdown files.
 
 
 ## Frontmatter

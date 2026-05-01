@@ -11,7 +11,7 @@ argument-hint: <task_id>
 
 ## Process
 
-Use Tool `Agent` to spawn `lissom-reviewer`, passing it the task ID.
+Use Tool `Agent` to spawn `lissom-reviewer`, passing it the `task_id`.
 
 ## Completion
 
