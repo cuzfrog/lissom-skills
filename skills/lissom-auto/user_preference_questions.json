@@ -17,7 +17,7 @@
       },
       {
         "label": "Focused",
-        "description": "Grill me until we've gone through every nook and cranny.",
+        "description": "Ask detailed follow-up questions about edge cases, alternatives, and tradeoffs.",
         "value": "focused"
       }
     ]
@@ -40,7 +40,7 @@
       },
       {
         "label": "Suggestion",
-        "description": "Nit-picking.",
+        "description": "Fix all issues including optional suggestions.",
         "value": "suggestion"
       }
     ]

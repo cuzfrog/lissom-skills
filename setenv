@@ -3,7 +3,7 @@
 export ANTHROPIC_API_KEY="" # must be explicitly set to empty
 export ANTHROPIC_BASE_URL=http://localhost:4000
 export ANTHROPIC_AUTH_TOKEN=dummy
-export ANTHROPIC_DEFAULT_OPUS_MODEL="qwen/qwen3.5-9b"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="tencent/hy3-preview:free"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="tencent/hy3-preview:free"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="qwen/qwen3.5-9b"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-super-120b-a12b:free"
 export CLAUDE_CODE_SUBAGENT_MODEL="qwen/qwen3.5-9b"

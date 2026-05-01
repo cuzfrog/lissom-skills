@@ -1,16 +1,15 @@
 ---
 name: lissom-review
 version: 2026-04-30T02:15:17Z
-description: Dispatches to lissom-reviewer and relays the pass/fail verdict to the caller.
+description: Dispatches to lissom-reviewer and relays the verdict to the caller.
+argument-hint: <task_id>
 ---
-
-You are invoked with a task ID (e.g. `T1`) and an optional mode.
 
 ## Inputs
 
-- `task_id`: The task identifier (e.g. `T1`)
+- `task_id`
 
-## What you do
+## Process
 
 Use Tool `Agent` to spawn `lissom-reviewer`, passing it the task ID.
 
@@ -18,6 +17,8 @@ Use Tool `Agent` to spawn `lissom-reviewer`, passing it the task ID.
 
 Verify `.lissom/tasks/<ID>/Review.md` exists and is non-empty.
 
-If critical issues are found, **do not mark the task as done** and **do not
-attempt to fix the code yourself**. Escalate to the caller with a summary of what must be fixed so that `lissom-plan` can generate fix step
-files and `lissom-implementer` can apply the actual changes.
+Return to the caller with:
+- Confirmation that `Review.md` was written.
+- Whether any findings exist (the caller owns threshold logic and fix-loop decisions).
+
+Do **not** attempt to fix code or mark the task as done.
