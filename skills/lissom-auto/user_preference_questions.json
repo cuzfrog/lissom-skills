@@ -44,5 +44,23 @@
         "value": "suggestion"
       }
     ]
+  },
+  {
+    "question": "Should I check and refine the specs with you first?",
+    "header": "Spec Refinement",
+    "multiSelect": false,
+    "preference_arg": "spec_review_required",
+    "options": [
+      {
+        "label": "Yes",
+        "description": "Review the specs with me and refine them until they're solid before implementation.",
+        "value": "yes"
+      },
+      {
+        "label": "No",
+        "description": "No, the specs are fine as they are.",
+        "value": "no"
+      }
+    ]
   }
 ]

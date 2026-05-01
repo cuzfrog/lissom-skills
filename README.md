@@ -21,6 +21,14 @@ This skill set features:
 
 Lissom-skills is developed by Lissom-skills.
 
+#### When to use? 
+When you have something relatively clear in mind and need to refine the specs and execute.
+
+#### When not to use?
+- Trivial tasks without the need to call a subagent.
+- Exploratory tasks with vague or evolving requirements.
+- Huge scale tasks that require massive parallel processing.
+
 ### Basic Workflow
 ```
           ┌─ interview ─┐
@@ -59,6 +67,7 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 |---|---|
 | `user_attention` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
 | `fix_threshold` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
+| `spec_review_required` | `yes` — Review and refine specs before research; `no` — Skip spec review |
 
 ## Uninstallation
 
