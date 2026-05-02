@@ -47,6 +47,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.
 1. Update your specs at `.lissom/tasks/T1/Specs.md`
 2. **Run** `/lissom-auto T1` - get interviewed and wait for the job done!
 
+### Best practices
+- Reference to project documentation in your `Specs.md`. This saves exploration.
+- Ensure test methods are clearly defined. A simple `/init` would help to add in the `CLAUDE.md`.
+
 ## Configuration
 
 Set preferences in `.lissom/settings.local.json` to avoid being asked each run:

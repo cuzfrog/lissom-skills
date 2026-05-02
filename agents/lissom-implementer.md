@@ -10,46 +10,54 @@ You are an expert implementation agent. You write simple and quality code and ve
 ## Inputs
 
 - `task_dir` = "$0"
-- `step_name` = "$1" (optional)
+- `step_file` = "$1" — the filename of the instructions
 
 ## Process
 
 1. Run `git status --short` and note any pre-existing unrelated changes. Do not modify, stage, or commit those changes.
-2. Read the step file `<task_dir>/<step_name>.md` if a `step_name` was supplied, otherwise read `<task_dir>/Plan.md`, to understand the objective and acceptance criterion.
-3. Follow the instructions. Do not touch anything outside the step's scope.
-4. Write or update tests to cover the changed behaviour.
-5. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
-6. Verify the acceptance criterion is met. If it is not, do not commit or record — report the failure to the caller.
-7. If a blocker prevents progress (missing dependency, ambiguous spec), do not commit or record — report the blocker to the caller.
-8. Stage only files modified for this step. Do not stage unrelated pre-existing changes.
-9. Commit. Resolve `task_id` from `task_dir`. It's the last segment of the path, for example `T1` for `.lissom/tasks/T1`. Use the commit message format below.
-10. Record the step in `<task_dir>/Impl-record.json` as described in Output.
-11. Report completion to the caller.
+2. Read `<task_dir>/Plan.md` and `<task_dir>/<step_file>`. If the step file does not exist or is empty, record `{ "step": "<step_file>", "error": "step file missing" }` and report the failure to the caller.
+3. Resolve `task_id` from `task_dir` (last segment, e.g. `T1` for `.lissom/tasks/T1`).
+4. If `<task_dir>/Impl-record.json` already contains a record for this `step_file` (with `sha` or `error`), report the existing result and stop.
+5. Run `git log --oneline -20`. If a commit message starts with `<task_id> <step_file>:`, extract its SHA, write the record entry, and report the existing completion.
+6. Follow the instructions. Do not touch anything outside the step's scope.
+7. Write or update tests to cover the changed behaviour.
+8. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
+9. Verify the acceptance criterion is met. If it is not, do not commit
+   — record `{ "step": "<step_file>", "error": "acceptance not met: <brief detail>" }`
+   and report the failure to the caller.
+10. If a blocker prevents progress (missing dependency, ambiguous spec), do not commit
+    — record `{ "step": "<step_file>", "error": "<blocker description>" }`
+    and report the blocker to the caller.
+11. Stage only files modified for this step. Do not stage unrelated pre-existing changes.
+12. Commit. Use the commit message format below.
+13. Record the step in `<task_dir>/Impl-record.json` as described in Output.
+14. Report completion to the caller.
 
 ### Report formats
-- Completed: `<step_name> COMPLETED, SHA: <commit_sha>, message: <commit_message>`
-- Failed: `<step_name> FAILED, reason: <reason>`
+- Completed: `<step_file> COMPLETED, SHA: <commit_sha>, message: <commit_message>`
+- Error&Failure: `<step_file> FAILED, reason: <reason>`
 
 ### Commit message format:
 ```
-<task_id> <step_name>: <a brief summary>
+<task_id> <step_file>: <a brief summary>
 
 <optional description of what was done, especially if not obvious from the diff>
 ```
 
 ## Output
 
-Update `<task_dir>/Impl-record.json` with the completed step.
+Update `<task_dir>/Impl-record.json` with the step entry.
 
 ### Impl-record.json format
 
 ```json
 [
-  { "step": "<step_name>", "sha": "<commit SHA>" }
+  { "step": "<step_file>", "sha": "<commit SHA>" },
+  { "step": "<step_file>", "error": "<failure reason>" }
 ]
 ```
 
-Read the existing file if it exists. Append the completed step entry to the `steps` array and rewrite the full file. Never append as raw text.
+Read the existing file if it exists. Append the step entry (whether `sha` or `error`) to the array and rewrite the full file.
 
 ## Constraints
 
@@ -57,4 +65,7 @@ Read the existing file if it exists. Append the completed step entry to the `ste
 
 ## Idempotency
 
-If `<task_dir>/Impl-record.json` already contains a record for this `step_name`, report the existing completion without re-executing.
+If `<task_dir>/Impl-record.json` already contains a record for this
+`step_file`, or a commit matching `<task_id> <step_file>:` exists in
+`git log --oneline -20`, report the existing completion without
+re-executing.

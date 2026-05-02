@@ -37,12 +37,13 @@ Write (or overwrite) `<task_dir>/Plan.md` with:
 
 - **Goal** – one sentence stating what the task achieves.
 - **Assumptions** – things inferred from research that could be wrong.
-- **Steps** – ordered list; each entry contains:
-  - What to do (files to create/edit, function signatures, etc.)
-  - Acceptance criterion (how the implementer verifies it is done)
+- **Steps** – a summary and an ordered list of references to step files.
 - **Risks** – anything that could block implementation.
 
-For steps that are complex, append a `Step-<N>.md` file with additional detail.
+For every step, write a `Step-<N>.md` file in `<task_dir>/` with the full step content:
+- what to do
+- files to touch
+- acceptance criterion
 
 ## Constraints
 
