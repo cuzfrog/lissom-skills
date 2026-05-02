@@ -2,13 +2,12 @@
 name: lissom-auto
 version: 2026-04-30T02:15:06Z
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
-argument-hint: <task_id> [additional_instructions]
+argument-hint: <task_id>
 ---
 
 ## Inputs
 
-- `task_id`
-- `additional_instructions` (optional)
+- `task_id` = "$0"
 
 ## Preference resolution
 
@@ -17,14 +16,19 @@ argument-hint: <task_id> [additional_instructions]
 3. For each preference, check if it is present in `settings.local.json`. If set, use it.
 4. For any preference not found in `settings.local.json`:
     - inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."
-    - use `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
+    - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
+
+## Task Directory Resolution
+1. `task_dir` = `.lissom/tasks/<task_id>` or `.lissom/tasks/backlog/<task_id>`
+2. If neither path exists, search available tools to locate the task, for example a JIRA ID. Then copy the task into `.lissom/tasks/<task_id>/Specs.md` and use `.lissom/tasks/<task_id>` as `task_dir`.
+3. If the task still cannot be found, fail.  
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.
-1. Invoke `lissom-research` with `task_id`, `user_attention`, and `spec_review_required`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
-2. Invoke `lissom-plan` with `task_id` and `user_attention`. Verify `Plan.md` exists; retry once on missing.
-3. Invoke `lissom-impl` with `task_id`. Verify `Impl-summary.md` exists; retry once on missing.
-4. Invoke `lissom-review` with `task_id`. Verify `Review.md` exists; retry once on missing.
+1. Invoke `lissom-research` with `task_dir`, `user_attention`, and `spec_review_required`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
+2. Invoke `lissom-plan` with `task_dir`. Verify `Plan.md` exists; retry once on missing.
+3. Invoke `lissom-impl` with `task_dir`. Verify `Impl-summary.md` exists; retry once on missing.
+4. Invoke `lissom-review` with `task_dir`. Verify `Review.md` exists; retry once on missing.
 5. Parse `Review.md` to decide whether to enter the fix loop:
   - Search for heading `**Critical**`. If found and followed by content before the next heading, critical issues exist.
   - Search for heading `**Warning**`. Same rule.
@@ -39,9 +43,9 @@ argument-hint: <task_id> [additional_instructions]
 ## Fix loop
 
 Up to 3 cycles:
-1. Invoke `lissom-plan` with `task_id`, `fix_cycle`, and `fix_threshold`.
-2. Invoke `lissom-impl` with `task_id`.
-3. Invoke `lissom-review` with `task_id`.
+1. Invoke `lissom-plan` with `task_dir`, `fix_cycle`, and `fix_threshold`.
+2. Invoke `lissom-impl` with `task_dir`.
+3. Invoke `lissom-review` with `task_dir`.
 4. Parse `Review.md` the same way as Execution step 5. If it passes → report success.
 
 After 3 cycles with persistent issues, report failure and direct the user to `Review.md`.
@@ -49,9 +53,9 @@ After 3 cycles with persistent issues, report failure and direct the user to `Re
 ## Rules
 
 - Never write code, plans, or research directly. Delegate all work by invoking the named sub-skills above.
-- If a sub-skill escalates a blocking question, use `AskUserQuestion` to relay it to the user and pass the answer back.
+- If a sub-skill escalates a blocking question, use Tool `AskUserQuestion` to relay it to the user and pass the answer back.
 - If a skill is interrupted mid-run, re-invoke it (skills are idempotent).
 
 ## Definition of done
-- These artifacts exist in `.lissom/tasks/<ID>/`: `Research.md`, `Plan.md`, `Impl-summary.md`, `Review.md`.
+- These artifacts exist in `.lissom/tasks/<task_id>/`: `Research.md`, `Plan.md`, `Impl-summary.md`, `Review.md`.
 - `Review.md` contains no issues at or above `fix_threshold`, or the fix loop has exhausted 3 cycles.

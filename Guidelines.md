@@ -23,10 +23,10 @@ Agents: Inputs → Process → Output → Constraints → Idempotency.
 - Keep files small. Remove decorative formatting that adds no meaning.
 - Prefer single-line statements. Do not break a sentence across lines for visual alignment.
 - Use bold sparingly — for section-internal labels, not emphasis on random words.
-- For tool call, explicitly write: "Use Tool `<ToolName>` to". For example, "Use Tool `AskUserQuestion` to interview user."
+- For tool call, explicitly write: "use Tool `<ToolName>` to". For example, "Use Tool `AskUserQuestion` to interview user."
 - Arguments must be explicitly declared in **Inputs** section, using "snake_case".
 - Identifiers like arguments, filename, toolname, enums, anchor use apostrophe quotes. E.g. `task_id`.
-- Logic clauses and titles use double star quotes. E.g. **If no step files exist**, **Goal**.
+- Logic clauses and titles use double star quotes (bold). E.g. **If no step files exist**, **Goal**.
 - Descriptive terms use double quotes when needed.
 - Do not use emojis in Markdown files.
 
