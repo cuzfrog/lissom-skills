@@ -16,7 +16,7 @@ argument-hint: <task_id> [additional_instructions]
 3. For each preference, check if it is present in `settings.local.json`. If set, use it.
 4. For any preference not found in `settings.local.json`:
     - inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."
-    - use `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
+    - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.
@@ -48,7 +48,7 @@ After 3 cycles with persistent issues, report failure and direct the user to `Re
 ## Rules
 
 - Never write code, plans, or research directly. Delegate all work by invoking the named sub-skills above.
-- If a sub-skill escalates a blocking question, use `AskUserQuestion` to relay it to the user and pass the answer back.
+- If a sub-skill escalates a blocking question, use Tool `AskUserQuestion` to relay it to the user and pass the answer back.
 - If a skill is interrupted mid-run, re-invoke it (skills are idempotent).
 
 ## Definition of done

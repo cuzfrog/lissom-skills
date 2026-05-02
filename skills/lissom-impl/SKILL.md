@@ -11,12 +11,12 @@ argument-hint: <task_id>
 
 ## Process
 
-0. Use `TodoWrite` tool to track progress.
+0. Use Tool `TodoWrite` to track progress.
 1. Read `.lissom/tasks/<task_id>/Impl-record.json` if it exists to find already-completed
    steps, then resume from the next incomplete step.
 2. Read `.lissom/tasks/<task_id>/Plan.md`. Check whether `Step-<N>.md` files exist for the task.
 3. **If step files exist**: iterate through each step in order (including fix
-   steps listed under `## Fix cycle <M>` sections in Plan.md). For each step: Use Tool `Agent` to spawn `lissom-implementer` with the `task_id` and `step_name` (e.g. `T1 Step-2`).
+   steps listed under `## Fix cycle <M>` sections in Plan.md). For each step: use Tool `Agent` to spawn `lissom-implementer` with the `task_id` and `step_name` (e.g. `T1 Step-2`).
 4. **If no step files exist**: use Tool `Agent` to spawn `lissom-implementer` with only the `task_id`. The `Plan.md` is treated as the default "step file".
 
 ### Per step process
