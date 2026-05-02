@@ -106,6 +106,12 @@ convert_agent_frontmatter() {
         fi
     done <<< "$content"
     
+    # Validate required fields
+    if [[ -z "$name_field" ]] || [[ -z "$version_field" ]] || [[ -z "$description_field" ]]; then
+        echo "Error: Missing required frontmatter fields (name, version, or description)" >&2
+        return 1
+    fi
+    
     # Output converted frontmatter in correct field order
     [[ -n "$name_field" ]] && echo "$name_field"
     [[ -n "$description_field" ]] && echo "$description_field"
