@@ -325,8 +325,3 @@ body"
         # Verify ordering
         assert name_idx < desc_idx < version_idx < mode_idx < temp_idx < perm_idx
 
-
-@pytest.fixture
-def script_dir() -> Path:
-    """Return the root directory of the lissom-skills project"""
-    return Path(__file__).parent.parent

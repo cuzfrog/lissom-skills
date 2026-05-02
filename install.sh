@@ -64,7 +64,7 @@ fi
 # If the repo files aren't present, download them from GitHub into a temp dir.
 REPO="https://raw.githubusercontent.com/cuzfrog/lissom-skills/main"
 CLEANUP_TMPDIR=""
-if [[ ! -f "$SCRIPT_DIR/agents/lissom-researcher.md" ]] && [[ ! -f "$SCRIPT_DIR/agents/task-researcher.md" ]]; then
+if [[ ! -f "$SCRIPT_DIR/agents/lissom-researcher.md" ]]; then
     SCRIPT_DIR="$(mktemp -d)"
     CLEANUP_TMPDIR="$SCRIPT_DIR"
     echo "Fetching files from GitHub..."
@@ -219,8 +219,8 @@ done
 for skill_dir in "$SCRIPT_DIR/skills"/*/; do
     skill_name=$(basename "$skill_dir")
     classify_file "$skill_dir/SKILL.md" "$TARGET/skills/$skill_name/SKILL.md"
-    # Also classify supporting files for lissom-auto and task-auto
-    if [[ "$skill_name" == "lissom-auto" || "$skill_name" == "task-auto" ]]; then
+    # Also classify supporting files for lissom-auto
+    if [[ "$skill_name" == "lissom-auto" ]]; then
         [[ -f "$skill_dir/user_preference_questions.json" ]] && classify_file "$skill_dir/user_preference_questions.json" "$TARGET/skills/$skill_name/user_preference_questions.json"
     fi
 done

@@ -57,8 +57,8 @@ def test_uninstall_removes_skills_and_agents(tmp_path):
     result = run_uninstall(src, work)
 
     assert result.returncode == 0
-    assert not (work / ".claude" / "agents" / "task-researcher.md").exists()
-    assert not (work / ".claude" / "skills" / "task-auto" / "SKILL.md").exists()
+    assert not (work / ".claude" / "agents" / "lissom-researcher.md").exists()
+    assert not (work / ".claude" / "skills" / "lissom-auto" / "SKILL.md").exists()
 
 
 def test_empty_dirs_cleaned(tmp_path):

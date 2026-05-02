@@ -18,51 +18,59 @@ uninstall_from() {
 
     echo "Uninstalling from $TARGET..."
 
-    # Remove agents (only lissom-skills' own agents)
-    for agent in "${AGENTS[@]}"; do
-        dest="$TARGET/agents/$agent.md"
-        if [[ -f "$dest" ]]; then
-            rm "$dest"
-            echo "  Removed $dest"
-            REMOVED=$((REMOVED + 1))
-        else
-            SKIPPED=$((SKIPPED + 1))
+    # Remove agents - scan the agents directory for any files that were installed by lissom-skills
+    # This includes production (lissom-*) agent names
+    if [[ -d "$TARGET/agents" ]]; then
+        for agent_file in "$TARGET/agents"/*.md; do
+            if [[ -f "$agent_file" ]]; then
+                local agent_name=$(basename "$agent_file" .md)
+                if [[ "$agent_name" =~ ^lissom- ]]; then
+                    rm "$agent_file"
+                    echo "  Removed $agent_file"
+                    REMOVED=$((REMOVED + 1))
+                fi
+            fi
+        done
+        
+        # Remove empty agents directory
+        if [[ -d "$TARGET/agents" ]] && [[ -z "$(ls -A "$TARGET/agents")" ]]; then
+            rmdir "$TARGET/agents"
         fi
-    done
-
-    # Remove empty agents directory
-    if [[ -d "$TARGET/agents" ]] && [[ -z "$(ls -A "$TARGET/agents")" ]]; then
-        rmdir "$TARGET/agents"
     fi
 
-    # Remove skills (only lissom-skills' own skills)
-    for skill in "${SKILLS[@]}"; do
-        dest="$TARGET/skills/$skill/SKILL.md"
-        if [[ -f "$dest" ]]; then
-            rm "$dest"
-            echo "  Removed $dest"
-            REMOVED=$((REMOVED + 1))
-        else
-            SKIPPED=$((SKIPPED + 1))
-        fi
-        # Also remove supporting files for lissom-auto
-        if [[ "$skill" == "lissom-auto" ]]; then
-            pref_dest="$TARGET/skills/$skill/user_preference_questions.json"
-            if [[ -f "$pref_dest" ]]; then
-                rm "$pref_dest"
-                echo "  Removed $pref_dest"
-                REMOVED=$((REMOVED + 1))
+    # Remove skills - scan the skills directory for any subdirectories that were installed by lissom-skills
+    # This includes production (lissom-*) skill names
+    if [[ -d "$TARGET/skills" ]]; then
+        for skill_dir in "$TARGET/skills"/*/; do
+            if [[ -d "$skill_dir" ]]; then
+                local skill_name=$(basename "$skill_dir")
+                if [[ "$skill_name" =~ ^lissom- ]]; then
+                    # Remove SKILL.md file
+                    if [[ -f "$skill_dir/SKILL.md" ]]; then
+                        rm "$skill_dir/SKILL.md"
+                        echo "  Removed $skill_dir/SKILL.md"
+                        REMOVED=$((REMOVED + 1))
+                    fi
+                    
+                    # Remove user_preference_questions.json if present
+                    if [[ -f "$skill_dir/user_preference_questions.json" ]]; then
+                        rm "$skill_dir/user_preference_questions.json"
+                        echo "  Removed $skill_dir/user_preference_questions.json"
+                        REMOVED=$((REMOVED + 1))
+                    fi
+                    
+                    # Remove empty skill directory
+                    if [[ -z "$(ls -A "$skill_dir")" ]]; then
+                        rmdir "$skill_dir"
+                    fi
+                fi
             fi
+        done
+        
+        # Remove empty skills directory
+        if [[ -d "$TARGET/skills" ]] && [[ -z "$(ls -A "$TARGET/skills")" ]]; then
+            rmdir "$TARGET/skills"
         fi
-        skill_target_dir="$TARGET/skills/$skill"
-        if [[ -d "$skill_target_dir" ]] && [[ -z "$(ls -A "$skill_target_dir")" ]]; then
-            rmdir "$skill_target_dir"
-        fi
-    done
-
-    # Remove empty skills directory
-    if [[ -d "$TARGET/skills" ]] && [[ -z "$(ls -A "$TARGET/skills")" ]]; then
-        rmdir "$TARGET/skills"
     fi
 
     # Remove empty target directory
@@ -73,7 +81,6 @@ uninstall_from() {
 
     echo ""
     echo "Removed $REMOVED files from $TARGET"
-    echo "Skipped $SKIPPED already-absent files"
 }
 
 # Parse arguments

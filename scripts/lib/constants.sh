@@ -13,10 +13,10 @@ SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 get_default_model() {
     local filename="$1"
     case "$filename" in
-        lissom-implementer.md|task-implementer.md) echo "haiku" ;;
-        lissom-planner.md|task-planner.md) echo "sonnet" ;;
-        lissom-researcher.md|task-researcher.md) echo "opus-4.6" ;;
-        lissom-reviewer.md|task-reviewer.md) echo "sonnet" ;;
+        lissom-implementer.md) echo "haiku" ;;
+        lissom-planner.md) echo "sonnet" ;;
+        lissom-researcher.md) echo "opus-4.6" ;;
+        lissom-reviewer.md) echo "sonnet" ;;
         lissom-specs-reviewer.md) echo "sonnet" ;;
         *) echo "" ;;
     esac
@@ -28,10 +28,10 @@ get_default_model() {
 get_opencode_model() {
     local agent_name="$1"
     case "$agent_name" in
-        lissom-implementer|task-implementer) echo "opencode-go/deepseek-v4-flash" ;;
-        lissom-planner|task-planner) echo "opencode-go/deepseek-v4-pro" ;;
-        lissom-researcher|task-researcher) echo "opencode-go/deepseek-v4-pro" ;;
-        lissom-reviewer|task-reviewer) echo "opencode-go/qwen3.6-plus" ;;
+        lissom-implementer) echo "opencode-go/deepseek-v4-flash" ;;
+        lissom-planner) echo "opencode-go/deepseek-v4-pro" ;;
+        lissom-researcher) echo "opencode-go/deepseek-v4-pro" ;;
+        lissom-reviewer) echo "opencode-go/qwen3.6-plus" ;;
         lissom-specs-reviewer) echo "opencode-go/qwen3.6-plus" ;;
         *) echo "opencode-go/qwen3.6-plus" ;;
     esac
