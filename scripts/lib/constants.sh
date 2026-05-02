@@ -29,8 +29,8 @@ get_opencode_model() {
     local agent_name="$1"
     case "$agent_name" in
         lissom-implementer|task-implementer) echo "opencode-go/deepseek-v4-flash" ;;
-        lissom-planner|task-planner) echo "opencode-go/qwen3.6-plus" ;;
-        lissom-researcher|task-researcher) echo "opencode-go/deepseek-v4-flash" ;;
+        lissom-planner|task-planner) echo "opencode-go/deepseek-v4-pro" ;;
+        lissom-researcher|task-researcher) echo "opencode-go/deepseek-v4-pro" ;;
         lissom-reviewer|task-reviewer) echo "opencode-go/qwen3.6-plus" ;;
         lissom-specs-reviewer) echo "opencode-go/qwen3.6-plus" ;;
         *) echo "opencode-go/qwen3.6-plus" ;;
