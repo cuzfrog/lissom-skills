@@ -1,6 +1,6 @@
 ---
 name: lissom-auto
-version: 2026-04-30T02:15:06Z
+version: 2026-05-02T00:00:00Z
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
 argument-hint: <task_id>
 ---
@@ -21,7 +21,10 @@ argument-hint: <task_id>
 ## Task Directory Resolution
 1. `task_dir` = `.lissom/tasks/<task_id>` or `.lissom/tasks/backlog/<task_id>`
 2. If neither path exists, search available tools to locate the task, for example a JIRA ID. Then copy the task into `.lissom/tasks/<task_id>/Specs.md` and use `.lissom/tasks/<task_id>` as `task_dir`.
-3. If the task still cannot be found, fail.  
+3. If the task still cannot be found, fail.
+
+### Artifact discovery
+- Prefer list dir or read files directly instead of file search. Because file search tools may respect exclusion rules, such as `.gitignore`, that hide the files we need to operate on.
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.
