@@ -6,22 +6,14 @@ AGENTS=(lissom-implementer lissom-planner lissom-researcher lissom-reviewer liss
 SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 
 # Parse arguments
-MODE="project"
-if [[ "$1" == "--user" ]]; then
-    MODE="user"
-elif [[ "$1" == "--project" ]]; then
-    MODE="project"
-elif [[ -n "$1" ]]; then
-    echo "Usage: $0 [--project | --user]"
+if [[ -n "$1" ]]; then
+    echo "Usage: $0"
     exit 1
 fi
 
-# Determine target directory
-if [[ "$MODE" == "user" ]]; then
-    TARGET="$HOME/.claude"
-else
-    TARGET="./.claude"
-fi
+# Determine target directory (always project .claude/)
+PROJECT_INSTALL_DIR=".claude"
+TARGET="$PROJECT_INSTALL_DIR"
 
 # Get script directory (where agents/, skills/, templates/ are located)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -335,33 +327,31 @@ else
     SKIPPED=$((SKIPPED + ${#OLDER_SRC[@]}))
 fi
 
-# Create sample Specs.md only in project mode and only if absent
-if [[ "$MODE" == "project" ]]; then
-    specs_dir=".lissom/tasks/T1"
-    specs_dest="$specs_dir/Specs.md"
-    if [[ ! -f "$specs_dest" ]]; then
-        mkdir -p "$specs_dir"
-        cp "$SCRIPT_DIR/templates/Specs.md" "$specs_dest"
-        echo "Created sample $specs_dest"
-    fi
+# Create sample Specs.md only if absent
+specs_dir=".lissom/tasks/T1"
+specs_dest="$specs_dir/Specs.md"
+if [[ ! -f "$specs_dest" ]]; then
+    mkdir -p "$specs_dir"
+    cp "$SCRIPT_DIR/templates/Specs.md" "$specs_dest"
+    echo "Created sample $specs_dest"
+fi
 
-    # Add .lissom/ to .gitignore if not already present
-    if [[ -f ".gitignore" ]]; then
-        if ! grep -q "^\.lissom/" ".gitignore"; then
-            {
-                echo ""
-                echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
-                echo ".lissom/"
-            } >> ".gitignore"
-            echo "Added .lissom/ to .gitignore"
-        fi
-    else
+# Add .lissom/ to .gitignore if not already present
+if [[ -f ".gitignore" ]]; then
+    if ! grep -q "^\.lissom/" ".gitignore"; then
         {
+            echo ""
             echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
             echo ".lissom/"
-        } > ".gitignore"
-        echo "Created .gitignore with .lissom/"
+        } >> ".gitignore"
+        echo "Added .lissom/ to .gitignore"
     fi
+else
+    {
+        echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
+        echo ".lissom/"
+    } > ".gitignore"
+    echo "Created .gitignore with .lissom/"
 fi
 
 # Print summary
@@ -411,9 +401,7 @@ if $MODELS_FOUND; then
 fi
 echo ""
 echo "Next steps:"
-if [[ "$MODE" == "project" ]]; then
-    echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
-fi
+echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
 echo "- Invoke '/lissom-auto T1', get interviewed and wait for the job to be done!"
 
 # Clean up temp directory used when fetching from GitHub
