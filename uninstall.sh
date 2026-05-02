@@ -79,16 +79,11 @@ uninstall_from() {
 }
 
 # Parse arguments
-if [[ "$1" == "--user" ]]; then
-    uninstall_from "$HOME/.claude"
-elif [[ "$1" == "--project" ]]; then
-    uninstall_from "./.claude"
-elif [[ -z "$1" ]]; then
-    uninstall_from "./.claude"
-    uninstall_from "$HOME/.claude"
-else
-    echo "Usage: $0 [--project | --user]"
+if [[ -n "$1" ]]; then
+    echo "Usage: $0"
     exit 1
 fi
 
-echo "Uninstall complete!"
+# Always scan both .claude/ and .opencode/
+uninstall_from "./.claude"
+uninstall_from "./.opencode"
