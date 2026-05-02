@@ -11,20 +11,19 @@
 └─┘  SKILLS     for daily dev automation and context protection.
 ```
 
-#### Why?
-- Thin-skill dispatcher - relentless context protection.
+#### Why? What's the difference from GSD, SuperPower?
+- Zero dependency - just plain files.
+- Thin skill dispatchers - relentless context protection.
 - Idempotency - hussle-free resume with minimal state.
 - Reinforced specs - no surprise dev experience.
 
-Lissom-skills is developed by Lissom-skills.
-
-#### When to use? 
-When you have something in mind and need to refine the specs and execute.
+#### When to use?
+- I have one task, help me refine the specs and automate it.
 
 #### When not to use?
 - Trivial tasks.
-- Exploratory tasks with vague or evolving requirements.
-- Huge scale tasks that require parallel processing.
+- Exploratory tasks.
+- Parallel processing.
 
 ### Basic Workflow
 ```
@@ -56,7 +55,8 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 ```json
 {
   "user_attention": "default",
-  "fix_threshold": "warning"
+  "fix_threshold": "warning",
+  "spec_review_required": "yes"
 }
 ```
 
