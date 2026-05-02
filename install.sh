@@ -22,6 +22,29 @@ TARGET="./$INSTALL_TARGET"
 TARGET_FORMAT="claude"  # default to Claude Code format
 ADD_MODEL_FIELD=false
 
+# Check for alternate target directory and warn if switching
+ALTERNATE_TARGET=$([[ "$INSTALL_TARGET" == ".claude" ]] && echo ".opencode" || echo ".claude")
+if [[ -d "$ALTERNATE_TARGET" ]] && [[ -n "$(ls -A "$ALTERNATE_TARGET"/agents/lissom-* 2>/dev/null)" ]]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  Warning: Found existing installation in $ALTERNATE_TARGET/"
+    echo ""
+    echo "You are installing to $INSTALL_TARGET/, but $ALTERNATE_TARGET/ already contains"
+    echo "lissom-skills files. Consider running uninstall.sh first to remove the"
+    echo "old installation and avoid confusion."
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    # Prompt for confirmation unless LISSOM_YES is set
+    if [[ -z "$LISSOM_YES" ]]; then
+        read -p "Continue anyway? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installation cancelled."
+            exit 0
+        fi
+    fi
+fi
+
 if [[ "$INSTALL_TARGET" == ".opencode" ]]; then
     TARGET_FORMAT="opencode"
     # For Opencode target, ask about model preference
