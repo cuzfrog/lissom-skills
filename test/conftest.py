@@ -61,6 +61,14 @@ def make_src_tree(
                    Example: {"task-researcher": "opus-4.6", "task-planner": "sonnet"}
         target_format: "claude" (default) or "opencode" to control frontmatter format
     """
+    # Copy scripts/lib from the real repo to the fixture
+    import shutil as shutil_module
+    repo_root = Path(__file__).resolve().parent.parent
+    scripts_lib_src = repo_root / "scripts" / "lib"
+    scripts_lib_dest = src / "scripts" / "lib"
+    if scripts_lib_src.exists():
+        shutil_module.copytree(scripts_lib_src, scripts_lib_dest, dirs_exist_ok=True)
+    
     for agent in AGENTS:
         (src / "agents").mkdir(parents=True, exist_ok=True)
         

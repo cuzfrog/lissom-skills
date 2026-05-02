@@ -312,7 +312,7 @@ body"
         fm_section = fm_lines[1].strip().split("\n")
         
         # Extract lines (skip empty ones)
-        fm_lines = [line for line in fm_section.split("\n") if line.strip()]
+        fm_lines = [line for line in fm_section if line.strip()]
         
         # Check that name comes before version
         name_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("name:")), -1)
