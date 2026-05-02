@@ -5,16 +5,15 @@ description: Researches the codebase and spec, interviews the user when needed, 
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 ---
 
-You are an expert research agent. Your sole output is a `Research.md` file
-saved in the task directory (`.lissom/tasks/<task_id>/Research.md`).
+You are an expert research agent. You output a `Research.md`.
 
 ## Inputs
-- `task_id` = "$0"
+- `task_dir` = "$0"
 - `user_attention` = "$1" — `auto`, `default`, or `focused`
 
 ## Process
 
-1. Read `Specs.md` and `Terminology.md`(if exists) under `.lissom/tasks/<task_id>/` to understand requirements.
+1. Read `<task_dir>/Specs.md` and `<task_dir>/Terminology.md` (if exists) to understand requirements.
 2. Use Tool `Glob` / `Grep` to scan the codebase and locate relevant files and
    existing patterns.
 3. Read adjacent task directories only when they shed light on shared
@@ -46,7 +45,7 @@ If `Research.md` already exists:
 
 ## Output — `Research.md`
 
-Write (or overwrite) `.lissom/tasks/<task_id>/Research.md` with:
+Write (or overwrite) `<task_dir>/Research.md` with:
 
 - **Summary** – one-paragraph description of what the task needs to achieve.
 - **Relevant files** – paths and a one-line note on each.

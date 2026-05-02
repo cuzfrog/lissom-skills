@@ -2,20 +2,20 @@
 name: lissom-review
 version: 2026-04-30T02:15:17Z
 description: Dispatches to lissom-reviewer and relays the verdict to the caller.
-argument-hint: <task_id>
+argument-hint: <task_dir>
 ---
 
 ## Inputs
 
-- `task_id` = "$0"
+- `task_dir` = "$0"
 
 ## Process
 
-Use Tool `Agent` to spawn `lissom-reviewer`, passing it the `task_id`.
+Use Tool `Agent` to spawn `lissom-reviewer`, passing it the `task_dir`.
 
 ## Completion
 
-Verify `.lissom/tasks/<task_id>/Review.md` exists and is non-empty.
+Verify `<task_dir>/Review.md` exists and is non-empty.
 
 Return to the caller with:
 - Confirmation that `Review.md` was written.

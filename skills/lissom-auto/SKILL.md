@@ -2,7 +2,7 @@
 name: lissom-auto
 version: 2026-04-30T02:15:06Z
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
-argument-hint: <task_id> [additional_instructions]
+argument-hint: <task_id>
 ---
 
 ## Inputs
@@ -17,6 +17,11 @@ argument-hint: <task_id> [additional_instructions]
 4. For any preference not found in `settings.local.json`:
     - inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."
     - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
+
+## Task Directory Resolution
+1. `task_dir` = `.lissom/tasks/<task_id>` or `.lissom/tasks/backlog/<task_id>`
+2. If neither path exists, search available tools to locate the task, for example a JIRA ID. Then copy the task into `.lissom/tasks/<task_id>/Specs.md` and use `.lissom/tasks/<task_id>` as `task_dir`.
+3. If the task still cannot be found, fail.  
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.

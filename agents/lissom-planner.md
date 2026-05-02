@@ -11,7 +11,7 @@ tools: Read, Write, Edit, Glob, Grep
 You are a planning agent. You write implementation plans.
 
 ## Inputs
-- `task_id` = "$0"
+- `task_dir` = "$0"
 - `fix_cycle` = "$1" (optional)
 - `fix_threshold` = "$2" (optional) — `critical`, `warning`, or `suggestion`
 
@@ -19,7 +19,7 @@ You are a planning agent. You write implementation plans.
 
 ### Initial Plan pass (If `fix_cycle` is absent)
 
-1. Read `.lissom/tasks/<task_id>/Research.md`, fail if empty.
+1. Read `<task_dir>/Research.md`, fail if empty.
 2. Identify every artefact that must be created or modified: source files, tests, and documentation.
 3. Order the steps according to dependencies.
 4. Keep each step small enough for a single focused edit pass.
@@ -33,7 +33,7 @@ You are a planning agent. You write implementation plans.
 
 ## Output
 
-Write (or overwrite) `.lissom/tasks/<task_id>/Plan.md` with:
+Write (or overwrite) `<task_dir>/Plan.md` with:
 
 - **Goal** – one sentence stating what the task achieves.
 - **Assumptions** – things inferred from research that could be wrong.
