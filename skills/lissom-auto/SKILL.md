@@ -7,8 +7,7 @@ argument-hint: <task_id> [additional_instructions]
 
 ## Inputs
 
-- `task_id`
-- `additional_instructions` (optional)
+- `task_id` = "$0"
 
 ## Preference resolution
 
@@ -53,5 +52,5 @@ After 3 cycles with persistent issues, report failure and direct the user to `Re
 - If a skill is interrupted mid-run, re-invoke it (skills are idempotent).
 
 ## Definition of done
-- These artifacts exist in `.lissom/tasks/<ID>/`: `Research.md`, `Plan.md`, `Impl-summary.md`, `Review.md`.
+- These artifacts exist in `.lissom/tasks/<task_id>/`: `Research.md`, `Plan.md`, `Impl-summary.md`, `Review.md`.
 - `Review.md` contains no issues at or above `fix_threshold`, or the fix loop has exhausted 3 cycles.

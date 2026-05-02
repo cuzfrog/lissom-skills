@@ -7,7 +7,7 @@ argument-hint: <task_id>
 
 ## Inputs
 
-- `task_id`
+- `task_id` = "$0"
 
 ## Process
 
@@ -15,7 +15,7 @@ Use Tool `Agent` to spawn `lissom-reviewer`, passing it the `task_id`.
 
 ## Completion
 
-Verify `.lissom/tasks/<ID>/Review.md` exists and is non-empty.
+Verify `.lissom/tasks/<task_id>/Review.md` exists and is non-empty.
 
 Return to the caller with:
 - Confirmation that `Review.md` was written.

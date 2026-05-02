@@ -7,16 +7,16 @@ argument-hint: <task_id> [fix_cycle] [fix_threshold]
 
 ## Inputs
 
-- `task_id`: The task identifier.
-- `fix_cycle` (optional): Fix-cycle counter for the fix loop.
-- `fix_threshold` (optional): `critical`, `warning`, or `suggestion`.
+- `task_id` = "$0"
+- `fix_cycle` = "$1" (optional)
+- `fix_threshold` = "$2" (optional): `critical`, `warning`, or `suggestion`.
 
 ## Process
 
-Use Tool `Agent` to spawn `lissom-planner`, passing: `task_id`, `fix_cycle` (if present), and `fix_threshold` (if present).
+Use Tool `Agent` to spawn `lissom-planner`, passing: `task_id`, `fix_cycle`, and `fix_threshold`.
 
 ## Completion
 
-Return to the caller only after `.lissom/tasks/<ID>/Plan.md` exists
+Return to the caller only after `.lissom/tasks/<task_id>/Plan.md` exists
 and contains at least one step. If it does not exist, re-invoke the agent once
 before escalating.

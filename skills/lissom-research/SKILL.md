@@ -7,9 +7,9 @@ argument-hint: <task_id> [user_attention] [spec_review_required]
 
 ## Inputs
 
-- `task_id`
-- `user_attention`: (optional) `default` (default), `auto`, or `focused`
-- `spec_review_required`: (optional) `yes` (default) or `no`
+- `task_id` = "$0"
+- `user_attention` = "$1" (optional): `default` (default), `auto`, or `focused`
+- `spec_review_required` = "$2" (optional): `yes` (default) or `no`
 
 ## Process
 
@@ -20,12 +20,12 @@ Execute sequentially:
    - If it returns `Specs INCOMPLETE` (auto mode only), relay the reasons to the
      user as a warning, then proceed.
    - Any other return value: treat as success and proceed.
-   - If `.lissom/tasks/<ID>/Specs.md` does not exist or is empty after the agent returns, escalate immediately.
+   - If `.lissom/tasks/<task_id>/Specs.md` does not exist or is empty after the agent returns, escalate immediately.
 
 2. Use Tool `Agent` to spawn `lissom-researcher`, passing it the `task_id` and `user_attention`.
 
 ## Completion
 
-Return to the caller only after `.lissom/tasks/<ID>/Research.md` exists and is
+Return to the caller only after `.lissom/tasks/<task_id>/Research.md` exists and is
 non-empty. If it does not exist, re-invoke `lissom-researcher` once before
 escalating.
