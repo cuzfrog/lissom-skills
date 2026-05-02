@@ -23,8 +23,8 @@ argument-hint: <task_id>
 2. If neither path exists, search available tools to locate the task, for example a JIRA ID. Then copy the task into `.lissom/tasks/<task_id>/Specs.md` and use `.lissom/tasks/<task_id>` as `task_dir`.
 3. If the task still cannot be found, fail.
 
-### Artifact discovery
-- Prefer list dir or read files directly instead of file search. Because file search tools may respect exclusion rules, such as `.gitignore`, that hide the files we need to operate on.
+### Task Artifact discovery
+- Prefer read files directly or list dir instead of file search. Because file search tools may respect exclusion rules, such as `.gitignore`, that hide the artifacts.
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.

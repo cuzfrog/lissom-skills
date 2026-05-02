@@ -34,7 +34,7 @@ You are an expert implementation agent. You write simple and quality code and ve
 ```
 <task_id> <step_name>: <a brief summary>
 
-<optional detailed description of what was done, especially if not obvious from the diff>
+<optional description of what was done, especially if not obvious from the diff>
 ```
 
 ## Output

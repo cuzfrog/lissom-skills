@@ -21,4 +21,3 @@ A Claude Code skill and agent set designed to specific and reliable.
 ## Rules
 
 - When editing skill or agent definitions, follow `Guidelines.md`.
-

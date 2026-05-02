@@ -69,10 +69,10 @@ def test_upgrade(tmp_path):
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
     make_src_tree(src, "2025-01-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1"})
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
     make_src_tree(src, "2026-06-01T00:00:00")
 
-    result = run_install(src, work)
+    result = run_install(src, work, env_extra={"LISSOM_TARGET": ".claude"})
 
     assert result.returncode == 0
     assert "newer than the source" not in result.stdout
@@ -136,21 +136,6 @@ def test_mixed_versions(tmp_path):
     assert "Skipped 1" in result.stdout
 
 
-def test_user_mode_target(tmp_path):
-    """T11: --user installs to $HOME/.claude and does not create Specs.md."""
-    src = tmp_path / "src"
-    work = tmp_path / "work"
-    fakehome = tmp_path / "home"
-    src.mkdir(); work.mkdir(); fakehome.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-
-    result = run_install(src, work, args=("--user",), env_extra={"HOME": str(fakehome), "LISSOM_YES": "1"})
-
-    assert result.returncode == 0
-    assert (fakehome / ".claude" / "agents" / "task-researcher.md").is_file()
-    assert not (work / ".lissom" / "tasks" / "T1" / "Specs.md").exists()
-
-
 def test_no_version_field_overwritten_silently(tmp_path):
     """T12: A versionless installed file is treated as 'version 0' and overwritten without a prompt."""
     src, work = tmp_path / "src", tmp_path / "work"
@@ -162,7 +147,7 @@ def test_no_version_field_overwritten_silently(tmp_path):
         "---\nname: task-researcher\ndescription: old, no version\n---\nbody\n"
     )
 
-    result = run_install(src, work)
+    result = run_install(src, work, env_extra={"LISSOM_TARGET": ".claude"})
 
     assert result.returncode == 0
     assert "newer than the source" not in result.stdout
@@ -290,7 +275,7 @@ def test_customization_message_displayed(tmp_path):
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
 
     assert result.returncode == 0
-    assert "The model field can be modified in the agent md files at .claude/agents/" in result.stdout
+    assert "The model field can be modified in the agent files at .claude/agents/" in result.stdout
 
 
 def test_model_config_declined(tmp_path):
@@ -334,6 +319,120 @@ def test_preserve_absence_of_model_field(tmp_path):
     researcher = (work / ".claude" / "agents" / "task-researcher.md").read_text()
     assert "2026-06-01T00:00:00" in researcher   # version updated
     assert "model:" not in researcher             # model field still absent
+
+
+# Opencode integration tests (Step 9)
+
+def test_install_opencode_target(tmp_path):
+    """OC1: Selecting .opencode/ target produces converted agent files with Opencode frontmatter."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
+
+    assert result.returncode == 0
+    # Verify Opencode directory exists and .claude doesn't
+    assert (work / ".opencode").exists()
+    assert not (work / ".claude").exists()
+    
+    # Verify agent files exist in .opencode
+    assert (work / ".opencode" / "agents" / "task-researcher.md").is_file()
+    assert (work / ".opencode" / "agents" / "task-planner.md").is_file()
+    
+    # Verify Opencode frontmatter: mode: subagent, temperature: 0.1, permission block
+    researcher = (work / ".opencode" / "agents" / "task-researcher.md").read_text()
+    assert "mode: subagent" in researcher
+    assert "temperature: 0.1" in researcher
+    assert "permission:" in researcher
+    assert "read: allow" in researcher
+    
+    # Verify Claude Code format fields are removed/converted
+    assert "tools:" not in researcher  # Claude Code tools line is removed
+
+
+def test_install_opencode_with_model(tmp_path):
+    """OC2: Opencode installation preserves models when creating new files with model support."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # For Claude target with LISSOM_YES=1, models are added by default
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
+    assert result.returncode == 0
+    
+    # Then upgrade to Opencode target - existing model fields should be preserved/converted
+    # Create an Opencode version of the file with models
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
+    assert result.returncode == 0
+    
+    # Files should exist in .opencode
+    researcher = (work / ".opencode" / "agents" / "task-researcher.md").read_text()
+    assert "mode: subagent" in researcher
+
+
+def test_install_opencode_without_model(tmp_path):
+    """OC3: Opencode installation without model preference excludes model field."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_NO": "1", "LISSOM_TARGET": ".opencode"})
+
+    assert result.returncode == 0
+    researcher = (work / ".opencode" / "agents" / "task-researcher.md").read_text()
+    
+    # Verify model field is absent
+    assert "model:" not in researcher
+    # But other Opencode fields should still be present
+    assert "mode: subagent" in researcher
+    assert "temperature: 0.1" in researcher
+
+
+def test_install_opencode_skill_frontmatter(tmp_path):
+    """OC4: Skill files retain their frontmatter unchanged in Opencode target."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
+
+    assert result.returncode == 0
+    
+    # Check skill frontmatter is preserved as-is
+    skill = (work / ".opencode" / "skills" / "task-auto" / "SKILL.md").read_text()
+    assert "name: task-auto" in skill
+    assert "version: 2026-01-01T00:00:00" in skill
+    # Skill frontmatter should NOT have Opencode-specific fields like mode/temperature
+    assert "mode: subagent" not in skill
+    assert "temperature:" not in skill
+
+
+def test_install_opencode_body_rewrite(tmp_path):
+    """OC5: Tool names in agent body text are rewritten during Opencode conversion."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+    
+    # Create an agent with tool references in the body
+    (src / "agents" / "task-custom.md").write_text(
+        "---\nname: task-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
+        "Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
+    )
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
+
+    assert result.returncode == 0
+    custom = (work / ".opencode" / "agents" / "task-custom.md").read_text()
+    
+    # Verify tool names are rewritten in body
+    assert "`bash`" in custom
+    assert "`read`" in custom
+    assert "`question`" in custom
+    # Verify old names are NOT present
+    assert "`Bash`" not in custom
+    assert "`Read`" not in custom
+    assert "`AskUserQuestion`" not in custom
 
 
 

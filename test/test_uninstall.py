@@ -48,13 +48,13 @@ def run_uninstall(src: Path, work: Path, args=(), env_extra=None):
 # Test cases
 
 def test_uninstall_removes_skills_and_agents(tmp_path):
-    """U1: All installed agent and skill files are removed."""
+    """U1: All installed agent and skill files are removed from both .claude/ and .opencode/."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
     make_src_tree(src, "2026-01-01T00:00:00")
     install_fixture(src, work)
 
-    result = run_uninstall(src, work, args=("--project",))
+    result = run_uninstall(src, work)
 
     assert result.returncode == 0
     assert not (work / ".claude" / "agents" / "task-researcher.md").exists()
@@ -68,7 +68,7 @@ def test_empty_dirs_cleaned(tmp_path):
     make_src_tree(src, "2026-01-01T00:00:00")
     install_fixture(src, work)
 
-    run_uninstall(src, work, args=("--project",))
+    run_uninstall(src, work)
 
     assert not (work / ".claude" / "agents").exists()
     assert not (work / ".claude" / "skills").exists()
@@ -81,33 +81,83 @@ def test_uninstall_nothing_to_remove(tmp_path):
     src.mkdir(); work.mkdir()
     make_src_tree(src, "2026-01-01T00:00:00")
 
-    result = run_uninstall(src, work, args=("--project",))
+    result = run_uninstall(src, work)
 
     assert result.returncode == 0
 
 
-def test_uninstall_user_flag(tmp_path):
-    """U5: --user flag removes files from $HOME/.claude and preserves CLAUDE.md."""
-    src = tmp_path / "src"
-    work = tmp_path / "work"
-    fakehome = tmp_path / "home"
-    src.mkdir(); work.mkdir(); fakehome.mkdir()
+def test_uninstall_claude_only(tmp_path):
+    """U5: Uninstall removes files from .claude/ when only that directory exists."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
     make_src_tree(src, "2026-01-01T00:00:00")
+    install_fixture(src, work)
 
-    # Install into fakehome/.claude using --user
+    # Verify .claude exists
+    assert (work / ".claude").exists()
+
+    result = run_uninstall(src, work)
+
+    assert result.returncode == 0
+    assert not (work / ".claude").exists()
+
+
+def test_uninstall_opencode_only(tmp_path):
+    """U6: Uninstall removes files from .opencode/ when only that directory exists."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+    
+    # Install to .opencode instead of .claude
     shutil.copy(INSTALL_SH, src / "install.sh")
     subprocess.run(
-        ["bash", str(src / "install.sh"), "--user"],
+        ["bash", str(src / "install.sh")],
         cwd=str(work),
-        env={**os.environ, "HOME": str(fakehome), "LISSOM_YES": "1"},
+        env={**os.environ, "LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"},
         stdin=subprocess.DEVNULL,
         capture_output=True,
         check=True,
     )
 
-    result = run_uninstall(src, work, args=("--user",), env_extra={"HOME": str(fakehome)})
+    # Verify .opencode exists and .claude doesn't
+    assert (work / ".opencode").exists()
+    assert not (work / ".claude").exists()
+
+    result = run_uninstall(src, work)
 
     assert result.returncode == 0
-    assert not (fakehome / ".claude" / "agents" / "task-researcher.md").exists()
+    assert not (work / ".opencode").exists()
+
+
+def test_uninstall_both_directories(tmp_path):
+    """U7: Uninstall removes files from both .claude/ and .opencode/ if both exist."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+    
+    # Install to .claude
+    install_fixture(src, work)
+    assert (work / ".claude").exists()
+
+    # Also install to .opencode
+    shutil.copy(INSTALL_SH, src / "install.sh")
+    subprocess.run(
+        ["bash", str(src / "install.sh")],
+        cwd=str(work),
+        env={**os.environ, "LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"},
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        check=True,
+    )
+    
+    # Verify both exist
+    assert (work / ".claude").exists()
+    assert (work / ".opencode").exists()
+
+    result = run_uninstall(src, work)
+
+    assert result.returncode == 0
+    assert not (work / ".claude").exists()
+    assert not (work / ".opencode").exists()
 
 

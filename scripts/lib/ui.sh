@@ -16,9 +16,16 @@ detect_dialog_tool() {
 # Prompt user to choose between .claude/ and .opencode/ target directories
 # Args: dialog_tool (e.g. "dialog", "whiptail", "select")
 # Returns: target directory name (".claude" or ".opencode")
+# Respects LISSOM_TARGET (explicit target selection)
 # Respects LISSOM_YES=1 (defaults to ".claude" without prompting)
 prompt_target_directory() {
     local dialog_tool="$1"
+    
+    # If LISSOM_TARGET is explicitly set, use it
+    if [[ -n "${LISSOM_TARGET:-}" ]]; then
+        echo "$LISSOM_TARGET"
+        return 0
+    fi
     
     # If LISSOM_YES=1, default to .claude/ (backward compatible)
     if [[ "${LISSOM_YES:-}" == "1" ]]; then

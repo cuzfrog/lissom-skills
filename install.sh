@@ -218,11 +218,14 @@ if [[ "$TARGET_FORMAT" == "claude" ]] && [[ $NEW_AGENT_COUNT -gt 0 ]]; then
         ADD_MODEL_FIELD=false
     else
         REPLY=""
-        {
-            printf "Add default model settings to agent files? [Y/n] " > /dev/tty \
-            && read -n 1 -r < /dev/tty \
-            && echo > /dev/tty
-        } 2>/dev/null || true
+        # Only prompt if stdin is a TTY (interactive mode)
+        if [[ -t 0 ]]; then
+            {
+                printf "Add default model settings to agent files? [Y/n] " > /dev/tty \
+                && read -n 1 -r < /dev/tty \
+                && echo > /dev/tty
+            } 2>/dev/null || true
+        fi
         if [[ -z "$REPLY" ]] || [[ "$REPLY" =~ ^[Yy]([Ee][Ss])?$ ]]; then
             ADD_MODEL_FIELD=true
         elif [[ "$REPLY" =~ ^[Nn]([Oo])?$ ]]; then
@@ -241,12 +244,15 @@ if [[ ${#OLDER_SRC[@]} -gt 0 ]]; then
         OVERWRITE_OLDER=true
     else
         REPLY="n"
-        {
-            printf "%d installed file(s) are newer than the source. Overwrite all? [y/N] " \
-                "$COUNT" > /dev/tty \
-            && read -n 1 -r < /dev/tty \
-            && echo > /dev/tty
-        } 2>/dev/null || true
+        # Only prompt if stdin is a TTY (interactive mode)
+        if [[ -t 0 ]]; then
+            {
+                printf "%d installed file(s) are newer than the source. Overwrite all? [y/N] " \
+                    "$COUNT" > /dev/tty \
+                && read -n 1 -r < /dev/tty \
+                && echo > /dev/tty
+            } 2>/dev/null || true
+        fi
         [[ $REPLY =~ ^[Yy]$ ]] && OVERWRITE_OLDER=true
     fi
 fi

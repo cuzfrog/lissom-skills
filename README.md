@@ -18,7 +18,7 @@
 - Reinforced specs - no surprise dev experience.
 
 #### When to use?
-- I have one task, help me refine the specs and automate it.
+- I have an idea, help me refine the specs and automate the implementation.
 
 #### When not to use?
 - Trivial tasks.
