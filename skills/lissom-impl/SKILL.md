@@ -1,6 +1,6 @@
 ---
 name: lissom-impl
-version: 2026-04-30T02:15:25Z
+version: 2026-05-02T00:00:00Z
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
 argument-hint: <task_dir>
 ---
@@ -20,34 +20,20 @@ argument-hint: <task_dir>
 4. **If no step files exist**: use Tool `Agent` to spawn `lissom-implementer` with only the `task_dir`. The `Plan.md` is treated as the default "step file".
 
 ### Per step process
-1. Extract: commit SHA, tests run, and pass/fail status from the agent's response.
-2. Re-read the step file's acceptance criterion. If the agent's report confirms the criterion is met, record the step in `Impl-record.json`.
-3. If not met, re-invoke `lissom-implementer` once more with the same step. If still failing, escalate with the step name and what failed.
-4. If the agent reports a blocker (e.g. missing dependency, ambiguous spec), escalate immediately.
+
+1. If the agent reports a blocker (e.g. missing dependency, ambiguous spec), escalate immediately.
+2. Verify the step entry exists in `<task_dir>/Impl-record.json`.
+3. If the record is missing, re-invoke `lissom-implementer` once more with the same step. If still missing after retry, escalate with the step name and the agent's last response.
 
 ## Constraints
 
 - Never apply fixes directly — every fix step must come from a `Step-<N>-fix-<M>.md`
   file written by `lissom-planner`.
 
-## Impl-record.json format
-
-```json
-{
-  "steps": [
-    { "step": "Step-1", "sha": "<commit SHA>" },
-    { "step": "Step-2", "sha": "<commit SHA>" }
-  ]
-}
-```
-
-Rewrite the full file after each step completes. Never append.
-
 ## Completion
 
 After all steps are done, write `<task_dir>/Impl-summary.md` containing:
-- Steps completed (with commit SHAs from `Impl-record.json`)
-- Tests run and their pass/fail status (gathered from agent responses during step iteration)
+- Steps completed with commit SHAs from `<task_dir>/Impl-record.json`
 - Any deviations from the plan
 - Assumptions section copied from `<task_dir>/Research.md`
 
