@@ -14,9 +14,28 @@ if [[ -n "$1" ]]; then
     exit 1
 fi
 
-# Determine target directory (always project .claude/)
-PROJECT_INSTALL_DIR=".claude"
-TARGET="$PROJECT_INSTALL_DIR"
+# Determine target directory (prompt user for .claude/ vs .opencode/)
+# Initialize model preference (only relevant for .opencode/)
+DIALOG_TOOL=$(detect_dialog_tool)
+INSTALL_TARGET=$(prompt_target_directory "$DIALOG_TOOL")
+TARGET="./$INSTALL_TARGET"
+TARGET_FORMAT="claude"  # default to Claude Code format
+ADD_MODEL_FIELD=false
+
+if [[ "$INSTALL_TARGET" == ".opencode" ]]; then
+    TARGET_FORMAT="opencode"
+    # For Opencode target, ask about model preference
+    INCLUDE_MODEL=$(prompt_model_preference "$DIALOG_TOOL")
+    if [[ "$INCLUDE_MODEL" == "true" ]]; then
+        ADD_MODEL_FIELD=true
+    fi
+fi
+
+# For .claude/ target, also handle the legacy model preference prompt
+if [[ "$INSTALL_TARGET" == ".claude" ]]; then
+    # This will be set later after checking if there are new agent files
+    :
+fi
 
 # When piped via curl, BASH_SOURCE[0] is empty so SCRIPT_DIR falls back to CWD.
 # If the repo files aren't present, download them from GitHub into a temp dir.
@@ -191,8 +210,8 @@ for i in "${!SILENT_DEST[@]}"; do
     fi
 done
 
-# Model configuration prompt
-if [[ $NEW_AGENT_COUNT -gt 0 ]]; then
+# Model configuration prompt (only for .claude/ format)
+if [[ "$TARGET_FORMAT" == "claude" ]] && [[ $NEW_AGENT_COUNT -gt 0 ]]; then
     if [[ "${LISSOM_YES:-}" == "1" ]]; then
         ADD_MODEL_FIELD=true
     elif [[ "${LISSOM_NO:-}" == "1" ]]; then
@@ -232,66 +251,112 @@ if [[ ${#OLDER_SRC[@]} -gt 0 ]]; then
     fi
 fi
 
-# Helper function to copy a file with optional model field handling
-copy_with_model_handling() {
+# Helper function to copy a file with format-specific handling and conversion
+# Handles .claude/ (Claude Code format) and .opencode/ (Opencode format) with conversion
+copy_with_conversion() {
     local src="$1" dest="$2" is_new="$3"
     local basename_dest
     basename_dest=$(basename "$dest")
+    local dirname_dest
+    dirname_dest=$(basename "$(dirname "$dest")")
     
-    # Only process agent files; copy others directly
-    if [[ "$dest" != *"/agents/"*.md ]]; then
+    # JSON files (user_preference_questions.json) are copied verbatim regardless of format
+    if [[ "$basename_dest" == "user_preference_questions.json" ]]; then
         cp "$src" "$dest"
         return 0
     fi
     
-    # Validate existing file's YAML if it exists
-    if [[ -f "$dest" ]]; then
-        if ! validate_yaml_frontmatter "$dest"; then
-            echo "Error: $dest has malformed YAML frontmatter." >&2
-            echo "Please fix or remove this file manually and re-run installation." >&2
-            return 1
-        fi
-    fi
-    
-    # If this is an upgrade (dest exists), preserve existing model field (or absence)
-    if [[ -f "$dest" ]]; then
-        local existing_model
-        existing_model=$(get_model "$dest")
-        local src_content
-        src_content=$(cat "$src")
-        
-        # If existing file has a model field, preserve it
-        if [[ -n "$existing_model" ]]; then
-            add_model_to_content "$src_content" "$existing_model" > "$dest"
-        else
-            # No model field in existing file → preserve absence
+    # For .claude/ format, use existing model-handling logic
+    if [[ "$TARGET_FORMAT" == "claude" ]]; then
+        # Only process agent files; copy others directly
+        if [[ "$dest" != *"/agents/"*.md ]]; then
             cp "$src" "$dest"
+            return 0
         fi
-    else
-        # New file: add model field if user accepted prompt
-        if $ADD_MODEL_FIELD; then
-            local default_model
-            default_model=$(get_default_model "$basename_dest")
-            if [[ -n "$default_model" ]]; then
-                local src_content
-                src_content=$(cat "$src")
-                add_model_to_content "$src_content" "$default_model" > "$dest"
+        
+        # Validate existing file's YAML if it exists
+        if [[ -f "$dest" ]]; then
+            if ! validate_yaml_frontmatter "$dest"; then
+                echo "Error: $dest has malformed YAML frontmatter." >&2
+                echo "Please fix or remove this file manually and re-run installation." >&2
+                return 1
+            fi
+        fi
+        
+        # If this is an upgrade (dest exists), preserve existing model field (or absence)
+        if [[ -f "$dest" ]]; then
+            local existing_model
+            existing_model=$(get_model "$dest")
+            local src_content
+            src_content=$(cat "$src")
+            
+            # If existing file has a model field, preserve it
+            if [[ -n "$existing_model" ]]; then
+                add_model_to_content "$src_content" "$existing_model" > "$dest"
             else
+                # No model field in existing file → preserve absence
                 cp "$src" "$dest"
             fi
         else
-            cp "$src" "$dest"
+            # New file: add model field if user accepted prompt
+            if $ADD_MODEL_FIELD; then
+                local default_model
+                default_model=$(get_default_model "$basename_dest")
+                if [[ -n "$default_model" ]]; then
+                    local src_content
+                    src_content=$(cat "$src")
+                    add_model_to_content "$src_content" "$default_model" > "$dest"
+                else
+                    cp "$src" "$dest"
+                fi
+            else
+                cp "$src" "$dest"
+            fi
         fi
+        return 0
     fi
+    
+    # For .opencode/ format, apply conversion
+    if [[ "$TARGET_FORMAT" == "opencode" ]]; then
+        # JSON files are already handled above
+        
+        # For agent files: convert frontmatter and tool names in body
+        if [[ "$dest" == *"/agents/"*.md ]]; then
+            local src_content
+            src_content=$(cat "$src")
+            # Extract agent name from filename (e.g. "lissom-researcher.md" -> "lissom-researcher")
+            local agent_name="${basename_dest%.md}"
+            # Convert and write to dest
+            convert_agent_file "$src_content" "$agent_name" "$ADD_MODEL_FIELD" > "$dest"
+            return 0
+        fi
+        
+        # For skill files: convert tool names in body but keep frontmatter
+        if [[ "$dest" == *"/skills/"*"/SKILL.md" ]]; then
+            local src_content
+            src_content=$(cat "$src")
+            # Only convert tool names in body, skill frontmatter stays unchanged
+            convert_tool_names_in_body "$src_content" > "$dest"
+            return 0
+        fi
+        
+        # For other files, copy as-is
+        cp "$src" "$dest"
+        return 0
+    fi
+    
+    # Fallback
+    cp "$src" "$dest"
     return 0
 }
+
 
 # Silent copies (new files, same version, source-newer)
 for i in "${!SILENT_SRC[@]}"; do
     mkdir -p "$(dirname "${SILENT_DEST[$i]}")"
     is_new="false"
     [[ ! -f "${SILENT_DEST[$i]}" ]] && is_new="true"
-    if ! copy_with_model_handling "${SILENT_SRC[$i]}" "${SILENT_DEST[$i]}" "$is_new"; then
+    if ! copy_with_conversion "${SILENT_SRC[$i]}" "${SILENT_DEST[$i]}" "$is_new"; then
         echo "Installation failed." >&2
         exit 1
     fi
@@ -302,7 +367,7 @@ done
 if $OVERWRITE_OLDER; then
     for i in "${!OLDER_SRC[@]}"; do
         mkdir -p "$(dirname "${OLDER_DEST[$i]}")"
-        if ! copy_with_model_handling "${OLDER_SRC[$i]}" "${OLDER_DEST[$i]}" "false"; then
+        if ! copy_with_conversion "${OLDER_SRC[$i]}" "${OLDER_DEST[$i]}" "false"; then
             echo "Installation failed." >&2
             exit 1
         fi
