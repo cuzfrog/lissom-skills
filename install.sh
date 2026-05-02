@@ -5,6 +5,7 @@ set -e  # Exit on error
 # Source constants and utility functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
+source "$SCRIPT_DIR/scripts/lib/conversion.sh"
 
 # Parse arguments
 if [[ -n "$1" ]]; then
