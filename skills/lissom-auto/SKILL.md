@@ -25,10 +25,10 @@ argument-hint: <task_id>
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.
-1. Invoke `lissom-research` with `task_id`, `user_attention`, and `spec_review_required`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
-2. Invoke `lissom-plan` with `task_id` and `user_attention`. Verify `Plan.md` exists; retry once on missing.
-3. Invoke `lissom-impl` with `task_id`. Verify `Impl-summary.md` exists; retry once on missing.
-4. Invoke `lissom-review` with `task_id`. Verify `Review.md` exists; retry once on missing.
+1. Invoke `lissom-research` with `task_dir`, `user_attention`, and `spec_review_required`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
+2. Invoke `lissom-plan` with `task_dir`. Verify `Plan.md` exists; retry once on missing.
+3. Invoke `lissom-impl` with `task_dir`. Verify `Impl-summary.md` exists; retry once on missing.
+4. Invoke `lissom-review` with `task_dir`. Verify `Review.md` exists; retry once on missing.
 5. Parse `Review.md` to decide whether to enter the fix loop:
   - Search for heading `**Critical**`. If found and followed by content before the next heading, critical issues exist.
   - Search for heading `**Warning**`. Same rule.
@@ -43,9 +43,9 @@ argument-hint: <task_id>
 ## Fix loop
 
 Up to 3 cycles:
-1. Invoke `lissom-plan` with `task_id`, `fix_cycle`, and `fix_threshold`.
-2. Invoke `lissom-impl` with `task_id`.
-3. Invoke `lissom-review` with `task_id`.
+1. Invoke `lissom-plan` with `task_dir`, `fix_cycle`, and `fix_threshold`.
+2. Invoke `lissom-impl` with `task_dir`.
+3. Invoke `lissom-review` with `task_dir`.
 4. Parse `Review.md` the same way as Execution step 5. If it passes → report success.
 
 After 3 cycles with persistent issues, report failure and direct the user to `Review.md`.
