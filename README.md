@@ -11,18 +11,15 @@
 └─┘  SKILLS     for daily dev automation and context protection.
 ```
 
-#### Why? How this is different from GSD, SuperPower?
-They are complex tool sets that require powerful AI models. Pressure on the model needs more care from developers. I see a single input prompt from CLI reach 50k+ or even more tokens. It feels like a cauldron we throw everthing into.
-
-This skill set features:
-- Thin-skill dispatcher pattern - relentless context protection.
+#### Why?
+- Thin-skill dispatcher - relentless context protection.
 - Idempotency - hussle-free resume with minimal state.
-- Reinforced Specs - no surprise dev experience.
+- Reinforced specs - no surprise dev experience.
 
 Lissom-skills is developed by Lissom-skills.
 
 #### When to use? 
-When you have something relatively clear in mind and need to refine the specs and execute.
+When you have something in mind and need to refine the specs and execute.
 
 #### When not to use?
 - Trivial tasks.
