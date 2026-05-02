@@ -328,6 +328,11 @@ copy_with_conversion() {
         
         # For agent files: convert frontmatter and tool names in body
         if [[ "$dest" == *"/agents/"*.md ]]; then
+            # Validate source frontmatter before conversion
+            if ! validate_yaml_frontmatter "$src"; then
+                echo "Error: $src has malformed YAML frontmatter." >&2
+                return 1
+            fi
             local src_content
             src_content=$(cat "$src")
             # Extract agent name from filename (e.g. "lissom-researcher.md" -> "lissom-researcher")
