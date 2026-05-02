@@ -2,11 +2,9 @@
 
 set -e  # Exit on error
 
-AGENTS=(lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
-SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
-
-# Get script directory (where agents/, skills/, templates/ are located)
+# Source constants
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/scripts/lib/constants.sh"
 
 uninstall_from() {
     local TARGET="$1"

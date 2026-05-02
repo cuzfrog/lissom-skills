@@ -2,8 +2,9 @@
 
 set -e  # Exit on error
 
-AGENTS=(lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer)
-SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
+# Source constants and utility functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/scripts/lib/constants.sh"
 
 # Parse arguments
 if [[ -n "$1" ]]; then
@@ -14,9 +15,6 @@ fi
 # Determine target directory (always project .claude/)
 PROJECT_INSTALL_DIR=".claude"
 TARGET="$PROJECT_INSTALL_DIR"
-
-# Get script directory (where agents/, skills/, templates/ are located)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # When piped via curl, BASH_SOURCE[0] is empty so SCRIPT_DIR falls back to CWD.
 # If the repo files aren't present, download them from GitHub into a temp dir.
@@ -100,21 +98,6 @@ validate_yaml_frontmatter() {
         fi
     done < "$file"
     [[ $has_opening -eq 1 ]] && [[ $has_closing -eq 1 ]]
-}
-
-# Map agent filename to default model value.
-# Args: basename of agent file (e.g. "lissom-implementer.md")
-# Returns: model name (haiku, sonnet, opus-4.6)
-get_default_model() {
-    local filename="$1"
-    case "$filename" in
-        lissom-implementer.md|task-implementer.md) echo "haiku" ;;
-        lissom-planner.md|task-planner.md) echo "sonnet" ;;
-        lissom-researcher.md|task-researcher.md) echo "opus-4.6" ;;
-        lissom-reviewer.md|task-reviewer.md) echo "sonnet" ;;
-        lissom-specs-reviewer.md) echo "sonnet" ;;
-        *) echo "" ;;
-    esac
 }
 
 # Insert model field into file content after the tools: line.
