@@ -44,8 +44,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 ## Here We Go!
-1. Update your specs at `.lissom/tasks/T1/Specs.md`
-2. **Run** `/lissom-auto T1` - get interviewed and wait for the job done!
+**Run** `/lissom-auto <task_id>` - get interviewed and wait for the job done!
+
+1. it looks for the task in `.lissom/tasks/<task_id>/Specs.md`
+2. if not found, it tries to locate with tools (e.g. JIRA MCP)
 
 ### Best practices
 - Reference to project documentation in your `Specs.md`. This saves exploration.
@@ -80,6 +82,5 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
 
 ## Author
-Cause Chung <cuzfrog@gmail.com> (Claude Certified)
+Cause Chung <cuzfrog@gmail.com>
 
-See also: **[claude-code-litellm-hybrid-setup](https://github.com/cuzfrog/claude-code-litellm-hybrid-setup)**
