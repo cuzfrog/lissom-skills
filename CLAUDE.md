@@ -2,7 +2,7 @@
 
 ## Purpose
 
-A Claude Code skill and agent set designed to specific and reliable.
+A Claude Code skill and agent set designed to be specific and reliable.
 
 ## Project Structure
 
@@ -10,8 +10,8 @@ A Claude Code skill and agent set designed to specific and reliable.
 
 - `skills/` — skill definitions (thin dispatchers)
 - `agents/` — agent definitions (rich domain logic)
-- `templates/` — files installed into a client project
-- `scripts/` — client install/remove scripts
+- `templates/` — files installed into a client project (`Specs.md`)
+- `scripts/` — client install/remove scripts with helpers in `scripts/lib/`
 
 ### Development workspace
 
@@ -22,9 +22,9 @@ A Claude Code skill and agent set designed to specific and reliable.
 
 ## Test Method
 - `scripts/` changes must follow TDD workflow.
-- use `pytest` to execute tests
-- use `/tmp/tests/**` as the workspace for test cases that require file operations
+- Use `pytest` to execute tests. Run a single test file: `pytest test/test_install.py -v`
+- Use `/tmp/tests/**` as the workspace for test cases that require file operations.
 
 ## Rules
 
-- When editing skill or agent definitions, follow `Guidelines.md`.
+- When touching `skills/` or `agents/`, follow @Guidelines.md.

@@ -13,18 +13,17 @@
 ```
 
 #### Why? What's the difference from GSD, SuperPower?
-- Zero dependency - just plain files.
-- Thin skill dispatchers - relentless context protection.
-- Idempotency - hussle-free resume with minimal state.
-- Reinforced specs - no surprise dev experience.
+- **Zero Dependency** - just plain files.
+- **Thin Skill Dispatchers** - relentless context protection.
+- **Idempotency** - hussle-free resume with minimal state.
+- **Hammered Specs** - no surprise dev experience.
 
 #### When to use?
 - I have an idea, help me refine the specs and automate the implementation.
 
 #### When not to use?
-- Trivial tasks.
-- Exploratory tasks.
-- Parallel processing.
+- Trivial tasks - do it in one agent.
+- Exploratory tasks - use `/explore`.
 
 ### Basic Workflow
 ```
@@ -39,10 +38,16 @@ research ─┘ auto ──►   +   ──► plan ──► impl ──► rev
 ```
 
 ## Installation
-Install into your project's `.claude/` or `.opencode/`:
+Install into your project's directory with:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/install.sh | bash
 ```
+
+Supported:
+- `.claude/` Claude Code and compatible agents.
+- `.opencode/` OpenCode.
+- `.qwen/` Qwen Code (soon).
+- `.gemini/` Gemini CLI (soon).
 
 ## Here We Go!
 **Run** `/lissom-auto <task_id>` - get interviewed and wait for the job done!
@@ -52,7 +57,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 
 ### Best practices
 - Reference to project documentation in your `Specs.md`. This saves exploration.
-- Ensure test methods are clearly defined. A simple `/init` would help to add in the `CLAUDE.md`.
+- Ensure test methods are clearly defined (e.g. in `CLAUDE.md`)
 
 ## Configuration
 
