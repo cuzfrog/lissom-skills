@@ -1,6 +1,6 @@
 ---
 name: lissom-researcher
-version: 2026-05-03T00:00:00Z
+version: 2026-05-03T12:48:24Z
 description: Researches the codebase and spec, interviews the user when needed, and produces Research.md for the downstream planning step.
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 ---

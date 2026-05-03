@@ -1,6 +1,6 @@
 ---
 name: lissom-impl
-version: 2026-05-02T00:00:00Z
+version: 2026-05-03T12:48:24Z
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
 argument-hint: <task_dir>
 ---

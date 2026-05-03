@@ -1,6 +1,6 @@
 ---
 name: lissom-auto
-version: 2026-05-02T00:00:00Z
+version: 2026-05-03T12:48:24Z
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
 argument-hint: <task_id>
 ---
