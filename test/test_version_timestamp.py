@@ -20,6 +20,13 @@ def _discover_files():
 
 def _parse_version(filepath):
     content = filepath.read_text()
+    # Check for comment format on first line
+    first_line = content.splitlines()[0] if content else ""
+    if first_line.startswith("<!-- version:") and first_line.endswith("-->"):
+        # Extract timestamp from: <!-- version: 2026-05-03T12:48:24Z -->
+        inner = first_line[len("<!-- version:"):-len("-->")]
+        return inner.strip()
+    # Fallback: old YAML frontmatter format
     parts = content.split("---", 2)
     if len(parts) < 3:
         return None
