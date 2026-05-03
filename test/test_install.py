@@ -141,11 +141,11 @@ def test_mixed_versions(tmp_path):
 
     # lissom-researcher source becomes newer → should upgrade silently
     (src / "agents" / "lissom-researcher.md").write_text(
-        "---\nname: lissom-researcher\nversion: 2026-06-01T00:00:00\ndescription: fixture\n---\nbody\n"
+        "<!-- version: 2026-06-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\n---\nbody\n"
     )
     # lissom-planner source becomes older → should be skipped (prompt declined via no tty)
     (src / "agents" / "lissom-planner.md").write_text(
-        "---\nname: lissom-planner\nversion: 2025-01-01T00:00:00\ndescription: fixture\n---\nbody\n"
+        "<!-- version: 2025-01-01T00:00:00 -->\n---\nname: lissom-planner\ndescription: fixture\n---\nbody\n"
     )
 
     result = run_install(src, work)
@@ -251,7 +251,7 @@ def test_mixed_existing_and_new_agents(tmp_path):
     agents_dir = work / ".claude" / "agents"
     agents_dir.mkdir(parents=True)
     (agents_dir / "lissom-researcher.md").write_text(
-        "---\nname: lissom-researcher\nversion: 2026-01-01T00:00:00\ndescription: fixture\ntools: read, write\nmodel: my-custom-model\n---\nbody\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: read, write\nmodel: my-custom-model\n---\nbody\n"
     )
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
@@ -330,7 +330,7 @@ def test_preserve_absence_of_model_field(tmp_path):
     agents_dir = work / ".claude" / "agents"
     agents_dir.mkdir(parents=True)
     (agents_dir / "lissom-researcher.md").write_text(
-        "---\nname: lissom-researcher\nversion: 2026-01-01T00:00:00\ndescription: fixture\ntools: read, write\n---\nbody\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: read, write\n---\nbody\n"
     )
 
     # Upgrade
@@ -453,7 +453,7 @@ def test_install_opencode_skill_frontmatter(tmp_path):
     # Check skill frontmatter is preserved as-is
     skill = (work / ".opencode" / "skills" / "lissom-auto" / "SKILL.md").read_text()
     assert "name: lissom-auto" in skill
-    assert "version: 2026-01-01T00:00:00" in skill
+    assert "<!-- version: 2026-01-01T00:00:00 -->" in skill
     # Skill frontmatter should NOT have Opencode-specific fields like mode/temperature
     assert "mode: subagent" not in skill
     assert "temperature:" not in skill
@@ -498,7 +498,7 @@ def test_install_opencode_body_rewrite(tmp_path):
     
     # Create an agent with tool references in the body
     (src / "agents" / "lissom-custom.md").write_text(
-        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
         "Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
     )
 
@@ -713,7 +713,7 @@ def test_install_qwen_skill_body_rewrite(tmp_path):
 
     # Overwrite lissom-auto skill with body containing tool references
     (src / "skills" / "lissom-auto" / "SKILL.md").write_text(
-        "---\nname: lissom-auto\nversion: 2026-01-01T00:00:00\ndescription: fixture\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-auto\ndescription: fixture\n"
         "argument-hint: <task_dir>\n---\n"
         "Use tool `Bash` to execute commands. Use `Read` to inspect files.\n"
         "Also try `Grep` for searching and `AskUserQuestion` for user input.\n"
@@ -751,7 +751,7 @@ def test_install_qwen_body_rewrite(tmp_path):
 
     # Create a custom agent with tool references in the body
     (src / "agents" / "lissom-custom.md").write_text(
-        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
         "Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
     )
 
@@ -807,7 +807,7 @@ def test_install_gemini_target(tmp_path):
 
     # Overwrite researcher with broader tools to verify Gemini-specific mappings
     (src / "agents" / "lissom-researcher.md").write_text(
-        "---\nname: lissom-researcher\nversion: 2026-01-01T00:00:00\ndescription: fixture\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\n"
         "tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion\n---\nbody\n"
     )
 
@@ -887,7 +887,7 @@ def test_install_gemini_ask_user_included(tmp_path):
 
     # Create custom agent with AskUserQuestion
     (src / "agents" / "lissom-custom.md").write_text(
-        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\n"
         "tools: Bash, Read, AskUserQuestion\n---\n"
         "Ask user with `AskUserQuestion` when needed.\n"
     )
@@ -925,7 +925,7 @@ def test_install_gemini_body_rewrite(tmp_path):
 
     # Create a custom agent with tool references in the body
     (src / "agents" / "lissom-custom.md").write_text(
-        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\n"
+        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\n"
         "tools: Bash, Read, Edit, WebSearch, AskUserQuestion\n---\n"
         "Use Tool `Bash` and `Edit` and `WebSearch` and `AskUserQuestion` for this task.\n"
         "Also use `Agent` for delegation.\n"
