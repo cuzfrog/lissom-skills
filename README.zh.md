@@ -16,7 +16,7 @@
 
 ---
 
-#### 为什么选择 Lissom？与 [GSD](https://github.com/gsd-build/get-shit-done)、SuperPower 有何不同？
+#### 为什么选择 Lissom？与 [GSD](https://github.com/gsd-build/get-shit-done)、[SuperPower](https://github.com/obra/superpowers) 有何不同？
 - **零依赖** — 纯文件。
 - **薄调度层** — 极致的上下文保护。
 - **幂等性** — 最小状态，无忧恢复。
@@ -52,10 +52,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 支持的平台：
-- `.claude/` Claude Code 及兼容代理。
+- `.claude/` [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) 及兼容代理。
 - `.opencode/` [OpenCode](https://opencode.ai)。
-- `.qwen/` Qwen Code（即将支持）。
-- `.gemini/` Gemini CLI（即将支持）。
+- `.qwen/` [Qwen Code](https://github.com/QwenLM/Qwen2.5-Coder)（即将支持）。
+- `.gemini/` [Gemini CLI](https://cloud.google.com/gemini-cli)（即将支持）。
 
 ---
 

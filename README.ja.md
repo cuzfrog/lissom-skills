@@ -16,7 +16,7 @@
 
 ---
 
-#### なぜ Lissom なのか？ [GSD](https://github.com/gsd-build/get-shit-done) や SuperPower との違いは？
+#### なぜ Lissom なのか？ [GSD](https://github.com/gsd-build/get-shit-done) や [SuperPower](https://github.com/obra/superpowers) との違いは？
 - **ゼロ依存** — プレーンなファイルのみ。
 - **薄いスキルディスパッチャー** — 徹底したコンテキスト保護。
 - **冪等性** — 最小限の状態で気軽に再開。
@@ -52,10 +52,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 対応プラットフォーム：
-- `.claude/` Claude Code および互換エージェント。
+- `.claude/` [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) および互換エージェント。
 - `.opencode/` [OpenCode](https://opencode.ai)。
-- `.qwen/` Qwen Code（近日対応予定）。
-- `.gemini/` Gemini CLI（近日対応予定）。
+- `.qwen/` [Qwen Code](https://github.com/QwenLM/Qwen2.5-Coder)（近日対応予定）。
+- `.gemini/` [Gemini CLI](https://cloud.google.com/gemini-cli)（近日対応予定）。
 
 ---
 

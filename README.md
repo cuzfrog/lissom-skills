@@ -16,7 +16,7 @@
 
 ---
 
-#### Why? What's the difference from [GSD](https://github.com/gsd-build/get-shit-done), SuperPower?
+#### Why? What's the difference from [GSD](https://github.com/gsd-build/get-shit-done), [SuperPower](https://github.com/obra/superpowers)?
 - **Zero Dependency** — just plain files.
 - **Thin Skill Dispatchers** — relentless context protection.
 - **Idempotency** — hussle-free resume with minimal state.
@@ -52,10 +52,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 Supported:
-- `.claude/` Claude Code and compatible agents.
+- `.claude/` [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) and compatible agents.
 - `.opencode/` [OpenCode](https://opencode.ai).
-- `.qwen/` Qwen Code (soon).
-- `.gemini/` Gemini CLI (soon).
+- `.qwen/` [Qwen Code](https://github.com/QwenLM/Qwen2.5-Coder).
+- `.gemini/` [Gemini CLI](https://cloud.google.com/gemini-cli).
 
 ---
 
