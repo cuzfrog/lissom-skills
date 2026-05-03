@@ -11,7 +11,8 @@ argument-hint: <task_dir>
 
 ## Process
 
-Enumerate `Step-*.md` and `Fix-*.md` files in `<task_dir>/` in numeric order. For each file not already in `<task_dir>/Impl-record.json` with a `sha`, use Tool `Agent` to spawn `lissom-implementer` with `task_dir` and `step_file` (the filename with extension).
+- Enumerate `Step-*.md` and `Fix-*.md` files in `<task_dir>/` in numeric order. For each file not already in `<task_dir>/Impl-record.json` with a `sha`, use Tool `Agent` to spawn `lissom-implementer` with `task_dir` and `step_file` (the filename with extension).
+- Read `Step-dependency-graph.md` or `Fix-dependency-graph-<N>.md` to determine dependencies between steps. 
 
 ### Per step process
 
