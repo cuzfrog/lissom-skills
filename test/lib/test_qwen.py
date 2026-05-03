@@ -37,14 +37,14 @@ def run_qwen_function(script_dir: Path, func_name: str, *args) -> str:
 class TestQwenFormatAgentFrontmatter:
     """Test qwen_format_agent_frontmatter function"""
 
-    def test_preserves_name_version_description(self, script_dir: Path):
-        """Name, version, and description fields are preserved"""
+    def test_preserves_name_and_description(self, script_dir: Path):
+        """Name and description fields are preserved; no version: in YAML"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test agent
 tools: Read, Write
 ---"
@@ -56,9 +56,12 @@ tools: Read, Write
             text=True,
         )
         assert result.returncode == 0
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in result.stdout
         assert "name: test-agent" in result.stdout
-        assert "version: 2026-01-01T00:00:00Z" in result.stdout
         assert "description: Test agent" in result.stdout
+        # No "version:" line should appear in the YAML section
+        fm_section = result.stdout.split("---")[1]
+        assert "version:" not in fm_section
 
     def test_includes_model_when_requested(self, script_dir: Path):
         """Model field is included when include_model=true"""
@@ -204,13 +207,13 @@ tools: Bash, NonExistentTool, Read
         assert "NonExistentTool" not in fm_section
 
     def test_field_ordering(self, script_dir: Path):
-        """Fields appear in correct order: name, description, version, model, tools"""
+        """Fields appear in correct order: comment, ---, name, description, model, tools"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test description
 tools: Bash, Read
 ---"
@@ -222,18 +225,18 @@ tools: Bash, Read
             text=True,
         )
         assert result.returncode == 0
-        fm_section = result.stdout.split("---")[1].strip().split("\n")
-
-        fm_lines = [line for line in fm_section if line.strip()]
-
+        # Comment should appear before the first ---
+        assert result.stdout.startswith("<!-- version: 2026-01-01T00:00:00Z -->")
+        # No "version:" line in YAML section
+        fm_section = result.stdout.split("---")[1]
+        assert "version:" not in fm_section
+        # YAML fields order: name, description, model, tools
+        fm_lines = [line for line in fm_section.strip().split("\n") if line.strip()]
         name_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("name:")), -1)
         desc_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("description:")), -1)
-        version_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("version:")), -1)
         model_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("model:")), -1)
         tools_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("tools:")), -1)
-
-        assert name_idx < desc_idx < version_idx
-        assert version_idx < model_idx
+        assert name_idx < desc_idx < model_idx
         assert model_idx < tools_idx
 
     def test_no_tools_line(self, script_dir: Path):
@@ -337,8 +340,8 @@ tools: Read
         assert result.returncode != 0
         assert "Missing required frontmatter fields" in result.stderr
 
-    def test_rejects_missing_version(self, script_dir: Path):
-        """Missing version field produces error on stderr"""
+    def test_missing_version_is_not_an_error(self, script_dir: Path):
+        """Missing version (no comment, no YAML field) is now accepted"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
@@ -353,8 +356,11 @@ tools: Read
             ["bash", "-c", bash_code],
             capture_output=True, text=True
         )
-        assert result.returncode != 0
-        assert "Missing required frontmatter fields" in result.stderr
+        assert result.returncode == 0
+        assert "name: test-agent" in result.stdout
+        assert "description: Test" in result.stdout
+        # No "version:" YAML field should appear in the YAML section
+        assert "version:" not in result.stdout.split("---")[1]
 
     def test_tool_name_mapping(self, script_dir: Path):
         """Each Claude tool name maps to its Qwen equivalent in frontmatter"""
@@ -766,9 +772,9 @@ class TestQwenFormatAgentFile:
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: A test agent
 tools: Bash, Read, AskUserQuestion
 ---
@@ -781,9 +787,11 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         assert result.returncode == 0
         out = result.stdout
 
+        # Version comment preserved before ---, no version: in YAML
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "name: test-agent" in out
-        assert "version: 2026-01-01T00:00:00Z" in out
         assert "description: A test agent" in out
+        assert "version:" not in out.split("---")[1]
 
         # Verify model is absent when not requested
         assert "model:" not in out.split("---")[1]
@@ -807,9 +815,9 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Research agent
 tools: Read, WebFetch
 ---
@@ -821,6 +829,8 @@ Research with \\`Read\\` and \\`WebFetch\\`.
         assert result.returncode == 0
         out = result.stdout
 
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
+        assert "version:" not in out.split("---")[1]
         assert "model: qwen3.6-plus" in out
         assert "  - read_file" in out
         assert "  - web_fetch" in out
@@ -834,9 +844,9 @@ Research with \\`Read\\` and \\`WebFetch\\`.
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Research agent
 tools: Read
 ---
@@ -848,6 +858,8 @@ Research with \\`Read\\`.
         assert result.returncode == 0
         out = result.stdout
 
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
+        assert "version:" not in out.split("---")[1]
         assert "model: qwen-custom-model" in out
 
     def test_all_agents(self, script_dir: Path):
@@ -856,9 +868,9 @@ Research with \\`Read\\`.
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
         for agent in "${{AGENTS[@]}}"; do
-            content="---
+            content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: $agent
-version: 2026-01-01T00:00:00Z
 description: $agent description
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 ---
@@ -878,5 +890,6 @@ Use \\`Bash\\` and \\`Read\\` for the agent \\`$agent\\`."
         out = result.stdout
         for agent in ["lissom-implementer", "lissom-planner", "lissom-researcher", "lissom-reviewer", "lissom-specs-reviewer"]:
             assert f"name: {agent}" in out
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "`run_shell_command`" in out
         assert "`read_file`" in out

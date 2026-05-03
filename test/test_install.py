@@ -596,7 +596,6 @@ def test_install_qwen_target(tmp_path):
     assert "model: qwen3.6-plus" in researcher
     assert "name: lissom-researcher" in researcher
     assert "description:" in researcher
-    assert "version:" in researcher
     assert "tools:" in researcher
     assert "  - read_file" in researcher
     assert "  - write_file" in researcher

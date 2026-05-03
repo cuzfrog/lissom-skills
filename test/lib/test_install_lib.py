@@ -463,7 +463,6 @@ cat '{dest}'
         out = r.stdout
         assert "name: lissom-researcher" in out
         assert "description: fixture" in out
-        assert "version:" in out
         assert "temperature: 0.1" in out
         assert "model: gemini-3-flash-preview" in out
         assert "tools:" in out
