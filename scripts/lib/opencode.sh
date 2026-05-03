@@ -49,7 +49,7 @@ opencode_rewrite_body_tools() {
 #   include_model - "true" or "false"
 # Returns: transformed frontmatter + body to stdout
 #
-# Field ordering: name, description, version, mode, model, temperature, permission
+# Field ordering: name, description, mode, model, temperature, permission
 opencode_format_frontmatter() {
     local content="$1"
     local agent_name="$2"
@@ -59,15 +59,6 @@ opencode_format_frontmatter() {
     local fmt=0 fm_end=0 ln=0
     local name_f="" desc_f="" tools_f="" other_f=""
     local line
-
-    # Extract version comment from first line (before frontmatter)
-    local version_comment=""
-    local first_line
-    local re_ver_comment='^<!--[[:space:]]*version:[[:space:]]*(.+)[[:space:]]*-->$'
-    IFS= read -r first_line <<< "$content"
-    if [[ "$first_line" =~ $re_ver_comment ]]; then
-        version_comment="$first_line"
-    fi
 
     while IFS= read -r line; do
         ln=$((ln + 1))
@@ -89,7 +80,6 @@ opencode_format_frontmatter() {
         return 1
     fi
 
-    [[ -n "$version_comment" ]] && echo "$version_comment"
     echo "---"
     echo "$name_f"; echo "$desc_f"
     echo "mode: subagent"

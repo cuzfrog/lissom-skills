@@ -42,8 +42,7 @@ class TestQwenFormatAgentFrontmatter:
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="<!-- version: 2026-01-01T00:00:00Z -->
----
+        content="---
 name: test-agent
 description: Test agent
 tools: Read, Write
@@ -56,7 +55,6 @@ tools: Read, Write
             text=True,
         )
         assert result.returncode == 0
-        assert "<!-- version: 2026-01-01T00:00:00Z -->" in result.stdout
         assert "name: test-agent" in result.stdout
         assert "description: Test agent" in result.stdout
         # No "version:" line should appear in the YAML section
@@ -70,7 +68,6 @@ tools: Read, Write
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -91,7 +88,6 @@ tools: Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -114,7 +110,6 @@ tools: Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -135,7 +130,6 @@ tools: Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, Read, Write
 ---"
@@ -163,7 +157,6 @@ tools: Bash, Read, Write
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, AskUserQuestion, Read
 ---"
@@ -189,7 +182,6 @@ tools: Bash, AskUserQuestion, Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, NonExistentTool, Read
 ---"
@@ -207,12 +199,11 @@ tools: Bash, NonExistentTool, Read
         assert "NonExistentTool" not in fm_section
 
     def test_field_ordering(self, script_dir: Path):
-        """Fields appear in correct order: comment, ---, name, description, model, tools"""
+        """Fields appear in correct order: ---, name, description, model, tools"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="<!-- version: 2026-01-01T00:00:00Z -->
----
+        content="---
 name: test-agent
 description: Test description
 tools: Bash, Read
@@ -225,9 +216,6 @@ tools: Bash, Read
             text=True,
         )
         assert result.returncode == 0
-        # Comment should appear before the first ---
-        assert result.stdout.startswith("<!-- version: 2026-01-01T00:00:00Z -->")
-        # No "version:" line in YAML section
         fm_section = result.stdout.split("---")[1]
         assert "version:" not in fm_section
         # YAML fields order: name, description, model, tools
@@ -246,7 +234,6 @@ tools: Bash, Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 ---"
         qwen_format_agent_frontmatter "$content" "test-agent" "false"
@@ -285,7 +272,6 @@ tools: Bash
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---
@@ -308,7 +294,6 @@ It should be preserved after conversion."
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -328,7 +313,6 @@ tools: Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 tools: Read
 ---"
         qwen_format_agent_frontmatter "$content" "test-agent" "false"
@@ -340,28 +324,6 @@ tools: Read
         assert result.returncode != 0
         assert "Missing required frontmatter fields" in result.stderr
 
-    def test_missing_version_is_not_an_error(self, script_dir: Path):
-        """Missing version (no comment, no YAML field) is now accepted"""
-        bash_code = f'''
-        source "{script_dir}/scripts/lib/constants.sh"
-        source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
-name: test-agent
-description: Test
-tools: Read
----"
-        qwen_format_agent_frontmatter "$content" "test-agent" "false"
-        '''
-        result = subprocess.run(
-            ["bash", "-c", bash_code],
-            capture_output=True, text=True
-        )
-        assert result.returncode == 0
-        assert "name: test-agent" in result.stdout
-        assert "description: Test" in result.stdout
-        # No "version:" YAML field should appear in the YAML section
-        assert "version:" not in result.stdout.split("---")[1]
-
     def test_tool_name_mapping(self, script_dir: Path):
         """Each Claude tool name maps to its Qwen equivalent in frontmatter"""
         bash_code = f'''
@@ -369,7 +331,6 @@ tools: Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 ---"
@@ -398,7 +359,6 @@ tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
         for agent in "${{AGENTS[@]}}"; do
             content="---
 name: $agent
-version: 2026-01-01T00:00:00Z
 description: $agent description
 tools: Bash, Read
 ---"
@@ -424,7 +384,6 @@ tools: Bash, Read
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 This body content should not appear"
@@ -446,7 +405,6 @@ This body content should not appear"
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools:
 ---"
@@ -472,7 +430,6 @@ class TestQwenFormatSkillFrontmatter:
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-skill
-version: 2026-01-01T00:00:00Z
 description: A test skill
 argument-hint: <task_dir>
 ---"
@@ -494,7 +451,6 @@ argument-hint: <task_dir>
         source "{script_dir}/scripts/lib/qwen.sh"
         content="---
 name: test-skill
-version: 2026-01-01T00:00:00Z
 description: A test skill
 argument-hint: <task_dir>
 ---"
@@ -551,26 +507,6 @@ Do something useful."
         assert result.returncode == 0
         assert "## Process" in result.stdout
         assert "Do something useful." in result.stdout
-
-    def test_strips_version(self, script_dir: Path):
-        """Version field is stripped from skill frontmatter"""
-        bash_code = f'''
-        source "{script_dir}/scripts/lib/constants.sh"
-        source "{script_dir}/scripts/lib/qwen.sh"
-        content="---
-name: test-skill
-version: 2026-01-01T00:00:00Z
-description: A test skill
----"
-        qwen_format_skill_frontmatter "$content"
-        '''
-        result = subprocess.run(
-            ["bash", "-c", bash_code],
-            capture_output=True, text=True
-        )
-        assert result.returncode == 0
-        fm_section = result.stdout.split("---")[1]
-        assert "version:" not in fm_section
 
     def test_strips_argument_hint(self, script_dir: Path):
         """argument-hint field is stripped from skill frontmatter"""
@@ -772,8 +708,7 @@ class TestQwenFormatAgentFile:
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="<!-- version: 2026-01-01T00:00:00Z -->
----
+        content="---
 name: test-agent
 description: A test agent
 tools: Bash, Read, AskUserQuestion
@@ -787,8 +722,6 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         assert result.returncode == 0
         out = result.stdout
 
-        # Version comment preserved before ---, no version: in YAML
-        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "name: test-agent" in out
         assert "description: A test agent" in out
         assert "version:" not in out.split("---")[1]
@@ -815,8 +748,7 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="<!-- version: 2026-01-01T00:00:00Z -->
----
+        content="---
 name: lissom-researcher
 description: Research agent
 tools: Read, WebFetch
@@ -829,7 +761,6 @@ Research with \\`Read\\` and \\`WebFetch\\`.
         assert result.returncode == 0
         out = result.stdout
 
-        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "version:" not in out.split("---")[1]
         assert "model: qwen3.6-plus" in out
         assert "  - read_file" in out
@@ -844,8 +775,7 @@ Research with \\`Read\\` and \\`WebFetch\\`.
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
-        content="<!-- version: 2026-01-01T00:00:00Z -->
----
+        content="---
 name: lissom-researcher
 description: Research agent
 tools: Read
@@ -858,7 +788,6 @@ Research with \\`Read\\`.
         assert result.returncode == 0
         out = result.stdout
 
-        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "version:" not in out.split("---")[1]
         assert "model: qwen-custom-model" in out
 
@@ -868,8 +797,7 @@ Research with \\`Read\\`.
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/qwen.sh"
         for agent in "${{AGENTS[@]}}"; do
-            content="<!-- version: 2026-01-01T00:00:00Z -->
----
+            content="---
 name: $agent
 description: $agent description
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
@@ -890,6 +818,5 @@ Use \\`Bash\\` and \\`Read\\` for the agent \\`$agent\\`."
         out = result.stdout
         for agent in ["lissom-implementer", "lissom-planner", "lissom-researcher", "lissom-reviewer", "lissom-specs-reviewer"]:
             assert f"name: {agent}" in out
-        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "`run_shell_command`" in out
         assert "`read_file`" in out

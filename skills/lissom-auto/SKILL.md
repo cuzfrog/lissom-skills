@@ -1,4 +1,3 @@
-<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-auto
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.

@@ -13,7 +13,7 @@ source "$QWEN_LIB_DIR/constants.sh"
 #   model_override - optional model override (default "")
 # Returns: transformed frontmatter + body to stdout
 #
-# Field ordering: name, description, version, model (optional), tools (YAML list)
+# Field ordering: name, description, model (optional), tools (YAML list)
 qwen_format_agent_frontmatter() {
     local content="$1"
     local agent_name="$2"
@@ -23,15 +23,6 @@ qwen_format_agent_frontmatter() {
     local fmt=0 fm_end=0 ln=0
     local name_f="" desc_f="" tools_f=""
     local line
-
-    # Extract version comment from first line (before frontmatter)
-    local version_comment=""
-    local first_line
-    IFS= read -r first_line <<< "$content"
-    local re='^<!--[[:space:]]*version:[[:space:]]*(.+)[[:space:]]*-->$'
-    if [[ "$first_line" =~ $re ]]; then
-        version_comment="$first_line"
-    fi
 
     while IFS= read -r line; do
         ln=$((ln + 1))
@@ -57,7 +48,6 @@ qwen_format_agent_frontmatter() {
         return 1
     fi
 
-    [[ -n "$version_comment" ]] && echo "$version_comment"
     echo "---"
     echo "$name_f"; echo "$desc_f"
 

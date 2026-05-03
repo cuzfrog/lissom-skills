@@ -1,4 +1,3 @@
-<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-specs-reviewer
 description: Evaluates and helps user refine specs.

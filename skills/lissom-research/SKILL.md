@@ -1,4 +1,3 @@
-<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-research
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.

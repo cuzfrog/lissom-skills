@@ -87,7 +87,7 @@ MODELS_FOUND=false
 
 # Array declarations
 SILENT_SRC=(); SILENT_DEST=()
-OLDER_SRC=();  OLDER_DEST=()
+OVERWRITE_SRC=(); OVERWRITE_DEST=()
 INSTALLED=0
 SKIPPED=0
 
@@ -110,7 +110,7 @@ done
 # Count new agent files
 NEW_AGENT_COUNT=0
 for i in "${!SILENT_DEST[@]}"; do
-    if [[ "${SILENT_DEST[$i]}" == */agents/*.md ]] && [[ ! -f "${SILENT_DEST[$i]}" ]]; then
+    if [[ "${SILENT_DEST[$i]}" == */agents/*.md ]]; then
         NEW_AGENT_COUNT=$((NEW_AGENT_COUNT + 1))
     fi
 done
@@ -122,35 +122,35 @@ if [[ $NEW_AGENT_COUNT -gt 0 ]]; then
     [[ "$INCLUDE_MODEL" == "true" ]] && ADD_MODEL_FIELD=true
 fi
 
-# Downgrade prompt (single, covering all older-source files)
-OVERWRITE_OLDER=false
-if [[ ${#OLDER_SRC[@]} -gt 0 ]]; then
-    COUNT=${#OLDER_SRC[@]}
+# Overwrite prompt (single, covering all existing files)
+OVERWRITE_ALL=false
+if [[ ${#OVERWRITE_SRC[@]} -gt 0 ]]; then
+    COUNT=${#OVERWRITE_SRC[@]}
     if [[ "${LISSOM_YES:-}" == "1" ]]; then
-        OVERWRITE_OLDER=true
+        OVERWRITE_ALL=true
     else
         REPLY="n"
         # Only prompt if stdin is a TTY (interactive mode)
         if [[ -t 0 ]]; then
             {
-                printf "%d installed file(s) are newer than the source. Overwrite all? [y/N] " \
+                printf "%d file(s) already exist. Overwrite all? [y/N] " \
                     "$COUNT" > /dev/tty \
                 && read -n 1 -r < /dev/tty \
                 && echo > /dev/tty
             } 2>/dev/null || true
         fi
-        [[ $REPLY =~ ^[Yy]$ ]] && OVERWRITE_OLDER=true
+        [[ $REPLY =~ ^[Yy]$ ]] && OVERWRITE_ALL=true
     fi
 fi
 
-# Silent copies (new files, same version, source-newer)
+# Silent copies (new files)
 install_files SILENT_SRC SILENT_DEST "$TARGET_FORMAT" "$ADD_MODEL_FIELD"
 
-# Downgrade copies
-if $OVERWRITE_OLDER; then
-    install_files OLDER_SRC OLDER_DEST "$TARGET_FORMAT" "$ADD_MODEL_FIELD"
+# Overwrite copies
+if $OVERWRITE_ALL; then
+    install_files OVERWRITE_SRC OVERWRITE_DEST "$TARGET_FORMAT" "$ADD_MODEL_FIELD"
 else
-    SKIPPED=$((SKIPPED + ${#OLDER_SRC[@]}))
+    SKIPPED=$((SKIPPED + ${#OVERWRITE_SRC[@]}))
 fi
 
 # Create sample Specs.md only if absent

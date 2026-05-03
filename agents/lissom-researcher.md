@@ -1,4 +1,3 @@
-<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-researcher
 description: Researches the codebase and spec, interviews the user when needed, and produces Research.md for the downstream planning step.

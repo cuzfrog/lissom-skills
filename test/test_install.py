@@ -39,7 +39,7 @@ def test_fresh_install(tmp_path):
     """T1: Fresh install copies all agents, skills, and Specs.md."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
 
@@ -49,26 +49,13 @@ def test_fresh_install(tmp_path):
     assert (work / ".lissom" / "tasks" / "T1" / "Specs.md").is_file()
 
 
-def test_reinstall_same_version(tmp_path):
-    """T2: Re-installing the same version overwrites silently with no downgrade prompt."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1"})
-
-    result = run_install(src, work)
-
-    assert result.returncode == 0
-    # The downgrade prompt phrase must not appear in stdout
-    assert "newer than the source" not in result.stdout
-    assert (work / ".claude" / "agents" / "lissom-researcher.md").is_file()
 
 
 def test_reinstall_same_dir_suppresses_cross_warning(tmp_path):
     """T2b: Reinstalling to same target dir suppresses cross-directory warning."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # First install to .claude
     run_install(src, work, env_extra={"LISSOM_YES": "1"})
@@ -76,7 +63,7 @@ def test_reinstall_same_dir_suppresses_cross_warning(tmp_path):
     # Seed .opencode with lissom files (simulate a prior OpenCode installation)
     (work / ".opencode" / "agents").mkdir(parents=True)
     (work / ".opencode" / "agents" / "lissom-researcher.md").write_text(
-        "---\nname: lissom-researcher\nversion: 2026-01-01T00:00:00\ndescription: fixture\n---\nbody\n"
+        "---\nname: lissom-researcher\ndescription: fixture\n---\nbody\n"
     )
 
     # Reinstall to .claude (same target) — should NOT warn about .opencode
@@ -86,102 +73,26 @@ def test_reinstall_same_dir_suppresses_cross_warning(tmp_path):
     assert "Found existing installation in .opencode/" not in result.stdout
 
 
-def test_upgrade(tmp_path):
-    """T3: Source newer than installed overwrites silently without a prompt."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2025-01-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
-    make_src_tree(src, "2026-06-01T00:00:00")
-
-    result = run_install(src, work, env_extra={"LISSOM_TARGET": ".claude"})
-
-    assert result.returncode == 0
-    assert "newer than the source" not in result.stdout
-    content = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    assert "2026-06-01T00:00:00" in content
 
 
-def test_downgrade_accepted(tmp_path):
-    """T4: All files are downgraded when LISSOM_YES=1."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-06-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1"})
-    make_src_tree(src, "2025-01-01T00:00:00")
-
-    result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
-
-    assert result.returncode == 0
-    content = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    assert "2025-01-01T00:00:00" in content
 
 
-def test_downgrade_declined(tmp_path):
-    """T5: No tty causes the downgrade prompt to default to 'no'; newer installed files preserved."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-06-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1"})
-    make_src_tree(src, "2025-01-01T00:00:00")
-
-    result = run_install(src, work)
-
-    assert result.returncode == 0
-    content = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    assert "2026-06-01T00:00:00" in content
 
 
-def test_mixed_versions(tmp_path):
-    """T6: Newer-source files upgrade silently; older-source file is skipped (one file skipped)."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1"})
-
-    # lissom-researcher source becomes newer → should upgrade silently
-    (src / "agents" / "lissom-researcher.md").write_text(
-        "<!-- version: 2026-06-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\n---\nbody\n"
-    )
-    # lissom-planner source becomes older → should be skipped (prompt declined via no tty)
-    (src / "agents" / "lissom-planner.md").write_text(
-        "<!-- version: 2025-01-01T00:00:00 -->\n---\nname: lissom-planner\ndescription: fixture\n---\nbody\n"
-    )
-
-    result = run_install(src, work)
-
-    assert result.returncode == 0
-    researcher = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    planner = (work / ".claude" / "agents" / "lissom-planner.md").read_text()
-    assert "2026-06-01T00:00:00" in researcher
-    assert "2026-01-01T00:00:00" in planner   # old installed version preserved
-    assert "Skipped 1" in result.stdout
 
 
-def test_no_version_field_overwritten_silently(tmp_path):
-    """T12: A versionless installed file is treated as 'version 0' and overwritten without a prompt."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
-    # Pre-place a file with no version field in the target
-    (work / ".claude" / "agents").mkdir(parents=True)
-    (work / ".claude" / "agents" / "lissom-researcher.md").write_text(
-        "---\nname: lissom-researcher\ndescription: old, no version\n---\nbody\n"
-    )
 
-    result = run_install(src, work, env_extra={"LISSOM_TARGET": ".claude"})
 
-    assert result.returncode == 0
-    assert "newer than the source" not in result.stdout
-    content = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    assert "2026-01-01T00:00:00" in content
+
+
+
 
 
 def test_model_config_accepted(tmp_path):
     """AC1: User accepts model prompt (LISSOM_YES=1); new agent files get default model fields and table is displayed."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
 
@@ -206,7 +117,7 @@ def test_model_config_default_no_tty(tmp_path):
     """Edge case 1: no answer defaults to Y so model fields are added."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work)  # no LISSOM_YES, no tty
 
@@ -215,43 +126,20 @@ def test_model_config_default_no_tty(tmp_path):
     assert "model: opus-4.6" in researcher
 
 
-def test_existing_files_preserve_model(tmp_path):
-    """AC3: Existing agent files with model fields preserve their values during upgrade."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
 
-    # Initial install with custom model values in destination
-    make_src_tree(src, "2026-01-01T00:00:00")
-    run_install(src, work, env_extra={"LISSOM_YES": "1"})
-
-    # Overwrite installed researcher with a custom model value
-    researcher_path = work / ".claude" / "agents" / "lissom-researcher.md"
-    content = researcher_path.read_text()
-    content = content.replace("model: opus-4.6", "model: my-custom-model")
-    researcher_path.write_text(content)
-
-    # Upgrade to newer version
-    make_src_tree(src, "2026-06-01T00:00:00")
-    result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
-
-    assert result.returncode == 0
-    researcher = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    assert "2026-06-01T00:00:00" in researcher   # version updated
-    assert "my-custom-model" in researcher        # model preserved
-    assert "my-custom-model" in result.stdout     # table shows preserved model
 
 
 def test_mixed_existing_and_new_agents(tmp_path):
     """AC4: Some agents exist (preserve their model), new agents get default models."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Install only researcher manually with a custom model
     agents_dir = work / ".claude" / "agents"
     agents_dir.mkdir(parents=True)
     (agents_dir / "lissom-researcher.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: read, write\nmodel: my-custom-model\n---\nbody\n"
+        "---\nname: lissom-researcher\ndescription: fixture\ntools: read, write\nmodel: my-custom-model\n---\nbody\n"
     )
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
@@ -268,7 +156,7 @@ def test_malformed_yaml_fails_installation(tmp_path):
     """AC5: Existing agent with malformed YAML causes install to fail with clear error."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Initial install
     run_install(src, work, env_extra={"LISSOM_YES": "1"})
@@ -278,7 +166,7 @@ def test_malformed_yaml_fails_installation(tmp_path):
     make_malformed_agent(researcher_path, "lissom-researcher")
 
     # Attempt upgrade
-    make_src_tree(src, "2026-06-01T00:00:00")
+    make_src_tree(src)
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
 
     assert result.returncode != 0
@@ -292,7 +180,7 @@ def test_customization_message_displayed(tmp_path):
     """AC6: After successful install with models, user sees customization message."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
 
@@ -304,7 +192,7 @@ def test_model_config_declined(tmp_path):
     """AC2: User declines model prompt (LISSOM_NO=1); agent files get no model fields."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_NO": "1"})
 
@@ -320,27 +208,7 @@ def test_model_config_declined(tmp_path):
     assert "The model field can be modified" not in result.stdout
 
 
-def test_preserve_absence_of_model_field(tmp_path):
-    """Upgrade preserves absence of model field when existing file has none."""
-    src, work = tmp_path / "src", tmp_path / "work"
-    src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
 
-    # Install researcher without a model field
-    agents_dir = work / ".claude" / "agents"
-    agents_dir.mkdir(parents=True)
-    (agents_dir / "lissom-researcher.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: read, write\n---\nbody\n"
-    )
-
-    # Upgrade
-    make_src_tree(src, "2026-06-01T00:00:00")
-    result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
-
-    assert result.returncode == 0
-    researcher = (work / ".claude" / "agents" / "lissom-researcher.md").read_text()
-    assert "2026-06-01T00:00:00" in researcher   # version updated
-    assert "model:" not in researcher             # model field still absent
 
 
 # Opencode integration tests (Step 9)
@@ -349,7 +217,7 @@ def test_install_opencode_target(tmp_path):
     """OC1: Selecting .opencode/ target produces converted agent files with Opencode frontmatter."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
 
@@ -377,7 +245,7 @@ def test_install_opencode_with_model(tmp_path):
     """OC2: Opencode installation preserves models when creating new files with model support."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # For Claude target with LISSOM_YES=1, models are added by default
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
@@ -397,7 +265,7 @@ def test_opencode_reinstall_preserves_model(tmp_path):
     """OC2b: Reinstalling to opencode preserves existing model values and shows the model table."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Initial install to opencode
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
@@ -426,7 +294,7 @@ def test_install_opencode_without_model(tmp_path):
     """OC3: Opencode installation without model preference excludes model field."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_NO": "1", "LISSOM_TARGET": ".opencode"})
 
@@ -444,7 +312,7 @@ def test_install_opencode_skill_frontmatter(tmp_path):
     """OC4: Skill files retain their frontmatter unchanged in Opencode target."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
 
@@ -453,7 +321,7 @@ def test_install_opencode_skill_frontmatter(tmp_path):
     # Check skill frontmatter is preserved as-is
     skill = (work / ".opencode" / "skills" / "lissom-auto" / "SKILL.md").read_text()
     assert "name: lissom-auto" in skill
-    assert "<!-- version: 2026-01-01T00:00:00 -->" in skill
+
     # Skill frontmatter should NOT have Opencode-specific fields like mode/temperature
     assert "mode: subagent" not in skill
     assert "temperature:" not in skill
@@ -481,7 +349,7 @@ def test_install_from_scripts_subdirectory(tmp_path):
     """SI1: Running install.sh from scripts/ subdirectory resolves paths correctly."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install_from_scripts(src, work, env_extra={"LISSOM_YES": "1"})
 
@@ -494,11 +362,11 @@ def test_install_opencode_body_rewrite(tmp_path):
     """OC5: Tool names in agent body text are rewritten during Opencode conversion."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
     
     # Create an agent with tool references in the body
     (src / "agents" / "lissom-custom.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
+        "---\nname: lissom-custom\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
         "Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
     )
 
@@ -561,7 +429,7 @@ def test_install_target_directory_clean(tmp_path):
     """Install creates the correct target directory without prompt text leakage in path."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # LISSOM_TARGET env overrides the interactive prompt entirely,
     # ensuring no prompt text gets captured in INSTALL_TARGET
@@ -581,7 +449,7 @@ def test_install_qwen_target(tmp_path):
     """QW1: Selecting .qwen/ target with LISSOM_YES=1 produces converted agent files with Qwen Code frontmatter."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
 
@@ -606,7 +474,7 @@ def test_install_qwen_with_model(tmp_path):
     """QW2: Qwen install with LISSOM_YES includes model fields."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
 
@@ -619,7 +487,7 @@ def test_install_qwen_warns_about_claude(tmp_path):
     """QW3: Installing to .qwen/ when .claude/ has lissom files shows warning about .claude/."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Seed .claude with lissom files
     run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
@@ -636,7 +504,7 @@ def test_install_qwen_warns_about_multiple_alts(tmp_path):
     """QW4: Installing to .qwen/ when both .claude/ and .opencode/ have lissom files warns about both."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Seed .claude
     run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
@@ -655,13 +523,13 @@ def test_reinstall_qwen_suppresses_warning(tmp_path):
     """QW5: Reinstalling to .qwen/ (already has lissom files) does NOT show warning."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # First install to .qwen
     run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
 
     # Seed .claude as well
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
     run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
 
     # Reinstall to .qwen (already populated) — should NOT warn even though .claude has files
@@ -677,7 +545,7 @@ def test_install_qwen_without_model(tmp_path):
     """QW2: Qwen Code installation without model preference excludes model field."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_NO": "1", "LISSOM_TARGET": ".qwen"})
 
@@ -691,7 +559,7 @@ def test_install_qwen_skill_frontmatter(tmp_path):
     """QW3: Skill files have Qwen Code frontmatter (name + description only)."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
 
@@ -709,11 +577,11 @@ def test_install_qwen_skill_body_rewrite(tmp_path):
     """QW3b: Tool names in skill body text are rewritten during Qwen Code install."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Overwrite lissom-auto skill with body containing tool references
     (src / "skills" / "lissom-auto" / "SKILL.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-auto\ndescription: fixture\n"
+        "---\nname: lissom-auto\ndescription: fixture\n"
         "argument-hint: <task_dir>\n---\n"
         "Use tool `Bash` to execute commands. Use `Read` to inspect files.\n"
         "Also try `Grep` for searching and `AskUserQuestion` for user input.\n"
@@ -747,11 +615,11 @@ def test_install_qwen_body_rewrite(tmp_path):
     """QW4: Tool names in agent body text are rewritten during Qwen Code conversion."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Create a custom agent with tool references in the body
     (src / "agents" / "lissom-custom.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
+        "---\nname: lissom-custom\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
         "Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
     )
 
@@ -774,7 +642,7 @@ def test_install_qwen_implementer_model(tmp_path):
     """QW5: lissom-implementer gets qwen3-coder-plus model."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
 
@@ -787,7 +655,7 @@ def test_install_qwen_model_table(tmp_path):
     """QW6: After Qwen install with models, the model table is displayed."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
 
@@ -803,11 +671,11 @@ def test_install_gemini_target(tmp_path):
     """GM1: Selecting .gemini/ target produces converted agent files with Gemini CLI frontmatter."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Overwrite researcher with broader tools to verify Gemini-specific mappings
     (src / "agents" / "lissom-researcher.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-researcher\ndescription: fixture\n"
+        "---\nname: lissom-researcher\ndescription: fixture\n"
         "tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion\n---\nbody\n"
     )
 
@@ -833,7 +701,7 @@ def test_install_gemini_with_model(tmp_path):
     """GM2: Gemini install with LISSOM_YES includes model fields."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
 
@@ -848,7 +716,7 @@ def test_install_gemini_without_model(tmp_path):
     """GM3: Gemini install without model preference excludes model field."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_NO": "1", "LISSOM_TARGET": ".gemini"})
 
@@ -863,7 +731,7 @@ def test_install_gemini_temperature_field(tmp_path):
     """GM4: Verify temperature: 0.1 present in all converted agents but not in skills."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
 
@@ -883,11 +751,11 @@ def test_install_gemini_ask_user_included(tmp_path):
     """GM5: Verify ask_user in tools list (unlike Qwen where it was removed)."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Create custom agent with AskUserQuestion
     (src / "agents" / "lissom-custom.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\n"
+        "---\nname: lissom-custom\ndescription: custom\n"
         "tools: Bash, Read, AskUserQuestion\n---\n"
         "Ask user with `AskUserQuestion` when needed.\n"
     )
@@ -904,7 +772,7 @@ def test_install_gemini_skill_frontmatter(tmp_path):
     """GM6: Skill files have Gemini CLI frontmatter (name + description only)."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
 
@@ -921,11 +789,11 @@ def test_install_gemini_body_rewrite(tmp_path):
     """GM7: Tool names in agent body text are rewritten during Gemini conversion."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Create a custom agent with tool references in the body
     (src / "agents" / "lissom-custom.md").write_text(
-        "<!-- version: 2026-01-01T00:00:00 -->\n---\nname: lissom-custom\ndescription: custom\n"
+        "---\nname: lissom-custom\ndescription: custom\n"
         "tools: Bash, Read, Edit, WebSearch, AskUserQuestion\n---\n"
         "Use Tool `Bash` and `Edit` and `WebSearch` and `AskUserQuestion` for this task.\n"
         "Also use `Agent` for delegation.\n"
@@ -956,7 +824,7 @@ def test_install_gemini_warns_about_claude(tmp_path):
     """GM8: Installing to .gemini/ when .claude/ has lissom files shows warning."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     # Seed .claude with lissom files
     run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
@@ -973,7 +841,7 @@ def test_install_gemini_model_table(tmp_path):
     """GM9: After Gemini install with models, the model table is displayed."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
-    make_src_tree(src, "2026-01-01T00:00:00")
+    make_src_tree(src)
 
     result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
 
