@@ -2,6 +2,9 @@
 .claude/*
 !.claude/settings.json
 
+.opencode/*
+!.opencode/plugins/version-timestamp.js
+
 __pycache__/
 .pytest_cache/
 venv/
