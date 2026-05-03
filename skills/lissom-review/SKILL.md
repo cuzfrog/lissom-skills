@@ -1,6 +1,6 @@
+<!-- version: 2026-05-03T12:48:24Z -->
 ---
 name: lissom-review
-version: 2026-05-03T12:48:24Z
 description: Dispatches to lissom-reviewer and relays the verdict to the caller.
 argument-hint: <task_dir>
 ---

@@ -1,6 +1,6 @@
+<!-- version: 2026-05-03T12:48:24Z -->
 ---
 name: lissom-research
-version: 2026-05-03T12:48:24Z
 description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
 argument-hint: <task_dir> [user_attention] [spec_review_required]
 ---
