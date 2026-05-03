@@ -40,7 +40,7 @@ research ─┘ auto ──►   +   ──► plan ──► impl ──► rev
 ## Installation
 Install into your project's `.claude/` or `.opencode/`:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/install.sh | bash
 ```
 
 ## Here We Go!
@@ -74,7 +74,7 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 Remove all installed files from both `.claude/` and `.opencode/` directories in the current project:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
 ```
 
 Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.

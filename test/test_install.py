@@ -14,7 +14,7 @@ from pathlib import Path
 from conftest import AGENTS, SKILLS, make_src_tree, make_malformed_agent
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-INSTALL_SH = REPO_ROOT / "install.sh"
+INSTALL_SH = REPO_ROOT / "scripts" / "install.sh"
 
 
 def run_install(src: Path, work: Path, args=(), env_extra=None):

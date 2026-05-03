@@ -9,7 +9,7 @@ A Claude Code skill and agent set designed to specific and reliable.
 - `skills/` — skill definitions (thin dispatchers)
 - `agents/` — agent definitions (rich domain logic)
 - `templates/` — files installed into a client project
-- `install.sh` / `uninstall.sh` — client install/remove scripts
+- `scripts/install.sh` / `scripts/uninstall.sh` — client install/remove scripts
 
 ## Development workspace
 

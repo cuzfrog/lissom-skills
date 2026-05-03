@@ -12,8 +12,8 @@ from pathlib import Path
 from conftest import AGENTS, SKILLS, make_src_tree
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-INSTALL_SH = REPO_ROOT / "install.sh"
-UNINSTALL_SH = REPO_ROOT / "uninstall.sh"
+INSTALL_SH = REPO_ROOT / "scripts" / "install.sh"
+UNINSTALL_SH = REPO_ROOT / "scripts" / "uninstall.sh"
 
 
 def install_fixture(src: Path, work: Path) -> None:
