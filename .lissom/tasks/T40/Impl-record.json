@@ -54,5 +54,21 @@
   {
     "step": "Step-14.md",
     "sha": "7ab6a0a72204f7ba230e4d532718ea32fd927f10"
+  },
+  {
+    "step": "Fix-1-Issue-1.md",
+    "sha": "162af1970e8106078b0f1b3de83e46b026cd0f32"
+  },
+  {
+    "step": "Fix-1-Issue-2.md",
+    "sha": "162af1970e8106078b0f1b3de83e46b026cd0f32"
+  },
+  {
+    "step": "Fix-1-Issue-3.md",
+    "sha": "b3e67a8a7980b48a57ab203a3087db5e2107a4b8"
+  },
+  {
+    "step": "Fix-1-Issue-4.md",
+    "sha": "162af1970e8106078b0f1b3de83e46b026cd0f32"
   }
 ]

@@ -34,10 +34,29 @@
 
 2. **Test install server routing**: The install.sh downloads from `$REPO/releases/latest/download/<zip>`. Testing required a custom HTTP server handler that routes `/releases/latest/download/` to the `dist/` directory.
 
+## Fix Cycle 1
+
+| Fix | File | SHA | Description |
+|-----|------|-----|-------------|
+| #1 | Fix-1-Issue-1.md | `162af19` | Split `REPO` into `REPO` (GitHub API) and `RAW_REPO` (raw content) in `install.sh` and `uninstall.sh` |
+| #2 | Fix-1-Issue-2.md | `162af19` | Add `trap cleanup EXIT` in both scripts to clean up temp dir on early exit |
+| #3 | Fix-1-Issue-3.md | `b3e67a8` | Deduplicate `_rewrite_body_tools` → shared `rewrite_backtick_tools()` in `frontmatter.py` |
+| #4 | Fix-1-Issue-4.md | `162af19` | Resolved by Fix #2's trap — zip file cleaned up via trap on early exit |
+
+### Fix Cycle Details
+
+1. **Fix #1 — REPO split**: Introduced `REPO` (GitHub API base for zip downloads) and `RAW_REPO` (raw.githubusercontent.com for lib file downloads). Both overridable via `LISSOM_REPO` and `LISSOM_RAW_REPO` env vars. Fixed `install.sh` lib download URL and `uninstall.sh` which had the opposite default.
+
+2. **Fix #2 — trap cleanup**: Added `cleanup()` trap function for `EXIT` in both `install.sh` and `uninstall.sh` so that `$CLEANUP_TMPDIR` and (in install.sh) `lissom-skills-tmp.zip` are cleaned up even if the script exits early due to `set -e`. Removed the manual cleanup at the bottom of both scripts.
+
+3. **Fix #3 — dedup `_rewrite_body_tools`**: Extracted the identical function from `opencode.py`, `qwen.py`, and `gemini.py` into a shared `rewrite_backtick_tools(content, mapping)` utility in `frontmatter.py`. Each converter now imports and calls the shared utility with its own mapping dict. Removed unused `import re` from all three converters.
+
+4. **Fix #4 — zip cleanup**: Verified that Fix #2's trap already includes `rm -f lissom-skills-tmp.zip`, which cleans up the downloaded zip on unzip failure. No additional code changes needed.
+
 ## Test Results
 
 ```
-78 passed in 13.82s
+78 passed in 16.12s
 ```
 
 - `test/test_build.py`: 25 tests (converter unit tests, build integration)
