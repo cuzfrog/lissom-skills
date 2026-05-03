@@ -2,9 +2,36 @@
 
 set -e  # Exit on error
 
-# Source constants and utility functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO="${LISSOM_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
+CLEANUP_TMPDIR=""
+
+# Determine SCRIPT_DIR -- when piped via curl, BASH_SOURCE[0] may be empty.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
 [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# If local files aren't present (e.g. curl pipe execution), download from GitHub.
+if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
+    SCRIPT_DIR="$(mktemp -d)"
+    CLEANUP_TMPDIR="$SCRIPT_DIR"
+    echo "Fetching files from GitHub..."
+    mkdir -p "$SCRIPT_DIR/scripts/lib" "$SCRIPT_DIR/agents" "$SCRIPT_DIR/templates"
+
+    for f in common.sh constants.sh opencode.sh qwen.sh gemini.sh ui.sh frontmatter.sh install_ops.sh; do
+        curl -fsSL "$REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
+    done
+
+    for agent in lissom-implementer lissom-planner lissom-researcher lissom-reviewer lissom-specs-reviewer; do
+        curl -fsSL "$REPO/agents/$agent.md" -o "$SCRIPT_DIR/agents/$agent.md"
+    done
+
+    for skill in lissom-auto lissom-impl lissom-plan lissom-research lissom-review; do
+        mkdir -p "$SCRIPT_DIR/skills/$skill"
+        curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
+    done
+    curl -fsSL "$REPO/skills/lissom-auto/user_preference_questions.json" -o "$SCRIPT_DIR/skills/lissom-auto/user_preference_questions.json" || true
+    curl -fsSL "$REPO/templates/Specs.md" -o "$SCRIPT_DIR/templates/Specs.md"
+fi
+
 source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 source "$SCRIPT_DIR/scripts/lib/opencode.sh"
@@ -55,28 +82,7 @@ if ! $TARGET_HAS_LISSOM; then
     fi
 fi
 
-# When piped via curl, BASH_SOURCE[0] is empty so SCRIPT_DIR falls back to CWD.
-# If the repo files aren't present, download them from GitHub into a temp dir.
-REPO="https://raw.githubusercontent.com/cuzfrog/lissom-skills/main"
-CLEANUP_TMPDIR=""
-if [[ ! -f "$SCRIPT_DIR/agents/lissom-researcher.md" ]]; then
-    SCRIPT_DIR="$(mktemp -d)"
-    CLEANUP_TMPDIR="$SCRIPT_DIR"
-    echo "Fetching files from GitHub..."
-    mkdir -p "$SCRIPT_DIR/agents" "$SCRIPT_DIR/templates"
-    for skill in "${SKILLS[@]}"; do mkdir -p "$SCRIPT_DIR/skills/$skill"; done
-    for agent in "${AGENTS[@]}"; do
-        curl -fsSL "$REPO/agents/$agent.md" -o "$SCRIPT_DIR/agents/$agent.md"
-    done
-    for skill in "${SKILLS[@]}"; do
-        curl -fsSL "$REPO/skills/$skill/SKILL.md" -o "$SCRIPT_DIR/skills/$skill/SKILL.md"
-        # Download supporting files for lissom-auto
-        if [[ "$skill" == "lissom-auto" ]]; then
-            curl -fsSL "$REPO/skills/$skill/user_preference_questions.json" -o "$SCRIPT_DIR/skills/$skill/user_preference_questions.json" || true
-        fi
-    done
-    curl -fsSL "$REPO/templates/Specs.md" -o "$SCRIPT_DIR/templates/Specs.md"
-fi
+
 
 # Create directory structure
 echo "Installing to $TARGET..."
