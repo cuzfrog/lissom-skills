@@ -2,7 +2,14 @@
 set -e
 
 REPO="${LISSOM_REPO:-https://github.com/cuzfrog/lissom-skills}"
+RAW_REPO="${LISSOM_RAW_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
 CLEANUP_TMPDIR=""
+
+cleanup() {
+    [[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true
+    rm -f lissom-skills-tmp.zip
+}
+trap cleanup EXIT
 
 # 1. Resolve SCRIPT_DIR (mirror the old install.sh approach for curl | bash)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
@@ -13,7 +20,7 @@ if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
     CLEANUP_TMPDIR="$SCRIPT_DIR"
     mkdir -p "$SCRIPT_DIR/scripts/lib"
     for f in common.sh constants.sh ui.sh; do
-        curl -fsSL "$REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
+        curl -fsSL "$RAW_REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
     done
 fi
 
@@ -97,5 +104,3 @@ echo "Next steps:"
 echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
 echo "- Invoke '/lissom-auto T1', get interviewed and wait for the job to be done!"
 
-# 11. Clean up temp directory
-[[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true

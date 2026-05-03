@@ -2,8 +2,11 @@
 
 set -e  # Exit on error
 
-REPO="${LISSOM_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
+RAW_REPO="${LISSOM_RAW_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
 CLEANUP_TMPDIR=""
+
+cleanup() { [[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true; }
+trap cleanup EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
 [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -13,7 +16,7 @@ if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
     CLEANUP_TMPDIR="$SCRIPT_DIR"
     mkdir -p "$SCRIPT_DIR/scripts/lib"
     for f in common.sh constants.sh ui.sh; do
-        curl -fsSL "$REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
+        curl -fsSL "$RAW_REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
     done
 fi
 
@@ -137,5 +140,3 @@ for target_dir in "${!TARGET_CONFIG[@]}"; do
     fi
 done
 
-# Clean up temp directory used when fetching from GitHub
-[[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true
