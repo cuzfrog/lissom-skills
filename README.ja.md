@@ -52,10 +52,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 対応プラットフォーム：
-- `.claude/` [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) および互換エージェント。
+- `.claude/` [Claude Code](https://code.claude.com/) および互換エージェント。
 - `.opencode/` [OpenCode](https://opencode.ai)。
-- `.qwen/` [Qwen Code](https://github.com/QwenLM/Qwen2.5-Coder)（近日対応予定）。
-- `.gemini/` [Gemini CLI](https://cloud.google.com/gemini-cli)（近日対応予定）。
+- `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
+- `.gemini/` [Gemini CLI](https://geminicli.com/)。
 
 ---
 

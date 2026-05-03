@@ -52,10 +52,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 支持的平台：
-- `.claude/` [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) 及兼容代理。
+- `.claude/` [Claude Code](https://code.claude.com/) 及兼容代理。
 - `.opencode/` [OpenCode](https://opencode.ai)。
-- `.qwen/` [Qwen Code](https://github.com/QwenLM/Qwen2.5-Coder)（即将支持）。
-- `.gemini/` [Gemini CLI](https://cloud.google.com/gemini-cli)（即将支持）。
+- `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
+- `.gemini/` [Gemini CLI](https://geminicli.com/)。
 
 ---
 

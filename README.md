@@ -52,10 +52,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 Supported:
-- `.claude/` [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) and compatible agents.
+- `.claude/` [Claude Code](https://code.claude.com/) and compatible agents.
 - `.opencode/` [OpenCode](https://opencode.ai).
-- `.qwen/` [Qwen Code](https://github.com/QwenLM/Qwen2.5-Coder).
-- `.gemini/` [Gemini CLI](https://cloud.google.com/gemini-cli).
+- `.qwen/` [Qwen Code](https://qwen.ai/qwencode).
+- `.gemini/` [Gemini CLI](https://geminicli.com/).
 
 ---
 
