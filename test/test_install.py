@@ -196,7 +196,7 @@ def test_model_config_accepted(tmp_path):
     assert "model: haiku" in implementer
     assert "model: sonnet" in reviewer
 
-    assert "┌─────────────────────────────┬───────────┐" in result.stdout
+    assert "┬" in result.stdout                           # table top border (adaptive width)
     assert "│ Agent" in result.stdout
     assert "lissom-researcher" in result.stdout
     assert "opus-4.6" in result.stdout
@@ -297,7 +297,7 @@ def test_customization_message_displayed(tmp_path):
     result = run_install(src, work, env_extra={"LISSOM_YES": "1"})
 
     assert result.returncode == 0
-    assert "The model field can be modified in the agent files at .claude/agents/" in result.stdout
+    assert "The model field can be modified in the agent files at ./.claude/agents/" in result.stdout
 
 
 def test_model_config_declined(tmp_path):
@@ -314,8 +314,8 @@ def test_model_config_declined(tmp_path):
 
     assert "model:" not in researcher
     assert "model:" not in planner
-    # Table should NOT be shown
-    assert "┌─────────────────────────────┬───────────┐" not in result.stdout
+    # Table should NOT be shown (no border with ┬ character)
+    assert "┬" not in result.stdout
     # Customization message should NOT be shown
     assert "The model field can be modified" not in result.stdout
 

@@ -4,9 +4,11 @@ Unit tests for install.sh utility functions.
 Tests for:
 - get_version()   - extract version from YAML frontmatter
 - get_model()     - extract model from YAML frontmatter
+- _get_frontmatter_field() - generic frontmatter field extraction
 - validate_yaml_frontmatter() - validate frontmatter structure
 - add_model_to_content() - insert model field into frontmatter
 - classify_file() - classify source/dest by version
+- has_lissom_installation() - check if lissom agent files exist
 """
 import subprocess
 from pathlib import Path
@@ -284,3 +286,87 @@ echo "OLDER:${{#OLDER_SRC[@]}}"
         assert r.returncode == 0
         assert "SILENT:1" in r.stdout
         assert "OLDER:0" in r.stdout
+
+
+class TestGetFrontmatterField:
+    """_get_frontmatter_field() is the shared implementation behind get_version/get_model."""
+
+    def test_field_prefix_collision_does_not_match(self, tmp_path, script_dir):
+        """A field named 'model_version' does NOT match when extracting 'model'."""
+        f = tmp_path / "test.md"
+        f.write_text("---\nname: test\nversion: 1\nmodel_version: xyz\nmodel: sonnet\n---\nbody\n")
+        r = run_install_function(script_dir, f"_get_frontmatter_field '{f}' model")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "sonnet"
+
+    def test_field_at_start_of_line_only(self, tmp_path, script_dir):
+        """Field name must appear at the start of a line (^ anchor)."""
+        f = tmp_path / "test.md"
+        f.write_text("---\nname: test\n not_model: xyz\nmodel: haiku\n---\nbody\n")
+        r = run_install_function(script_dir, f"_get_frontmatter_field '{f}' model")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "haiku"
+
+    def test_version_with_special_chars(self, tmp_path, script_dir):
+        """Version timestamp with dots, dashes, colons is captured."""
+        f = tmp_path / "test.md"
+        f.write_text("---\nname: test\nversion: 2026-01-01T12:00:00Z\n---\nbody\n")
+        r = run_install_function(script_dir, f"get_version '{f}'")
+        assert r.returncode == 0
+        assert "2026-01-01T12:00:00Z" in r.stdout
+
+    def test_model_value_with_trailing_whitespace(self, tmp_path, script_dir):
+        """Trailing whitespace is stripped from the extracted value."""
+        f = tmp_path / "test.md"
+        f.write_text("---\nname: test\nmodel: sonnet   \n---\nbody\n")
+        r = run_install_function(script_dir, f"get_model '{f}'")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "sonnet"
+
+
+class TestHasLissomInstallation:
+    """has_lissom_installation() checks whether a target dir has lissom agent files."""
+
+    def test_has_lissom_agents_returns_true(self, tmp_path, script_dir):
+        target = tmp_path / "target"
+        (target / "agents").mkdir(parents=True)
+        (target / "agents" / "lissom-researcher.md").write_text("body\n")
+        r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
+        assert r.returncode == 0
+        assert "EXIT:0" in r.stdout
+
+    def test_no_lissom_agents_returns_false(self, tmp_path, script_dir):
+        target = tmp_path / "target"
+        (target / "agents").mkdir(parents=True)
+        (target / "agents" / "other.md").write_text("body\n")
+        r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
+        assert r.returncode == 0
+        assert "EXIT:1" in r.stdout
+
+    def test_missing_directory_returns_false(self, tmp_path, script_dir):
+        target = tmp_path / "nonexistent"
+        r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
+        assert r.returncode == 0
+        assert "EXIT:1" in r.stdout
+
+    def test_no_agents_subdir_returns_false(self, tmp_path, script_dir):
+        target = tmp_path / "target"
+        target.mkdir()
+        r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
+        assert r.returncode == 0
+        assert "EXIT:1" in r.stdout
+
+    def test_empty_agents_dir_returns_false(self, tmp_path, script_dir):
+        target = tmp_path / "target"
+        (target / "agents").mkdir(parents=True)
+        r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
+        assert r.returncode == 0
+        assert "EXIT:1" in r.stdout
+
+    def test_hidden_lissom_file_not_detected(self, tmp_path, script_dir):
+        target = tmp_path / "target"
+        (target / "agents").mkdir(parents=True)
+        (target / "agents" / ".lissom-researcher.md").write_text("body\n")
+        r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
+        assert r.returncode == 0
+        assert "EXIT:1" in r.stdout

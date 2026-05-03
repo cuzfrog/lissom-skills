@@ -64,3 +64,28 @@ prompt_model_preference() {
         echo "false"
     fi
 }
+
+# Display an adaptive-width table of agent → model mappings.
+# Args: name of an associative array variable (agent_name → model_value)
+display_model_table() {
+    local -n models="$1"
+    local max_agent=5 max_model=5
+    local key val
+    for key in "${!models[@]}"; do
+        val="${models[$key]}"
+        (( ${#key} > max_agent )) && max_agent=${#key}
+        (( ${#val} > max_model )) && max_model=${#val}
+    done
+    local c1=$((max_agent + 2)) c2=$((max_model + 2))
+    local d1 d2
+    printf -v d1 '%*s' "$c1" ''; d1="${d1// /─}"
+    printf -v d2 '%*s' "$c2" ''; d2="${d2// /─}"
+    echo "┌${d1}┬${d2}┐"
+    printf "│ %-*s │ %-*s │\n" "$max_agent" "Agent" "$max_model" "Model"
+    echo "├${d1}┼${d2}┤"
+    local agent_name
+    for agent_name in $(printf '%s\n' "${!models[@]}" | sort); do
+        printf "│ %-*s │ %-*s │\n" "$max_agent" "$agent_name" "$max_model" "${models[$agent_name]}"
+    done
+    echo "└${d1}┴${d2}┘"
+}

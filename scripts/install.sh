@@ -29,8 +29,8 @@ ALTERNATE_TARGET=$([[ "$INSTALL_TARGET" == ".claude" ]] && echo ".opencode" || e
 # Only warn about alternate target if current target doesn't already have lissom files
 # (version logic handles reinstall/overwrite within the same target)
 TARGET_HAS_LISSOM=false
-[[ -d "$TARGET/agents" ]] && [[ -n "$(ls -A "$TARGET"/agents/lissom-* 2>/dev/null)" ]] && TARGET_HAS_LISSOM=true
-if ! $TARGET_HAS_LISSOM && [[ -d "$ALTERNATE_TARGET" ]] && [[ -n "$(ls -A "$ALTERNATE_TARGET"/agents/lissom-* 2>/dev/null)" ]]; then
+has_lissom_installation "$TARGET" && TARGET_HAS_LISSOM=true
+if ! $TARGET_HAS_LISSOM && has_lissom_installation "$ALTERNATE_TARGET"; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "⚠️  Warning: Found existing installation in $ALTERNATE_TARGET/"
     echo ""
@@ -173,133 +173,12 @@ if [[ ${#OLDER_SRC[@]} -gt 0 ]]; then
     fi
 fi
 
-# Helper function to copy a file with format-specific handling and conversion
-# Handles .claude/ (Claude Code format) and .opencode/ (Opencode format) with conversion
-copy_with_conversion() {
-    local src="$1" dest="$2" is_new="$3"
-    local basename_dest
-    basename_dest=$(basename "$dest")
-    local dirname_dest
-    dirname_dest=$(basename "$(dirname "$dest")")
-    
-    # JSON files (user_preference_questions.json) are copied verbatim regardless of format
-    if [[ "$basename_dest" == "user_preference_questions.json" ]]; then
-        cp "$src" "$dest"
-        return 0
-    fi
-    
-    # For .claude/ format, use existing model-handling logic
-    if [[ "$TARGET_FORMAT" == "claude" ]]; then
-        # Only process agent files; copy others directly
-        if [[ "$dest" != *"/agents/"*.md ]]; then
-            cp "$src" "$dest"
-            return 0
-        fi
-        
-        # Validate existing file's YAML if it exists
-        if [[ -f "$dest" ]]; then
-            if ! validate_yaml_frontmatter "$dest"; then
-                echo "Error: $dest has malformed YAML frontmatter." >&2
-                echo "Please fix or remove this file manually and re-run installation." >&2
-                return 1
-            fi
-        fi
-        
-        # If this is an upgrade (dest exists), preserve existing model field (or absence)
-        if [[ -f "$dest" ]]; then
-            local existing_model
-            existing_model=$(get_model "$dest")
-            local src_content
-            src_content=$(cat "$src")
-            
-            # If existing file has a model field, preserve it
-            if [[ -n "$existing_model" ]]; then
-                add_model_to_content "$src_content" "$existing_model" > "$dest"
-            else
-                # No model field in existing file → preserve absence
-                cp "$src" "$dest"
-            fi
-        else
-            # New file: add model field if user accepted prompt
-            if $ADD_MODEL_FIELD; then
-                local default_model
-                default_model=$(get_default_model "$basename_dest")
-                if [[ -n "$default_model" ]]; then
-                    local src_content
-                    src_content=$(cat "$src")
-                    add_model_to_content "$src_content" "$default_model" > "$dest"
-                else
-                    cp "$src" "$dest"
-                fi
-            else
-                cp "$src" "$dest"
-            fi
-        fi
-        return 0
-    fi
-    
-    # For .opencode/ format, apply conversion
-    if [[ "$TARGET_FORMAT" == "opencode" ]]; then
-        # JSON files are already handled above
-        
-        # For agent files: convert frontmatter and tool names in body
-        if [[ "$dest" == *"/agents/"*.md ]]; then
-            # Validate source frontmatter before conversion
-            if ! validate_yaml_frontmatter "$src"; then
-                echo "Error: $src has malformed YAML frontmatter." >&2
-                return 1
-            fi
-            local src_content
-            src_content=$(cat "$src")
-            # Extract agent name from filename (e.g. "lissom-researcher.md" -> "lissom-researcher")
-            local agent_name="${basename_dest%.md}"
-            # Convert and write to dest
-            convert_agent_file "$src_content" "$agent_name" "$ADD_MODEL_FIELD" > "$dest"
-            return 0
-        fi
-        
-        # For skill files: convert tool names in body but keep frontmatter
-        if [[ "$dest" == *"/skills/"*"/SKILL.md" ]]; then
-            local src_content
-            src_content=$(cat "$src")
-            # Only convert tool names in body, skill frontmatter stays unchanged
-            convert_tool_names_in_body "$src_content" > "$dest"
-            return 0
-        fi
-        
-        # For other files, copy as-is
-        cp "$src" "$dest"
-        return 0
-    fi
-    
-    # Fallback
-    cp "$src" "$dest"
-    return 0
-}
-
-
 # Silent copies (new files, same version, source-newer)
-for i in "${!SILENT_SRC[@]}"; do
-    mkdir -p "$(dirname "${SILENT_DEST[$i]}")"
-    is_new="false"
-    [[ ! -f "${SILENT_DEST[$i]}" ]] && is_new="true"
-    if ! copy_with_conversion "${SILENT_SRC[$i]}" "${SILENT_DEST[$i]}" "$is_new"; then
-        echo "Installation failed." >&2
-        exit 1
-    fi
-    INSTALLED=$((INSTALLED + 1))
-done
+install_files SILENT_SRC SILENT_DEST "$TARGET_FORMAT" "$ADD_MODEL_FIELD"
 
 # Downgrade copies
 if $OVERWRITE_OLDER; then
-    for i in "${!OLDER_SRC[@]}"; do
-        mkdir -p "$(dirname "${OLDER_DEST[$i]}")"
-        if ! copy_with_conversion "${OLDER_SRC[$i]}" "${OLDER_DEST[$i]}" "false"; then
-            echo "Installation failed." >&2
-            exit 1
-        fi
-        INSTALLED=$((INSTALLED + 1))
-    done
+    install_files OLDER_SRC OLDER_DEST "$TARGET_FORMAT" "$ADD_MODEL_FIELD"
 else
     SKIPPED=$((SKIPPED + ${#OLDER_SRC[@]}))
 fi
@@ -361,20 +240,11 @@ if [[ -d "$TARGET/agents" ]]; then
     # Display table if at least one agent has a model
     if $MODELS_FOUND; then
         echo ""
-        echo "┌─────────────────────────────┬───────────┐"
-        echo "│ Agent                       │ Model     │"
-        echo "├─────────────────────────────┼───────────┤"
-        
-        # Sort agent names and display rows
-        for agent_name in $(printf '%s\n' "${!AGENT_MODELS[@]}" | sort); do
-            printf "│ %-27s │ %-9s │\n" "$agent_name" "${AGENT_MODELS[$agent_name]}"
-        done
-        
-        echo "└─────────────────────────────┴───────────┘"
+        display_model_table AGENT_MODELS
     fi
 fi
 if $MODELS_FOUND; then
-    echo "The model field can be modified in the agent files at .claude/agents/"
+    echo "The model field can be modified in the agent files at $TARGET/agents/"
 fi
 echo ""
 echo "Next steps:"

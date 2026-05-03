@@ -21,6 +21,7 @@ A Claude Code skill and agent set designed to specific and reliable.
 - all dirs in @.gitignore
 
 ## Test Method
+- `scripts/` changes must follow TDD workflow.
 - use `pytest` to execute tests
 - use `/tmp/tests/**` as the workspace for test cases that require file operations
 

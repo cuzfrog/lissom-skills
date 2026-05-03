@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 # Frontmatter parsing and manipulation functions for YAML frontmatter in .md files.
 
-# Extract the `version:` value from a file's YAML frontmatter.
-# Returns empty string if no version field is found.
-get_version() {
-    local file="$1"
+# Extract a named scalar value from a file's YAML frontmatter (e.g. "version", "model").
+# Uses ^anchor so field names that are prefixes of each other do not collide.
+# Returns empty string if field is not found.
+_get_frontmatter_field() {
+    local file="$1" field="$2"
     local in_fm=0
     while IFS= read -r line; do
         if [[ "$line" == "---" ]]; then
-            if [[ $in_fm -eq 0 ]]; then
-                in_fm=1
-            else
-                break
-            fi
-        elif [[ $in_fm -eq 1 ]] && [[ "$line" =~ ^version:[[:space:]]*(.+)$ ]]; then
+            if [[ $in_fm -eq 0 ]]; then in_fm=1; else break; fi
+        elif [[ $in_fm -eq 1 ]] && [[ "$line" =~ ^$field:[[:space:]]*(.+)$ ]]; then
             echo "${BASH_REMATCH[1]}"
             return
         fi
@@ -21,25 +18,8 @@ get_version() {
     echo ""
 }
 
-# Extract the `model:` value from a file's YAML frontmatter.
-# Returns empty string if no model field is found.
-get_model() {
-    local file="$1"
-    local in_fm=0
-    while IFS= read -r line; do
-        if [[ "$line" == "---" ]]; then
-            if [[ $in_fm -eq 0 ]]; then
-                in_fm=1
-            else
-                break
-            fi
-        elif [[ $in_fm -eq 1 ]] && [[ "$line" =~ ^model:[[:space:]]*(.+)$ ]]; then
-            echo "${BASH_REMATCH[1]}"
-            return
-        fi
-    done < "$file"
-    echo ""
-}
+get_version() { _get_frontmatter_field "$1" "version"; }
+get_model()   { _get_frontmatter_field "$1" "model"; }
 
 # Validate YAML frontmatter structure.
 # Returns 0 if valid, 1 if malformed (missing closing --- or unopened frontmatter).
