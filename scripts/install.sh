@@ -4,6 +4,7 @@ set -e  # Exit on error
 
 # Source constants and utility functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 source "$SCRIPT_DIR/scripts/lib/conversion.sh"
 source "$SCRIPT_DIR/scripts/lib/ui.sh"
@@ -16,8 +17,7 @@ fi
 
 # Determine target directory (prompt user for .claude/ vs .opencode/)
 # Initialize model preference (only relevant for .opencode/)
-DIALOG_TOOL=$(detect_dialog_tool)
-INSTALL_TARGET=$(prompt_target_directory "$DIALOG_TOOL")
+INSTALL_TARGET=$(prompt_target_directory)
 TARGET="./$INSTALL_TARGET"
 TARGET_FORMAT="claude"  # default to Claude Code format
 ADD_MODEL_FIELD=false
@@ -48,7 +48,7 @@ fi
 if [[ "$INSTALL_TARGET" == ".opencode" ]]; then
     TARGET_FORMAT="opencode"
     # For Opencode target, ask about model preference
-    INCLUDE_MODEL=$(prompt_model_preference "$DIALOG_TOOL")
+    INCLUDE_MODEL=$(prompt_model_preference)
     if [[ "$INCLUDE_MODEL" == "true" ]]; then
         ADD_MODEL_FIELD=true
     fi

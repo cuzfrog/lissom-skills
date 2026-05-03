@@ -408,6 +408,37 @@ def test_install_opencode_skill_frontmatter(tmp_path):
     assert "temperature:" not in skill
 
 
+def run_install_from_scripts(src: Path, work: Path, env_extra=None):
+    """Copy install.sh into src/scripts/ and run it, simulating `bash scripts/install.sh`."""
+    scripts_dir = src / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy(INSTALL_SH, scripts_dir / "install.sh")
+    env = {**os.environ}
+    if env_extra:
+        env.update(env_extra)
+    return subprocess.run(
+        ["bash", str(scripts_dir / "install.sh")],
+        cwd=str(work),
+        env=env,
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_install_from_scripts_subdirectory(tmp_path):
+    """SI1: Running install.sh from scripts/ subdirectory resolves paths correctly."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install_from_scripts(src, work, env_extra={"LISSOM_YES": "1"})
+
+    assert result.returncode == 0
+    assert (work / ".claude" / "agents" / "lissom-researcher.md").is_file()
+    assert (work / ".claude" / "skills" / "lissom-auto" / "SKILL.md").is_file()
+
+
 def test_install_opencode_body_rewrite(tmp_path):
     """OC5: Tool names in agent body text are rewritten during Opencode conversion."""
     src, work = tmp_path / "src", tmp_path / "work"

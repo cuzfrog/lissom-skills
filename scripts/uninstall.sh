@@ -4,6 +4,7 @@ set -e  # Exit on error
 
 # Source constants
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 
 uninstall_from() {
