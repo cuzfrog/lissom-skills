@@ -13,7 +13,7 @@ SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 get_default_model() {
     local filename="$1"
     case "$filename" in
-        lissom-implementer.md) echo "haiku" ;;
+        lissom-implementer.md) echo "sonnet" ;;
         lissom-planner.md) echo "sonnet" ;;
         lissom-researcher.md) echo "opus-4.6" ;;
         lissom-reviewer.md) echo "sonnet" ;;

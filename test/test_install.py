@@ -193,7 +193,7 @@ def test_model_config_accepted(tmp_path):
 
     assert "model: opus-4.6" in researcher
     assert "model: sonnet" in planner
-    assert "model: haiku" in implementer
+    assert "model: sonnet" in implementer
     assert "model: sonnet" in reviewer
 
     assert "┬" in result.stdout                           # table top border (adaptive width)

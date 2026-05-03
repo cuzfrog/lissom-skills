@@ -38,23 +38,25 @@ prompt_target_directory() {
     echo "$choice"
 }
 
-# Prompt user whether to set default models for agents
-# Returns: "true" or "false"
-# Respects LISSOM_NO=1 (skips prompt, returns false)
+# Prompt user whether to set default models for agents.
+# Args: <default_answer> — "true" or "false" to return when non-interactive (default: "false")
+# Returns: "true" or "false" on stdout
+# Respects: LISSOM_YES=1 → "true" (skip), LISSOM_NO=1  → "false" (skip)
 prompt_model_preference() {
-    # If LISSOM_NO=1, skip model setting
+    local default="${1:-false}"
+    local reply
+
+    if [[ "${LISSOM_YES:-}" == "1" ]]; then
+        echo "true"; return 0
+    fi
     if [[ "${LISSOM_NO:-}" == "1" ]]; then
-        echo "false"
-        return 0
+        echo "false"; return 0
     fi
-    
-    # Check if stdin is a TTY (interactive mode)
+
     if [[ ! -t 0 ]]; then
-        # Non-interactive (curl-pipe install) - default to not setting models
-        echo "false"
-        return 0
+        echo "$default"; return 0
     fi
-    
+
     echo -n "Set default models for agents? You can modify agent definition files later. [Y/n] " >&2
     read -n 1 -r reply
     echo >&2

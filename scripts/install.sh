@@ -53,17 +53,6 @@ fi
 
 if [[ "$INSTALL_TARGET" == ".opencode" ]]; then
     TARGET_FORMAT="opencode"
-    # For Opencode target, ask about model preference
-    INCLUDE_MODEL=$(prompt_model_preference)
-    if [[ "$INCLUDE_MODEL" == "true" ]]; then
-        ADD_MODEL_FIELD=true
-    fi
-fi
-
-# For .claude/ target, also handle the legacy model preference prompt
-if [[ "$INSTALL_TARGET" == ".claude" ]]; then
-    # This will be set later after checking if there are new agent files
-    :
 fi
 
 # When piped via curl, BASH_SOURCE[0] is empty so SCRIPT_DIR falls back to CWD.
@@ -126,30 +115,11 @@ for i in "${!SILENT_DEST[@]}"; do
     fi
 done
 
-# Model configuration prompt (only for .claude/ format)
-if [[ "$TARGET_FORMAT" == "claude" ]] && [[ $NEW_AGENT_COUNT -gt 0 ]]; then
-    if [[ "${LISSOM_YES:-}" == "1" ]]; then
-        ADD_MODEL_FIELD=true
-    elif [[ "${LISSOM_NO:-}" == "1" ]]; then
-        ADD_MODEL_FIELD=false
-    else
-        REPLY=""
-        # Only prompt if stdin is a TTY (interactive mode)
-        if [[ -t 0 ]]; then
-            {
-                printf "Add default model settings to agent files? [Y/n] " > /dev/tty \
-                && read -n 1 -r < /dev/tty \
-                && echo > /dev/tty
-            } 2>/dev/null || true
-        fi
-        if [[ -z "$REPLY" ]] || [[ "$REPLY" =~ ^[Yy]([Ee][Ss])?$ ]]; then
-            ADD_MODEL_FIELD=true
-        elif [[ "$REPLY" =~ ^[Nn]([Oo])?$ ]]; then
-            ADD_MODEL_FIELD=false
-        else
-            ADD_MODEL_FIELD=true
-        fi
-    fi
+# Model configuration prompt — unified for all target formats
+if [[ $NEW_AGENT_COUNT -gt 0 ]]; then
+    model_default=$([[ "$TARGET_FORMAT" == "opencode" ]] && echo "false" || echo "true")
+    INCLUDE_MODEL=$(prompt_model_preference "$model_default")
+    [[ "$INCLUDE_MODEL" == "true" ]] && ADD_MODEL_FIELD=true
 fi
 
 # Downgrade prompt (single, covering all older-source files)
