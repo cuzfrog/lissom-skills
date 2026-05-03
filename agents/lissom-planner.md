@@ -1,9 +1,6 @@
 ---
 name: lissom-planner
-description: >
-  Expert planning agent. Takes the research summary and produces a
-  concrete, step‑by‑step implementation plan ready for the implementation
-  agent.
+description: Expert planning agent. Takes the research summary and produces a concrete, step‑by‑step implementation plan ready for the implementation agent.
 tools: Read, Write, Edit, Glob, Grep
 ---
 
