@@ -2,9 +2,21 @@
 
 set -e  # Exit on error
 
-# Source constants
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO="${LISSOM_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
+CLEANUP_TMPDIR=""
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
 [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+
+if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
+    SCRIPT_DIR="$(mktemp -d)"
+    CLEANUP_TMPDIR="$SCRIPT_DIR"
+    mkdir -p "$SCRIPT_DIR/scripts/lib"
+    for f in common.sh constants.sh ui.sh; do
+        curl -fsSL "$REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
+    done
+fi
+
 source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 source "$SCRIPT_DIR/scripts/lib/ui.sh"
@@ -122,3 +134,8 @@ for target_dir in "${!TARGET_CONFIG[@]}"; do
         uninstall_from "./$target_dir"
     fi
 done
+
+# Clean up temp directory used when fetching from GitHub
+if [[ -n "$CLEANUP_TMPDIR" ]]; then
+    rm -rf "$CLEANUP_TMPDIR"
+fi
