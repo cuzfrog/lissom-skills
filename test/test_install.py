@@ -522,7 +522,7 @@ def test_install_opencode_body_rewrite(tmp_path):
 
 def test_prompt_target_directory_stdout_clean(tmp_path):
     """T1 regression: prompt_target_directory outputs only the target name to stdout."""
-    for target in (".claude", ".opencode"):
+    for target in (".claude", ".opencode", ".qwen", ".gemini"):
         result = subprocess.run(
             ["bash", "-c", f"""
                 source scripts/lib/ui.sh
@@ -565,7 +565,7 @@ def test_install_target_directory_clean(tmp_path):
 
     # LISSOM_TARGET env overrides the interactive prompt entirely,
     # ensuring no prompt text gets captured in INSTALL_TARGET
-    for target in (".claude", ".opencode"):
+    for target in (".claude", ".opencode", ".qwen", ".gemini"):
         result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": target})
 
         assert result.returncode == 0, f"install.sh failed with {target}: {result.stderr}"
@@ -574,3 +574,411 @@ def test_install_target_directory_clean(tmp_path):
             f"stdout: {result.stdout}\nstderr: {result.stderr}"
         )
 
+
+# Qwen install tests (Step 5)
+
+def test_install_qwen_target(tmp_path):
+    """QW1: Selecting .qwen/ target with LISSOM_YES=1 produces converted agent files with Qwen Code frontmatter."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    assert (work / ".qwen").exists()
+    assert not (work / ".claude").exists()
+
+    assert (work / ".qwen" / "agents" / "lissom-researcher.md").is_file()
+    assert (work / ".qwen" / "agents" / "lissom-planner.md").is_file()
+
+    researcher = (work / ".qwen" / "agents" / "lissom-researcher.md").read_text()
+    assert "model: qwen3.6-plus" in researcher
+    assert "name: lissom-researcher" in researcher
+    assert "description:" in researcher
+    assert "version:" in researcher
+    assert "tools:" in researcher
+    assert "  - read_file" in researcher
+    assert "  - write_file" in researcher
+    assert "tools: Bash, Read" not in researcher  # old format removed
+
+
+def test_install_qwen_with_model(tmp_path):
+    """QW2: Qwen install with LISSOM_YES includes model fields."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    researcher = (work / ".qwen" / "agents" / "lissom-researcher.md").read_text()
+    assert "model: qwen3.6-plus" in researcher
+
+
+def test_install_qwen_warns_about_claude(tmp_path):
+    """QW3: Installing to .qwen/ when .claude/ has lissom files shows warning about .claude/."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Seed .claude with lissom files
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
+
+    # Install to .qwen — should warn about .claude
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    assert "Found existing installation in .claude/" in result.stdout
+    assert (work / ".qwen" / "agents" / "lissom-researcher.md").is_file()
+
+
+def test_install_qwen_warns_about_multiple_alts(tmp_path):
+    """QW4: Installing to .qwen/ when both .claude/ and .opencode/ have lissom files warns about both."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Seed .claude
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
+    # Seed .opencode
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
+
+    # Install to .qwen — should warn about both
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    assert "Found existing installation in .claude/" in result.stdout
+    assert "Found existing installation in .opencode/" in result.stdout
+
+
+def test_reinstall_qwen_suppresses_warning(tmp_path):
+    """QW5: Reinstalling to .qwen/ (already has lissom files) does NOT show warning."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # First install to .qwen
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    # Seed .claude as well
+    make_src_tree(src, "2026-01-01T00:00:00")
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
+
+    # Reinstall to .qwen (already populated) — should NOT warn even though .claude has files
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    assert "Found existing installation in" not in result.stdout
+
+
+# Qwen content integration tests (Step 9)
+
+def test_install_qwen_without_model(tmp_path):
+    """QW2: Qwen Code installation without model preference excludes model field."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_NO": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    researcher = (work / ".qwen" / "agents" / "lissom-researcher.md").read_text()
+    assert "model:" not in researcher
+    assert "tools:" in researcher
+
+
+def test_install_qwen_skill_frontmatter(tmp_path):
+    """QW3: Skill files have Qwen Code frontmatter (name + description only)."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    skill = (work / ".qwen" / "skills" / "lissom-auto" / "SKILL.md").read_text()
+    assert "name: lissom-auto" in skill
+    assert "description: fixture" in skill
+    # version and argument-hint must be stripped
+    assert "version:" not in skill
+    assert "argument-hint:" not in skill
+    assert "mode:" not in skill      # no Opencode-specific fields
+
+
+def test_install_qwen_skill_body_rewrite(tmp_path):
+    """QW3b: Tool names in skill body text are rewritten during Qwen Code install."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Overwrite lissom-auto skill with body containing tool references
+    (src / "skills" / "lissom-auto" / "SKILL.md").write_text(
+        "---\nname: lissom-auto\nversion: 2026-01-01T00:00:00\ndescription: fixture\n"
+        "argument-hint: <task_dir>\n---\n"
+        "Use tool `Bash` to execute commands. Use `Read` to inspect files.\n"
+        "Also try `Grep` for searching and `AskUserQuestion` for user input.\n"
+    )
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    skill = (work / ".qwen" / "skills" / "lissom-auto" / "SKILL.md").read_text()
+
+    # Frontmatter simplified (existing requirement)
+    assert "name: lissom-auto" in skill
+    assert "description: fixture" in skill
+    assert "version:" not in skill
+    assert "argument-hint:" not in skill
+
+    # Body tool names rewritten
+    assert "`run_shell_command`" in skill
+    assert "`read_file`" in skill
+    assert "`grep_search`" in skill
+    assert "`question`" in skill
+
+    # Original tool names gone from body
+    assert "`Bash`" not in skill
+    assert "`Read`" not in skill
+    assert "`Grep`" not in skill
+    assert "`AskUserQuestion`" not in skill
+
+
+def test_install_qwen_body_rewrite(tmp_path):
+    """QW4: Tool names in agent body text are rewritten during Qwen Code conversion."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Create a custom agent with tool references in the body
+    (src / "agents" / "lissom-custom.md").write_text(
+        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\ntools: Bash, Read, AskUserQuestion\n---\n"
+        "Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
+    )
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    custom = (work / ".qwen" / "agents" / "lissom-custom.md").read_text()
+
+    # Body tool names rewritten
+    assert "`run_shell_command`" in custom
+    assert "`read_file`" in custom
+    assert "`question`" in custom
+    # Old names gone
+    assert "`Bash`" not in custom
+    assert "`Read`" not in custom
+    assert "`AskUserQuestion`" not in custom
+
+
+def test_install_qwen_implementer_model(tmp_path):
+    """QW5: lissom-implementer gets qwen3-coder-plus model."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    impl = (work / ".qwen" / "agents" / "lissom-implementer.md").read_text()
+    assert "model: qwen3-coder-plus" in impl
+
+
+def test_install_qwen_model_table(tmp_path):
+    """QW6: After Qwen install with models, the model table is displayed."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"})
+
+    assert result.returncode == 0
+    assert "┬" in result.stdout  # table border present
+    assert "lissom-researcher" in result.stdout
+    assert "qwen3.6-plus" in result.stdout
+
+
+# Gemini install integration tests (Step 9)
+
+def test_install_gemini_target(tmp_path):
+    """GM1: Selecting .gemini/ target produces converted agent files with Gemini CLI frontmatter."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Overwrite researcher with broader tools to verify Gemini-specific mappings
+    (src / "agents" / "lissom-researcher.md").write_text(
+        "---\nname: lissom-researcher\nversion: 2026-01-01T00:00:00\ndescription: fixture\n"
+        "tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion\n---\nbody\n"
+    )
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    assert (work / ".gemini").exists()
+    assert not (work / ".claude").exists()
+
+    assert (work / ".gemini" / "agents" / "lissom-researcher.md").is_file()
+    assert (work / ".gemini" / "agents" / "lissom-planner.md").is_file()
+
+    researcher = (work / ".gemini" / "agents" / "lissom-researcher.md").read_text()
+    assert "temperature: 0.1" in researcher
+    assert "tools:" in researcher
+    assert "tools: Bash, Read" not in researcher  # old inline format removed
+    assert "  - replace" in researcher
+    assert "  - google_web_search" in researcher
+    assert "  - ask_user" in researcher
+
+
+def test_install_gemini_with_model(tmp_path):
+    """GM2: Gemini install with LISSOM_YES includes model fields."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    researcher = (work / ".gemini" / "agents" / "lissom-researcher.md").read_text()
+    assert "model: gemini-3-pro-preview" in researcher
+    impl = (work / ".gemini" / "agents" / "lissom-implementer.md").read_text()
+    assert "model: gemini-3-flash-preview" in impl
+
+
+def test_install_gemini_without_model(tmp_path):
+    """GM3: Gemini install without model preference excludes model field."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_NO": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    researcher = (work / ".gemini" / "agents" / "lissom-researcher.md").read_text()
+    assert "model:" not in researcher
+    assert "tools:" in researcher
+    assert "temperature: 0.1" in researcher
+
+
+def test_install_gemini_temperature_field(tmp_path):
+    """GM4: Verify temperature: 0.1 present in all converted agents but not in skills."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+
+    for agent in AGENTS:
+        content = (work / ".gemini" / "agents" / f"{agent}.md").read_text()
+        assert "temperature: 0.1" in content, f"{agent} missing temperature: 0.1"
+
+    # Skills should NOT have temperature
+    for skill in SKILLS:
+        content = (work / ".gemini" / "skills" / skill / "SKILL.md").read_text()
+        assert "temperature:" not in content, f"{skill} skill should not have temperature"
+
+
+def test_install_gemini_ask_user_included(tmp_path):
+    """GM5: Verify ask_user in tools list (unlike Qwen where it was removed)."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Create custom agent with AskUserQuestion
+    (src / "agents" / "lissom-custom.md").write_text(
+        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\n"
+        "tools: Bash, Read, AskUserQuestion\n---\n"
+        "Ask user with `AskUserQuestion` when needed.\n"
+    )
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    custom = (work / ".gemini" / "agents" / "lissom-custom.md").read_text()
+    assert "  - ask_user" in custom       # in tools list
+    assert "`ask_user`" in custom          # in body text
+
+
+def test_install_gemini_skill_frontmatter(tmp_path):
+    """GM6: Skill files have Gemini CLI frontmatter (name + description only)."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    skill = (work / ".gemini" / "skills" / "lissom-auto" / "SKILL.md").read_text()
+    assert "name: lissom-auto" in skill
+    assert "description: fixture" in skill
+    assert "version:" not in skill
+    assert "argument-hint:" not in skill
+    assert "temperature:" not in skill
+
+
+def test_install_gemini_body_rewrite(tmp_path):
+    """GM7: Tool names in agent body text are rewritten during Gemini conversion."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Create a custom agent with tool references in the body
+    (src / "agents" / "lissom-custom.md").write_text(
+        "---\nname: lissom-custom\nversion: 2026-01-01T00:00:00\ndescription: custom\n"
+        "tools: Bash, Read, Edit, WebSearch, AskUserQuestion\n---\n"
+        "Use Tool `Bash` and `Edit` and `WebSearch` and `AskUserQuestion` for this task.\n"
+        "Also use `Agent` for delegation.\n"
+    )
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    custom = (work / ".gemini" / "agents" / "lissom-custom.md").read_text()
+
+    # Tool names rewritten
+    assert "`run_shell_command`" in custom
+    assert "`replace`" in custom
+    assert "`google_web_search`" in custom
+    assert "`ask_user`" in custom
+
+    # Old names gone
+    assert "`Bash`" not in custom
+    assert "`Edit`" not in custom
+    assert "`WebSearch`" not in custom
+    assert "`AskUserQuestion`" not in custom
+
+    # Unmapped tools pass through
+    assert "`Agent`" in custom
+
+
+def test_install_gemini_warns_about_claude(tmp_path):
+    """GM8: Installing to .gemini/ when .claude/ has lissom files shows warning."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Seed .claude with lissom files
+    run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".claude"})
+
+    # Install to .gemini — should warn about .claude
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    assert "Found existing installation in .claude/" in result.stdout
+    assert (work / ".gemini" / "agents" / "lissom-researcher.md").is_file()
+
+
+def test_install_gemini_model_table(tmp_path):
+    """GM9: After Gemini install with models, the model table is displayed."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"})
+
+    assert result.returncode == 0
+    assert "┬" in result.stdout  # table border present
+    assert "lissom-researcher" in result.stdout
+    assert "gemini-3-pro-preview" in result.stdout

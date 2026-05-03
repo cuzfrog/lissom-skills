@@ -382,3 +382,94 @@ def test_dry_run_default_false(tmp_path):
     assert "Removed" in result_no_arg.stdout
     assert "Removed" in result_explicit.stdout
 
+
+# ── Qwen uninstall tests (Step 10) ──────────────────────────────────────────
+
+def test_uninstall_qwen(tmp_path):
+    """UQ1: Uninstall finds and removes files from .qwen/ when only that directory exists."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Install to .qwen instead of .claude
+    shutil.copy(INSTALL_SH, src / "install.sh")
+    subprocess.run(
+        ["bash", str(src / "install.sh")],
+        cwd=str(work),
+        env={**os.environ, "LISSOM_YES": "1", "LISSOM_TARGET": ".qwen"},
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        check=True,
+    )
+
+    assert (work / ".qwen").exists()
+
+    result = run_uninstall(src, work)
+
+    assert result.returncode == 0
+    assert not (work / ".qwen").exists()
+
+
+def test_uninstall_all_targets(tmp_path):
+    """UQ2: Uninstall removes files from all four directories (.claude/, .opencode/, .qwen/, .gemini/) when all populated."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Install to all four targets
+    for target in (".claude", ".opencode", ".qwen", ".gemini"):
+        shutil.copy(INSTALL_SH, src / "install.sh")
+        subprocess.run(
+            ["bash", str(src / "install.sh")],
+            cwd=str(work),
+            env={**os.environ, "LISSOM_YES": "1", "LISSOM_TARGET": target},
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            check=True,
+        )
+
+    assert (work / ".claude").exists()
+    assert (work / ".opencode").exists()
+    assert (work / ".qwen").exists()
+    assert (work / ".gemini").exists()
+
+    result = run_uninstall(src, work)
+
+    assert result.returncode == 0
+    assert not (work / ".claude").exists()
+    assert not (work / ".opencode").exists()
+    assert not (work / ".qwen").exists()
+    assert not (work / ".gemini").exists()
+    # Verify per-directory summary includes all four
+    assert ".claude/ ->" in result.stdout
+    assert ".opencode/ ->" in result.stdout
+    assert ".qwen/ ->" in result.stdout
+    assert ".gemini/ ->" in result.stdout
+
+
+def test_uninstall_gemini(tmp_path):
+    """UG1: Uninstall finds and removes files from .gemini/ when only that directory exists."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Install to .gemini instead of .claude
+    shutil.copy(INSTALL_SH, src / "install.sh")
+    subprocess.run(
+        ["bash", str(src / "install.sh")],
+        cwd=str(work),
+        env={**os.environ, "LISSOM_YES": "1", "LISSOM_TARGET": ".gemini"},
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        check=True,
+    )
+
+    assert (work / ".gemini").exists()
+    assert (work / ".gemini" / "agents" / "lissom-researcher.md").exists()
+
+    result = run_uninstall(src, work)
+
+    assert result.returncode == 0
+    assert not (work / ".gemini").exists()
+    assert not (work / ".gemini" / "agents" / "lissom-researcher.md").exists()
+

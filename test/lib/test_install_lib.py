@@ -443,3 +443,181 @@ fi
 """)
         assert r.returncode == 0
         assert "FOUND:false" in r.stdout
+
+
+class TestConvertAgentGemini:
+    """_convert_agent_gemini() converts agent files to Gemini CLI format."""
+
+    def test_valid_frontmatter_with_model(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_agent_gemini '{src}' '{dest}' "true" ""
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        out = r.stdout
+        assert "name: lissom-researcher" in out
+        assert "description: fixture" in out
+        assert "version:" in out
+        assert "temperature: 0.1" in out
+        assert "model: gemini-3-flash-preview" in out
+        assert "tools:" in out
+        assert "  - run_shell_command" in out
+        assert "  - read_file" in out
+        assert "body" in out
+
+    def test_valid_frontmatter_with_model_value(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_agent_gemini '{src}' '{dest}' "true" "gemini-3-pro-preview"
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        assert "model: gemini-3-pro-preview" in r.stdout
+
+    def test_valid_frontmatter_without_model(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_agent_gemini '{src}' '{dest}' "false" ""
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        assert "model:" not in r.stdout
+
+    def test_malformed_frontmatter_returns_error(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-researcher\nversion: 2026-01-01\nbody without closing frontmatter\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_agent_gemini '{src}' '{dest}' "false" ""
+echo "EXIT:$?"
+""")
+        assert "EXIT:1" in r.stdout
+
+    def test_body_tool_rewrite(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash\n---\n"
+            "Use tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_agent_gemini '{src}' '{dest}' "false" ""
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        out = r.stdout
+        assert "`run_shell_command`" in out
+        assert "`read_file`" in out
+        assert "`ask_user`" in out
+        assert "`Bash`" not in out
+        assert "`Read`" not in out
+        assert "`AskUserQuestion`" not in out
+
+
+class TestConvertSkillGemini:
+    """_convert_skill_gemini() converts skill files to Gemini CLI format."""
+
+    def test_skill_frontmatter_stripped(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-auto\nversion: 2026-01-01\ndescription: fixture\n"
+            "argument-hint: <task_dir>\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_skill_gemini '{src}' '{dest}'
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        out = r.stdout
+        assert "name: lissom-auto" in out
+        assert "description: fixture" in out
+        assert "version:" not in out
+        assert "argument-hint:" not in out
+        assert "body" in out
+
+    def test_skill_body_tool_rewrite(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-auto\nversion: 2026-01-01\ndescription: fixture\n---\n"
+            "Use tool `Bash` to execute commands. Use `Read` to inspect files.\n"
+            "Also try `Grep` for searching and `WebSearch` for web.\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_skill_gemini '{src}' '{dest}'
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        out = r.stdout
+        assert "`run_shell_command`" in out
+        assert "`read_file`" in out
+        assert "`grep_search`" in out
+        assert "`google_web_search`" in out
+        assert "`Bash`" not in out
+        assert "`Read`" not in out
+        assert "`Grep`" not in out
+        assert "`WebSearch`" not in out
+
+    def test_malformed_skill_frontmatter_returns_error(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text(
+            "---\nname: lissom-auto\n---no closing---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_skill_gemini '{src}' '{dest}'
+echo "EXIT:$?"
+""")
+        assert "EXIT:1" in r.stdout
+
+
+class TestConvertOtherGemini:
+    """_convert_other_gemini() copies files verbatim."""
+
+    def test_other_file_copied_verbatim(self, tmp_path, script_dir):
+        src = tmp_path / "src.md"
+        dest = tmp_path / "dest.md"
+        src.write_text("some random content\nwith multiple lines\n")
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_other_gemini '{src}' '{dest}'
+cat '{dest}'
+""")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "some random content\nwith multiple lines"
+
+    def test_binary_file_copy(self, tmp_path, script_dir):
+        src = tmp_path / "src.bin"
+        dest = tmp_path / "dest.bin"
+        src.write_bytes(b"binary\x00data\xff")
+        r = run_install_function(script_dir, f"""
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
+_convert_other_gemini '{src}' '{dest}'
+echo "EXIT:$?"
+""")
+        assert r.returncode == 0
+        assert dest.read_bytes() == b"binary\x00data\xff"

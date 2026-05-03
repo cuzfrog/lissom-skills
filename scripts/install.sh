@@ -8,6 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 source "$SCRIPT_DIR/scripts/lib/opencode.sh"
+source "$SCRIPT_DIR/scripts/lib/qwen.sh"
+source "$SCRIPT_DIR/scripts/lib/gemini.sh"
 source "$SCRIPT_DIR/scripts/lib/ui.sh"
 source "$SCRIPT_DIR/scripts/lib/frontmatter.sh"
 source "$SCRIPT_DIR/scripts/lib/install_ops.sh"
@@ -20,29 +22,35 @@ TARGET="./$INSTALL_TARGET"
 TARGET_FORMAT=$(get_target_format "$INSTALL_TARGET")
 ADD_MODEL_FIELD=false
 
-# Check for alternate target directory and warn if switching
-ALTERNATE_TARGET=$([[ "$INSTALL_TARGET" == ".claude" ]] && echo ".opencode" || echo ".claude")
-# Only warn about alternate target if current target doesn't already have lissom files
-# (version logic handles reinstall/overwrite within the same target)
+# Check for alternate target directories and warn if they have lissom installations
 TARGET_HAS_LISSOM=false
 has_lissom_installation "$TARGET" && TARGET_HAS_LISSOM=true
-if ! $TARGET_HAS_LISSOM && has_lissom_installation "$ALTERNATE_TARGET"; then
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⚠️  Warning: Found existing installation in $ALTERNATE_TARGET/"
-    echo ""
-    echo "You are installing to $INSTALL_TARGET/, but $ALTERNATE_TARGET/ already contains"
-    echo "lissom-skills files. Consider running uninstall.sh first to remove the"
-    echo "old installation and avoid confusion."
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    
-    # Prompt for confirmation unless LISSOM_YES is set
-    if [[ -z "$LISSOM_YES" ]]; then
-        read -p "Continue anyway? (y/N) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "Installation cancelled."
-            exit 0
+if ! $TARGET_HAS_LISSOM; then
+    WARN_TARGETS=()
+    for alt_target in "${!TARGET_CONFIG[@]}"; do
+        [[ "$alt_target" == "$INSTALL_TARGET" ]] && continue
+        has_lissom_installation "$alt_target" && WARN_TARGETS+=("$alt_target")
+    done
+    if [[ ${#WARN_TARGETS[@]} -gt 0 ]]; then
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        for alt in "${WARN_TARGETS[@]}"; do
+            echo "⚠️  Warning: Found existing installation in $alt/"
+        done
+        echo ""
+        echo "You are installing to $INSTALL_TARGET/, but the director(ies) above already contain"
+        echo "lissom-skills files. Consider running uninstall.sh first to remove the"
+        echo "old installation(s) and avoid confusion."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        # Prompt for confirmation unless LISSOM_YES is set
+        if [[ -z "$LISSOM_YES" ]]; then
+            read -p "Continue anyway? (y/N) " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                echo "Installation cancelled."
+                exit 0
+            fi
         fi
     fi
 fi
