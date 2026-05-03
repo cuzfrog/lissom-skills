@@ -19,3 +19,30 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python -m pytest test/ -v
+
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Build zips
+        run: python scripts/build.py
+      - name: Create/update GitHub release
+        run: |
+          TAG="release-$(date +'%Y%m%d-%H%M%S')"
+          gh release create "$TAG" dist/*.zip \
+            --title "Build $(date +'%Y-%m-%d %H:%M')" \
+            --notes "Automated build from main branch." \
+            --latest
+        env:
+          GH_TOKEN: ${{ github.token }}
