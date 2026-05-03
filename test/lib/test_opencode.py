@@ -87,7 +87,7 @@ class TestOpencodeRewriteBodyTools:
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
-        content="Use tool \`Bash\` to run commands"
+        content="Use tool \\`Bash\\` to run commands"
         opencode_rewrite_body_tools "$content"
         """
         result = subprocess.run(
@@ -102,7 +102,7 @@ class TestOpencodeRewriteBodyTools:
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
-        content="Ask using \`AskUserQuestion\` tool"
+        content="Ask using \\`AskUserQuestion\\` tool"
         opencode_rewrite_body_tools "$content"
         """
         result = subprocess.run(
@@ -117,7 +117,7 @@ class TestOpencodeRewriteBodyTools:
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
-        content="Use \`Agent\` or \`TodoWrite\` for other tasks"
+        content="Use \\`Agent\\` or \\`TodoWrite\\` for other tasks"
         opencode_rewrite_body_tools "$content"
         """
         result = subprocess.run(
@@ -133,7 +133,7 @@ class TestOpencodeRewriteBodyTools:
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
-        content="Use \`Read\` here and \`Read\` there"
+        content="Use \\`Read\\` here and \\`Read\\` there"
         opencode_rewrite_body_tools "$content"
         """
         result = subprocess.run(
@@ -326,8 +326,8 @@ version: 2026-01-01T00:00:00Z
 description: A test agent
 tools: Bash, Read, AskUserQuestion
 ---
-Use tool \`Bash\` and \`Read\` to work.
-Ask the user with \`AskUserQuestion\` when needed.
+Use tool \\`Bash\\` and \\`Read\\` to work.
+Ask the user with \\`AskUserQuestion\\` when needed.
 "
         opencode_format_agent_file "$content" "test-agent" "false"
         """
@@ -363,7 +363,7 @@ version: 2026-01-01T00:00:00Z
 description: Research agent
 tools: Read, WebFetch
 ---
-Research with \`Read\` and \`WebFetch\`.
+Research with \\`Read\\` and \\`WebFetch\\`.
 "
         opencode_format_agent_file "$content" "lissom-researcher" "true"
         """

@@ -1,6 +1,6 @@
 ---
 name: lissom-planner
-version: 2026-05-03T00:00:00Z
+version: 2026-05-03T12:48:24Z
 description: >
   Expert planning agent. Takes the research summary and produces a
   concrete, step‑by‑step implementation plan ready for the implementation
