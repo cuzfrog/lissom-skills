@@ -24,7 +24,11 @@ ADD_MODEL_FIELD=false
 
 # Check for alternate target directory and warn if switching
 ALTERNATE_TARGET=$([[ "$INSTALL_TARGET" == ".claude" ]] && echo ".opencode" || echo ".claude")
-if [[ -d "$ALTERNATE_TARGET" ]] && [[ -n "$(ls -A "$ALTERNATE_TARGET"/agents/lissom-* 2>/dev/null)" ]]; then
+# Only warn about alternate target if current target doesn't already have lissom files
+# (version logic handles reinstall/overwrite within the same target)
+TARGET_HAS_LISSOM=false
+[[ -d "$TARGET/agents" ]] && [[ -n "$(ls -A "$TARGET"/agents/lissom-* 2>/dev/null)" ]] && TARGET_HAS_LISSOM=true
+if ! $TARGET_HAS_LISSOM && [[ -d "$ALTERNATE_TARGET" ]] && [[ -n "$(ls -A "$ALTERNATE_TARGET"/agents/lissom-* 2>/dev/null)" ]]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "⚠️  Warning: Found existing installation in $ALTERNATE_TARGET/"
     echo ""

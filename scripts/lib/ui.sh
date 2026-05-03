@@ -25,9 +25,9 @@ prompt_target_directory() {
         return 0
     fi
     
-    echo "Select installation target:"
+    echo "Select installation target:" >&2
     local choice=".claude"
-    select choice in ".claude (Claude Code format)" ".opencode (Opencode format)"; do
+    select choice in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)"; do
         case "$REPLY" in
             1) choice=".claude"; break ;;
             2) choice=".opencode"; break ;;
@@ -55,9 +55,9 @@ prompt_model_preference() {
         return 0
     fi
     
-    echo -n "Set default models for agents? [Y/n] "
+    echo -n "Set default models for agents? You can modify agent definition files later. [Y/n] " >&2
     read -n 1 -r reply
-    echo
+    echo >&2
     if [[ -z "$reply" ]] || [[ "$reply" =~ ^[Yy]$ ]]; then
         echo "true"
     else

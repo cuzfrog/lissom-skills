@@ -64,6 +64,28 @@ def test_reinstall_same_version(tmp_path):
     assert (work / ".claude" / "agents" / "lissom-researcher.md").is_file()
 
 
+def test_reinstall_same_dir_suppresses_cross_warning(tmp_path):
+    """T2b: Reinstalling to same target dir suppresses cross-directory warning."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # First install to .claude
+    run_install(src, work, env_extra={"LISSOM_YES": "1"})
+
+    # Seed .opencode with lissom files (simulate a prior OpenCode installation)
+    (work / ".opencode" / "agents").mkdir(parents=True)
+    (work / ".opencode" / "agents" / "lissom-researcher.md").write_text(
+        "---\nname: lissom-researcher\nversion: 2026-01-01T00:00:00\ndescription: fixture\n---\nbody\n"
+    )
+
+    # Reinstall to .claude (same target) — should NOT warn about .opencode
+    result = run_install(src, work, env_extra={"LISSOM_TARGET": ".claude"})
+
+    assert result.returncode == 0
+    assert "Found existing installation in .opencode/" not in result.stdout
+
+
 def test_upgrade(tmp_path):
     """T3: Source newer than installed overwrites silently without a prompt."""
     src, work = tmp_path / "src", tmp_path / "work"
@@ -466,4 +488,60 @@ def test_install_opencode_body_rewrite(tmp_path):
     assert "`AskUserQuestion`" not in custom
 
 
+# Regression tests: ui.sh prompt functions must not leak prompt text to stdout
+# when called via command substitution $(...).
+
+def test_prompt_target_directory_stdout_clean(tmp_path):
+    """T1 regression: prompt_target_directory outputs only the target name to stdout."""
+    for target in (".claude", ".opencode"):
+        result = subprocess.run(
+            ["bash", "-c", f"""
+                source scripts/lib/ui.sh
+                LISSOM_TARGET={target} prompt_target_directory
+            """],
+            capture_output=True, text=True,
+            cwd=REPO_ROOT,
+        )
+        assert result.returncode == 0
+        lines = result.stdout.strip().splitlines()
+        assert len(lines) == 1, (
+            f"Expected 1 line of stdout (the target name), got {len(lines)}: {lines}\n"
+            f"stderr: {result.stderr}"
+        )
+        assert lines[0] == target, f"stdout should be '{target}', got: {lines[0]!r}"
+
+
+def test_prompt_model_preference_stdout_clean(tmp_path):
+    """Regression: prompt_model_preference outputs only 'true'/'false' to stdout."""
+    # LISSOM_NO=1 path — outputs "false"
+    result = subprocess.run(
+        ["bash", "-c", "source scripts/lib/ui.sh && LISSOM_NO=1 prompt_model_preference"],
+        capture_output=True, text=True,
+        cwd=REPO_ROOT,
+    )
+    assert result.returncode == 0
+    lines = result.stdout.strip().splitlines()
+    assert len(lines) == 1, (
+        f"Expected 1 line of stdout ('false'), got {len(lines)}: {lines}\n"
+        f"stderr: {result.stderr}"
+    )
+    assert lines[0] == "false", f"stdout should be 'false', got: {lines[0]!r}"
+
+
+def test_install_target_directory_clean(tmp_path):
+    """Install creates the correct target directory without prompt text leakage in path."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # LISSOM_TARGET env overrides the interactive prompt entirely,
+    # ensuring no prompt text gets captured in INSTALL_TARGET
+    for target in (".claude", ".opencode"):
+        result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": target})
+
+        assert result.returncode == 0, f"install.sh failed with {target}: {result.stderr}"
+        assert (work / target).is_dir(), (
+            f"Expected directory {target} to exist. "
+            f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        )
 
