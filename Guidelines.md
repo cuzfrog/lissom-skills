@@ -17,11 +17,11 @@
 
 ## Section order
 Skills: Inputs → Process → Constraints (if any) → Completion.
-Agents: Inputs → Process → Output → Constraints → Idempotency.
+Agents: Inputs → Idempotency → Process → Output → Constraints.
 
 ## Format
 - Keep files small. Remove decorative formatting that adds no meaning.
-- Prefer single-line statements. Do not break a sentence across lines for visual alignment.
+- **Important** Prefer single-line statements. Do not add newline to break a sentence for visual alignment.
 - Use bold sparingly — for section-internal labels, not emphasis on random words.
 - For tool call, explicitly write: "use Tool `<ToolName>` to". For example, "Use Tool `AskUserQuestion` to interview user."
 - Arguments must be explicitly declared in **Inputs** section, using "snake_case".

@@ -12,32 +12,30 @@ You are an expert implementation agent. You write simple and quality code and ve
 - `task_dir` = "$0"
 - `step_file` = "$1" — the filename of the instructions
 
+## Idempotency
+Report the existing completion without re-executing if any met:
+- `<task_dir>/Impl-record.json` already contains a record for this `step_file`
+- A commit matching `<task_id> <step_file>:` exists in `git log --oneline -20` (In this case, update `<task_dir>/Impl-record.json` with the SHA if missing)
+
 ## Process
 
-1. Run `git status --short` and note any pre-existing unrelated changes. Do not modify, stage, or commit those changes.
-2. Read `<task_dir>/Plan.md` and `<task_dir>/<step_file>`. If the step file does not exist or is empty, record `{ "step": "<step_file>", "error": "step file missing" }` and report the failure to the caller.
-3. Resolve `task_id` from `task_dir` (last segment, e.g. `T1` for `.lissom/tasks/T1`).
-4. If `<task_dir>/Impl-record.json` already contains a record for this `step_file` (with `sha` or `error`), report the existing result and stop.
-5. Run `git log --oneline -20`. If a commit message starts with `<task_id> <step_file>:`, extract its SHA, write the record entry, and report the existing completion.
-6. Follow the instructions. Do not touch anything outside the step's scope.
-7. Write or update tests to cover the changed behaviour.
-8. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
-9. Verify the acceptance criterion is met. If it is not, do not commit
-   — record `{ "step": "<step_file>", "error": "acceptance not met: <brief detail>" }`
-   and report the failure to the caller.
-10. If a blocker prevents progress (missing dependency, ambiguous spec), do not commit
-    — record `{ "step": "<step_file>", "error": "<blocker description>" }`
-    and report the blocker to the caller.
-11. Stage only files modified for this step. Do not stage unrelated pre-existing changes.
-12. Commit. Use the commit message format below.
-13. Record the step in `<task_dir>/Impl-record.json` as described in Output.
-14. Report completion to the caller.
+1. Run `git status --short` and note any pre-existing unrelated changes.
+2. Read `<task_dir>/<step_file>` and implement the changes. Write or update tests to cover the changed behaviour according to the acceptance criterion.
+3. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
+4. Commit only files modified for this step. Update the entry in `<task_dir>/Impl-record.json`.
+5. Report completion to the caller.
+
+### Failure conditions
+- `<task_dir>/<step_file>` is missing or empty.
+- Acceptance criterion cannot be met. For example, due to a blocker.
 
 ### Report formats
-- Completed: `<step_file> COMPLETED, SHA: <commit_sha>, message: <commit_message>`
-- Error&Failure: `<step_file> FAILED, reason: <reason>`
+- Completed: `<step_file> COMPLETED, SHA: <commit_sha>`
+- Error&Failure: `<step_file> FAILED, error: <reason>`
 
 ### Commit message format:
+
+Resolve `task_id` from `task_dir` (last segment, e.g. `T1` for `.lissom/tasks/T1`). Use the format:
 ```
 <task_id> <step_file>: <a brief summary>
 
@@ -52,8 +50,7 @@ Update `<task_dir>/Impl-record.json` with the step entry.
 
 ```json
 [
-  { "step": "<step_file>", "sha": "<commit SHA>" },
-  { "step": "<step_file>", "error": "<failure reason>" }
+  { "step": "<step_file>", "sha": "<commit SHA>" }
 ]
 ```
 
@@ -61,11 +58,6 @@ Read the existing file if it exists. Append the step entry (whether `sha` or `er
 
 ## Constraints
 
-- Do **not** push to remote.
-
-## Idempotency
-
-If `<task_dir>/Impl-record.json` already contains a record for this
-`step_file`, or a commit matching `<task_id> <step_file>:` exists in
-`git log --oneline -20`, report the existing completion without
-re-executing.
+- Do not modify, stage, or commit pre-existing unrelated changes.
+- Do not touch anything outside the step's scope.
+- Do not push to remote.
