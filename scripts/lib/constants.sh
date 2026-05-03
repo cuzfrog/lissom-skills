@@ -32,7 +32,7 @@ get_opencode_model() {
         lissom-planner) echo "opencode-go/deepseek-v4-pro" ;;
         lissom-researcher) echo "opencode-go/deepseek-v4-pro" ;;
         lissom-reviewer) echo "opencode-go/qwen3.6-plus" ;;
-        lissom-specs-reviewer) echo "opencode-go/qwen3.6-plus" ;;
+        lissom-specs-reviewer) echo "opencode-go/deepseek-v4-flash" ;;
         *) echo "opencode-go/qwen3.6-plus" ;;
     esac
 }

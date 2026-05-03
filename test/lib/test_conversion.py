@@ -325,3 +325,75 @@ body"
         # Verify ordering
         assert name_idx < desc_idx < version_idx < mode_idx < temp_idx < perm_idx
 
+
+class TestConvertAgentFile:
+    """convert_agent_file() wrapper — end-to-end agent file conversion."""
+
+    def test_full_conversion_without_model(self, script_dir: Path):
+        """Agent frontmatter and body are both converted."""
+        bash_code = f"""
+        source "{script_dir}/scripts/lib/constants.sh"
+        source "{script_dir}/scripts/lib/conversion.sh"
+        content="---
+name: test-agent
+version: 2026-01-01T00:00:00Z
+description: A test agent
+tools: Bash, Read, AskUserQuestion
+---
+Use tool \`Bash\` and \`Read\` to work.
+Ask the user with \`AskUserQuestion\` when needed.
+"
+        convert_agent_file "$content" "test-agent" "false"
+        """
+        result = subprocess.run(["bash", "-c", bash_code], capture_output=True, text=True)
+        assert result.returncode == 0
+        out = result.stdout
+
+        # Frontmatter converted
+        assert "name: test-agent" in out
+        assert "mode: subagent" in out
+        assert "temperature: 0.1" in out
+        assert "permission:" in out
+        assert "bash: allow" in out
+        assert "read: allow" in out
+        assert "question: allow" in out
+        assert "tools:" not in out.split("---")[1]  # removed from frontmatter
+
+        # Model not included
+        assert "model:" not in out.split("---")[1]
+
+        # Body tool names rewritten
+        assert "`bash`" in out
+        assert "`read`" in out
+        assert "`question`" in out
+        assert "`Bash`" not in out
+        assert "`AskUserQuestion`" not in out
+
+    def test_full_conversion_with_model(self, script_dir: Path):
+        """Agent frontmatter and body are converted; model field included."""
+        bash_code = f"""
+        source "{script_dir}/scripts/lib/constants.sh"
+        source "{script_dir}/scripts/lib/conversion.sh"
+        content="---
+name: lissom-researcher
+version: 2026-01-01T00:00:00Z
+description: Research agent
+tools: Read, WebFetch
+---
+Research with \`Read\` and \`WebFetch\`.
+"
+        convert_agent_file "$content" "lissom-researcher" "true"
+        """
+        result = subprocess.run(["bash", "-c", bash_code], capture_output=True, text=True)
+        assert result.returncode == 0
+        out = result.stdout
+
+        # Model field present in frontmatter
+        assert "model: opencode-go/deepseek-v4-pro" in out
+
+        # Body tool names rewritten
+        assert "`read`" in out
+        assert "`webfetch`" in out
+        assert "`WebFetch`" not in out
+        assert "`Read`" not in out
+
