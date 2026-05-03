@@ -21,19 +21,27 @@ gemini_format_agent_frontmatter() {
     local model_override="${4:-}"
 
     local fmt=0 fm_end=0 ln=0
-    local name_f="" desc_f="" ver_f="" tools_f=""
+    local name_f="" desc_f="" tools_f=""
     local line
+
+    # Extract version comment from first line (before frontmatter)
+    local version_comment=""
+    local first_line version_regex
+    IFS= read -r first_line <<< "$content"
+    version_regex='^<!--[[:space:]]*version:[[:space:]]*(.+)[[:space:]]*-->$'
+    if [[ "$first_line" =~ $version_regex ]]; then
+        version_comment="$first_line"
+    fi
 
     while IFS= read -r line; do
         ln=$((ln + 1))
         if [[ "$line" == "---" ]]; then
-            if [[ $fmt -eq 0 ]]; then fmt=1; echo "$line"
+            if [[ $fmt -eq 0 ]]; then fmt=1  # echoed later with comment
             else fm_end=$ln; break
             fi
         elif [[ $fmt -eq 1 ]]; then
             if   [[ "$line" =~ ^name:[[:space:]]*(.*)$ ]];        then name_f="name: ${BASH_REMATCH[1]}"
             elif [[ "$line" =~ ^description:[[:space:]]*(.*)$ ]]; then desc_f="description: ${BASH_REMATCH[1]}"
-            elif [[ "$line" =~ ^version:[[:space:]]*(.*)$ ]];     then ver_f="version: ${BASH_REMATCH[1]}"
             elif [[ "$line" =~ ^tools:[[:space:]]*(.*)$ ]];       then tools_f="${BASH_REMATCH[1]}"
             fi
         fi
@@ -44,12 +52,14 @@ gemini_format_agent_frontmatter() {
         return 1
     fi
 
-    if [[ -z "$name_f" ]] || [[ -z "$desc_f" ]] || [[ -z "$ver_f" ]]; then
-        echo "Error: Missing required frontmatter fields (name, version, description)" >&2
+    if [[ -z "$name_f" ]] || [[ -z "$desc_f" ]]; then
+        echo "Error: Missing required frontmatter fields (name, description)" >&2
         return 1
     fi
 
-    echo "$name_f"; echo "$desc_f"; echo "$ver_f"
+    [[ -n "$version_comment" ]] && echo "$version_comment"
+    echo "---"
+    echo "$name_f"; echo "$desc_f"
 
     # Always emit temperature: 0.1
     echo "temperature: 0.1"

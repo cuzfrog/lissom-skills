@@ -38,13 +38,13 @@ class TestGeminiFormatAgentFrontmatter:
     """Test gemini_format_agent_frontmatter function"""
 
     def test_preserves_name_version_description(self, script_dir: Path):
-        """Name, version, and description fields are preserved"""
+        """Name and description are preserved; version is extracted from comment"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test agent
 tools: Read, Write
 ---"
@@ -56,9 +56,13 @@ tools: Read, Write
             text=True,
         )
         assert result.returncode == 0
+        # Version comment appears before opening ---
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in result.stdout
         assert "name: test-agent" in result.stdout
-        assert "version: 2026-01-01T00:00:00Z" in result.stdout
         assert "description: Test agent" in result.stdout
+        # No version: line in YAML frontmatter
+        fm_section = result.stdout.split("---")[1]
+        assert "version:" not in fm_section
 
     def test_includes_model_when_requested(self, script_dir: Path):
         """Model field is included when include_model=true"""
@@ -204,13 +208,13 @@ tools: Bash, NonExistentTool, Read
         assert "NonExistentTool" not in fm_section
 
     def test_field_ordering(self, script_dir: Path):
-        """Fields appear in correct order: name, description, version, temperature, model, tools"""
+        """Fields appear in correct order: version comment, ---, name, description, temperature, model, tools"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test description
 tools: Bash, Read
 ---"
@@ -222,19 +226,28 @@ tools: Bash, Read
             text=True,
         )
         assert result.returncode == 0
-        fm_section = result.stdout.split("---")[1].strip().split("\n")
+        lines = result.stdout.strip().split("\n")
 
+        # First line should be the version comment
+        assert lines[0] == "<!-- version: 2026-01-01T00:00:00Z -->"
+        # Second line should be opening ---
+        assert lines[1] == "---"
+
+        # After the opening ---, check field order
+        fm_lines = [line for line in lines[2:] if line.strip() and not line.startswith("---") or line == "---"]
+
+        # Re-split: everything between first --- and last --- is the YAML section
+        fm_section = result.stdout.split("---")[1].strip().split("\n")
         fm_lines = [line for line in fm_section if line.strip()]
 
         name_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("name:")), -1)
         desc_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("description:")), -1)
-        version_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("version:")), -1)
         temp_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("temperature:")), -1)
         model_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("model:")), -1)
         tools_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("tools:")), -1)
 
-        assert name_idx < desc_idx < version_idx
-        assert version_idx < temp_idx
+        assert name_idx < desc_idx
+        assert desc_idx < temp_idx
         assert temp_idx < model_idx
         assert model_idx < tools_idx
 
@@ -383,8 +396,8 @@ tools: Read
         assert result.returncode != 0
         assert "Missing required frontmatter fields" in result.stderr
 
-    def test_rejects_missing_version(self, script_dir: Path):
-        """Missing version field produces error on stderr"""
+    def test_missing_version_is_not_error(self, script_dir: Path):
+        """Version is no longer required; missing version is not an error"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
@@ -399,8 +412,9 @@ tools: Read
             ["bash", "-c", bash_code],
             capture_output=True, text=True
         )
-        assert result.returncode != 0
-        assert "Missing required frontmatter fields" in result.stderr
+        assert result.returncode == 0
+        assert "name: test-agent" in result.stdout
+        assert "version:" not in result.stdout.split("---")[1]
 
     def test_tool_name_mapping(self, script_dir: Path):
         """Each Claude tool name maps to its Gemini equivalent in frontmatter"""
@@ -845,9 +859,9 @@ class TestGeminiFormatAgentFile:
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
-        content="---
+        content="<!-- version: 2026-01-01T00:00:00Z -->
+---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: A test agent
 tools: Bash, Read, AskUserQuestion
 ---
@@ -860,15 +874,19 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         assert result.returncode == 0
         out = result.stdout
 
+        # Version comment should appear before ---
+        assert "<!-- version: 2026-01-01T00:00:00Z -->" in out
         assert "name: test-agent" in out
-        assert "version: 2026-01-01T00:00:00Z" in out
         assert "description: A test agent" in out
 
         # Verify model is absent when not requested
         assert "model:" not in out.split("---")[1]
 
-        # Tools as YAML list — AskUserQuestion included for Gemini
+        # No version: line in YAML frontmatter
         fm_section = out.split("---")[1]
+        assert "version:" not in fm_section
+
+        # Tools as YAML list — AskUserQuestion included for Gemini
         assert "tools:" in fm_section
         assert "  - run_shell_command" in fm_section
         assert "  - read_file" in fm_section
