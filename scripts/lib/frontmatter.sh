@@ -18,7 +18,32 @@ _get_frontmatter_field() {
     echo ""
 }
 
-get_version() { _get_frontmatter_field "$1" "version"; }
+# Extract a named field from an HTML comment on line 1 of the file.
+# Format: <!-- key: value -->
+# Returns the captured value, or empty string if not found.
+_get_comment_field() {
+    local file="$1" field="$2"
+    local first_line
+    read -r first_line < "$file" || true
+    if [[ "$first_line" =~ ^\<\!--[[:space:]]*$field:[[:space:]]*(.+)[[:space:]]*--\>$ ]]; then
+        echo "${BASH_REMATCH[1]}"
+        return
+    fi
+    echo ""
+}
+
+get_version() {
+    local file="$1"
+    # Try comment format first (new source files)
+    local comment_ver
+    comment_ver=$(_get_comment_field "$file" "version")
+    if [[ -n "$comment_ver" ]]; then
+        echo "$comment_ver"
+        return
+    fi
+    # Fall back to YAML frontmatter (backward-compat for old destination files)
+    _get_frontmatter_field "$file" "version"
+}
 get_model()   { _get_frontmatter_field "$1" "model"; }
 
 # Validate YAML frontmatter structure.
