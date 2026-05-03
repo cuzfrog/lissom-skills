@@ -187,6 +187,22 @@ def make_src_tree(
 
 
 
+def seed_lissom_files(work: Path, target: str = ".claude") -> None:
+    """Create lissom-skills files directly without running install."""
+    for agent in AGENTS:
+        agent_dir = work / target / "agents"
+        agent_dir.mkdir(parents=True, exist_ok=True)
+        (agent_dir / f"{agent}.md").write_text(
+            f"---\nname: {agent}\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+        )
+    for skill in SKILLS:
+        skill_dir = work / target / "skills" / skill
+        skill_dir.mkdir(parents=True, exist_ok=True)
+        (skill_dir / "SKILL.md").write_text(
+            f"---\nname: {skill}\ndescription: fixture\n---\nbody\n"
+        )
+
+
 def make_malformed_agent(path: Path, agent_name: str) -> None:
     """
     Create an agent file with malformed YAML frontmatter (missing closing ---).
