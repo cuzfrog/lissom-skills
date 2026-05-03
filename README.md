@@ -22,9 +22,8 @@
 - I have an idea, help me refine the specs and automate the implementation.
 
 #### When not to use?
-- Trivial tasks.
-- Exploratory tasks.
-- Parallel processing.
+- Trivial tasks - do it in one agent.
+- Exploratory tasks - use `/explore`.
 
 ### Basic Workflow
 ```
@@ -47,8 +46,8 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 Supported:
 - `.claude/` Claude Code and compatible agents.
 - `.opencode/` OpenCode.
-- `.qwen/` Qwen Code.
-- `.gemini/` Gemini CLI.
+- `.qwen/` Qwen Code (soon).
+- `.gemini/` Gemini CLI (soon).
 
 ## Here We Go!
 **Run** `/lissom-auto <task_id>` - get interviewed and wait for the job done!
