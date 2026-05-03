@@ -1,43 +1,47 @@
 #!/usr/bin/env bash
 # UI interaction functions for prompting users.
 
-# Prompt user to choose among .claude/, .opencode/, and .qwen/ target directories
-# Returns: target directory name (".claude", ".opencode", or ".qwen")
-# Respects LISSOM_TARGET (explicit target selection)
-# Respects LISSOM_YES=1 (defaults to ".claude" without prompting)
 prompt_target_directory() {
-    # If LISSOM_TARGET is explicitly set, use it
-    if [[ -n "${LISSOM_TARGET:-}" ]]; then
-        echo "$LISSOM_TARGET"
-        return 0
+    [[ -n "${LISSOM_TARGET:-}" ]] && { echo "$LISSOM_TARGET"; return 0; }
+    [[ "${LISSOM_YES:-}" == "1" ]] && { echo ".claude"; return 0; }
+
+    # When stdin is a terminal, use select interactively
+    if [[ -t 0 ]]; then
+        echo "Select installation target:" >&2
+        select _ in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)" ".qwen (Qwen Code)" ".gemini (Gemini CLI)"; do
+            case "$REPLY" in
+                1) echo ".claude"; return 0 ;;
+                2) echo ".opencode"; return 0 ;;
+                3) echo ".qwen"; return 0 ;;
+                4) echo ".gemini"; return 0 ;;
+                *) echo "Invalid choice. Try again." >&2 ;;
+            esac
+        done
     fi
-    
-    # If LISSOM_YES=1, default to .claude/ (backward compatible)
-    if [[ "${LISSOM_YES:-}" == "1" ]]; then
-        echo ".claude"
-        return 0
-    fi
-    
-    # Check if stdin is a TTY (interactive mode)
-    if [[ ! -t 0 ]]; then
-        # Non-interactive (curl-pipe install) - default to .claude/
-        echo ".claude"
-        return 0
-    fi
-    
-    echo "Select installation target:" >&2
-    local choice=".claude"
-    select choice in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)" ".qwen (Qwen Code)" ".gemini (Gemini CLI)"; do
-        case "$REPLY" in
-            1) choice=".claude"; break ;;
-            2) choice=".opencode"; break ;;
-            3) choice=".qwen"; break ;;
-            4) choice=".gemini"; break ;;
-            *) echo "Invalid choice. Try again." ;;
+
+    # When stdin is piped (e.g. curl | bash) but a terminal is available,
+    # read from /dev/tty to show the interactive menu.
+    if [[ -t 1 ]] && exec {_ui_tty_fd}</dev/tty 2>/dev/null; then
+        echo "Select installation target:" >&2
+        echo "1) .claude (Claude Code and most CLIs)" >&2
+        echo "2) .opencode (Opencode)" >&2
+        echo "3) .qwen (Qwen Code)" >&2
+        echo "4) .gemini (Gemini CLI)" >&2
+        echo -n "Choice [1]: " >&2
+        read -r _ui_reply <&${_ui_tty_fd}
+        exec {_ui_tty_fd}<&-
+        case "${_ui_reply:-1}" in
+            1|"") echo ".claude" ;;
+            2) echo ".opencode" ;;
+            3) echo ".qwen" ;;
+            4) echo ".gemini" ;;
+            *) echo "Invalid choice, defaulting to .claude." >&2; echo ".claude" ;;
         esac
-    done
-    
-    echo "$choice"
+        return 0
+    fi
+
+    # No TTY available at all (e.g. CI) — safe default
+    echo ".claude"
 }
 
 # Prompt user whether to set default models for agents.
