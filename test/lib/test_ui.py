@@ -26,6 +26,15 @@ source "$SCRIPT_DIR/scripts/lib/ui.sh"
     )
 
 
+def _write_input_after_delay(master_fd: int, input_str: str) -> None:
+    """Write input to a PTY master after a brief delay to let the child process start."""
+    time.sleep(0.3)
+    try:
+        os.write(master_fd, input_str.encode())
+    except OSError:
+        pass  # Process may have exited already
+
+
 def run_ui_function_with_pty(script_dir: Path, bash_body: str, input_str: str = "") -> subprocess.CompletedProcess:
     """Run bash code with ui.sh loaded in a pseudo-terminal for interactive testing."""
     bash_code = f"""#!/usr/bin/env bash
@@ -44,8 +53,9 @@ source "$SCRIPT_DIR/scripts/lib/ui.sh"
     os.close(slave_fd)
 
     if input_str:
-        os.write(master_fd, input_str.encode())
-        time.sleep(0.05)
+        import threading
+        writer = threading.Thread(target=_write_input_after_delay, args=(master_fd, input_str), daemon=True)
+        writer.start()
 
     stdout_bytes, stderr_bytes = proc.communicate(timeout=5)
     os.close(master_fd)
