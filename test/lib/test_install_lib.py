@@ -70,6 +70,46 @@ class TestGetVersion:
         assert r.returncode == 0
         assert r.stdout.strip() == ""
 
+    def test_comment_format_version(self, tmp_path, script_dir):
+        """Extracts version from HTML comment on line 1."""
+        f = tmp_path / "test.md"
+        f.write_text("<!-- version: 2026-06-01T12:00:00Z -->\n---\nname: test\ndescription: no version in YAML\n---\nbody\n")
+        r = run_install_function(script_dir, f"get_version '{f}'")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "2026-06-01T12:00:00Z"
+
+    def test_comment_format_takes_precedence(self, tmp_path, script_dir):
+        """Comment version is used even when YAML also has version field."""
+        f = tmp_path / "test.md"
+        f.write_text("<!-- version: 2026-06-01T12:00:00Z -->\n---\nname: test\nversion: 2025-01-01T00:00:00\n---\nbody\n")
+        r = run_install_function(script_dir, f"get_version '{f}'")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "2026-06-01T12:00:00Z"
+
+    def test_fallback_to_yaml_version(self, tmp_path, script_dir):
+        """Fallback to YAML version when no comment present (backward compat)."""
+        f = tmp_path / "test.md"
+        f.write_text("---\nname: test\nversion: 2025-01-01T00:00:00\n---\nbody\n")
+        r = run_install_function(script_dir, f"get_version '{f}'")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "2025-01-01T00:00:00"
+
+    def test_comment_without_version_field(self, tmp_path, script_dir):
+        """Comment with different field name does not match version."""
+        f = tmp_path / "test.md"
+        f.write_text("<!-- model: sonnet -->\n---\nname: test\n---\nbody\n")
+        r = run_install_function(script_dir, f"get_version '{f}'")
+        assert r.returncode == 0
+        assert r.stdout.strip() == ""
+
+    def test_comment_with_extra_whitespace(self, tmp_path, script_dir):
+        """Handles extra whitespace around comment fields."""
+        f = tmp_path / "test.md"
+        f.write_text("<!--  version:  2026-06-01T12:00:00Z  -->\n---\nname: test\n---\nbody\n")
+        r = run_install_function(script_dir, f"get_version '{f}'")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "2026-06-01T12:00:00Z"
+
 
 class TestGetModel:
     """get_model() extracts model from YAML frontmatter."""
@@ -323,6 +363,14 @@ class TestGetFrontmatterField:
         assert r.returncode == 0
         assert r.stdout.strip() == "sonnet"
 
+    def test_comment_field_extraction(self, tmp_path, script_dir):
+        """_get_comment_field extracts named field from comment on line 1."""
+        f = tmp_path / "test.md"
+        f.write_text("<!-- model: haiku -->\n---\nname: test\n---\nbody\n")
+        r = run_install_function(script_dir, f"_get_comment_field '{f}' model")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "haiku"
+
 
 class TestHasLissomInstallation:
     """has_lissom_installation() checks whether a target dir has lissom agent files."""
@@ -452,7 +500,7 @@ class TestConvertAgentGemini:
         src = tmp_path / "src.md"
         dest = tmp_path / "dest.md"
         src.write_text(
-            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+            "<!-- version: 2026-01-01 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
         )
         r = run_install_function(script_dir, f"""
 source "$SCRIPT_DIR/scripts/lib/gemini.sh"
@@ -461,6 +509,7 @@ cat '{dest}'
 """)
         assert r.returncode == 0
         out = r.stdout
+        assert "<!-- version: 2026-01-01" in out
         assert "name: lissom-researcher" in out
         assert "description: fixture" in out
         assert "temperature: 0.1" in out
@@ -474,7 +523,7 @@ cat '{dest}'
         src = tmp_path / "src.md"
         dest = tmp_path / "dest.md"
         src.write_text(
-            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+            "<!-- version: 2026-01-01 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
         )
         r = run_install_function(script_dir, f"""
 source "$SCRIPT_DIR/scripts/lib/gemini.sh"
@@ -482,13 +531,15 @@ _convert_agent_gemini '{src}' '{dest}' "true" "gemini-3-pro-preview"
 cat '{dest}'
 """)
         assert r.returncode == 0
-        assert "model: gemini-3-pro-preview" in r.stdout
+        out = r.stdout
+        assert "<!-- version: 2026-01-01" in out
+        assert "model: gemini-3-pro-preview" in out
 
     def test_valid_frontmatter_without_model(self, tmp_path, script_dir):
         src = tmp_path / "src.md"
         dest = tmp_path / "dest.md"
         src.write_text(
-            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
+            "<!-- version: 2026-01-01 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: Bash, Read\n---\nbody\n"
         )
         r = run_install_function(script_dir, f"""
 source "$SCRIPT_DIR/scripts/lib/gemini.sh"
@@ -496,7 +547,9 @@ _convert_agent_gemini '{src}' '{dest}' "false" ""
 cat '{dest}'
 """)
         assert r.returncode == 0
-        assert "model:" not in r.stdout
+        out = r.stdout
+        assert "<!-- version: 2026-01-01" in out
+        assert "model:" not in out
 
     def test_malformed_frontmatter_returns_error(self, tmp_path, script_dir):
         src = tmp_path / "src.md"
@@ -515,7 +568,7 @@ echo "EXIT:$?"
         src = tmp_path / "src.md"
         dest = tmp_path / "dest.md"
         src.write_text(
-            "---\nname: lissom-researcher\nversion: 2026-01-01\ndescription: fixture\ntools: Bash\n---\n"
+            "<!-- version: 2026-01-01 -->\n---\nname: lissom-researcher\ndescription: fixture\ntools: Bash\n---\n"
             "Use tool `Bash` and `Read` and `AskUserQuestion` for this task.\n"
         )
         r = run_install_function(script_dir, f"""
@@ -525,6 +578,7 @@ cat '{dest}'
 """)
         assert r.returncode == 0
         out = r.stdout
+        assert "<!-- version: 2026-01-01" in out
         assert "`run_shell_command`" in out
         assert "`read_file`" in out
         assert "`ask_user`" in out
@@ -540,7 +594,7 @@ class TestConvertSkillGemini:
         src = tmp_path / "src.md"
         dest = tmp_path / "dest.md"
         src.write_text(
-            "---\nname: lissom-auto\nversion: 2026-01-01\ndescription: fixture\n"
+            "<!-- version: 2026-01-01 -->\n---\nname: lissom-auto\ndescription: fixture\n"
             "argument-hint: <task_dir>\n---\nbody\n"
         )
         r = run_install_function(script_dir, f"""
@@ -560,7 +614,7 @@ cat '{dest}'
         src = tmp_path / "src.md"
         dest = tmp_path / "dest.md"
         src.write_text(
-            "---\nname: lissom-auto\nversion: 2026-01-01\ndescription: fixture\n---\n"
+            "<!-- version: 2026-01-01 -->\n---\nname: lissom-auto\ndescription: fixture\n---\n"
             "Use tool `Bash` to execute commands. Use `Read` to inspect files.\n"
             "Also try `Grep` for searching and `WebSearch` for web.\n"
         )
