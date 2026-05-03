@@ -8,8 +8,8 @@
 
 ```
 ┌─┐
-│L│░ LISSOM  —  シンプルで信頼性の高い Claude Code スキル & エージェント
-└─┘  SKILLS     日々の開発自動化とコンテキスト保護のため。
+│L│░ LISSOM  —  Simple, reliable Claude Code skills & agents
+└─┘  SKILLS     for daily dev automation and context protection.
 ```
 
 #### なぜ Lissom なのか？ GSD や SuperPower との違いは？
@@ -27,14 +27,14 @@
 
 ### 基本ワークフロー
 ```
-           ┌─ インタビュー ─┐
-           │                /
- research ─┘ auto ──►      +   ──► plan ──► impl ──► review ──► done
-  Specs.md    Research.md  /    Plan.md         Review.md      │
-   ▲                       /                                   │ 重大?
-   │                       └────── 修正ループ（最大 3 回） ◄───┘
-   │                                            │
-   └────────────────── 修正ループ上限到達 ───────┘
+           ┌─ interview ─┐
+           │             /
+ research ─┘ auto ──►   +   ──► plan ──► impl ──► review ──► done
+  Specs.md    Research.md /    Plan.md         Review.md     │
+   ▲                     /                                   │ critical?
+   │                     └──────── fix cycle (max 3)  ◄──────┘
+   │                                          │
+   └──────────────── fix cycles exhausted ────┘
 ```
 
 ## インストール
