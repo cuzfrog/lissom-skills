@@ -1,9 +1,10 @@
 # Lissom Skills
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/cuzfrog/lissom-skills?style=for-the-badge)](https://github.com/cuzfrog/lissom-skills/stargazers)
-[![CI](https://img.shields.io/github/actions/workflow/status/cuzfrog/lissom-skills/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/cuzfrog/lissom-skills/actions/workflows/ci.yml)
-[![GitHub repo size](https://img.shields.io/github/repo-size/cuzfrog/lissom-skills?style=for-the-badge)](https://github.com/cuzfrog/lissom-skills)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/cuzfrog/lissom-skills)](https://github.com/cuzfrog/lissom-skills/stargazers)
+[![GitHub last commit](https://img.shields.io/github/last-commit/cuzfrog/lissom-skills/main)](https://github.com/cuzfrog/lissom-skills/commits/main)
+[![GitHub repo size](https://img.shields.io/github/repo-size/cuzfrog/lissom-skills)](https://github.com/cuzfrog/lissom-skills)
+[![CI](https://github.com/cuzfrog/lissom-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/cuzfrog/lissom-skills/actions/workflows/ci.yml)
 
 [English](README.md) · [简体中文](README.zh.md) · **日本語**
 
