@@ -370,3 +370,76 @@ class TestHasLissomInstallation:
         r = run_install_function(script_dir, f"has_lissom_installation '{target}'; echo EXIT:$?")
         assert r.returncode == 0
         assert "EXIT:1" in r.stdout
+
+
+class TestCollectAgentModels:
+    """collect_agent_models() collects agent→model mappings from agent files."""
+
+    def test_collects_models_from_agents(self, tmp_path, script_dir):
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir()
+        (agents_dir / "lissom-researcher.md").write_text(
+            "---\nname: lissom-researcher\nversion: 1\nmodel: opus-4.6\n---\nbody\n"
+        )
+        (agents_dir / "lissom-planner.md").write_text(
+            "---\nname: lissom-planner\nversion: 1\nmodel: sonnet\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+declare -A MODELS
+collect_agent_models '{agents_dir}' MODELS
+echo "RESEARCHER:${{MODELS[lissom-researcher]}}"
+echo "PLANNER:${{MODELS[lissom-planner]}}"
+echo "COUNT:${{#MODELS[@]}}"
+""")
+        assert r.returncode == 0
+        assert "RESEARCHER:opus-4.6" in r.stdout
+        assert "PLANNER:sonnet" in r.stdout
+        assert "COUNT:2" in r.stdout
+
+    def test_excludes_agents_without_model(self, tmp_path, script_dir):
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir()
+        (agents_dir / "lissom-researcher.md").write_text(
+            "---\nname: lissom-researcher\nversion: 1\nmodel: opus-4.6\n---\nbody\n"
+        )
+        (agents_dir / "no-model.md").write_text(
+            "---\nname: no-model\nversion: 1\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+declare -A MODELS
+collect_agent_models '{agents_dir}' MODELS
+echo "COUNT:${{#MODELS[@]}}"
+echo "HAS_NO_MODEL:${{MODELS[no-model]:-absent}}"
+""")
+        assert r.returncode == 0
+        assert "COUNT:1" in r.stdout
+        assert "HAS_NO_MODEL:absent" in r.stdout
+
+    def test_returns_false_when_no_models_found(self, tmp_path, script_dir):
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir()
+        (agents_dir / "no-model.md").write_text(
+            "---\nname: no-model\nversion: 1\n---\nbody\n"
+        )
+        r = run_install_function(script_dir, f"""
+declare -A MODELS
+if collect_agent_models '{agents_dir}' MODELS; then
+    echo "FOUND:true"
+else
+    echo "FOUND:false"
+fi
+""")
+        assert r.returncode == 0
+        assert "FOUND:false" in r.stdout
+
+    def test_missing_directory_returns_false(self, tmp_path, script_dir):
+        r = run_install_function(script_dir, f"""
+declare -A MODELS
+if collect_agent_models '{tmp_path}/nonexistent' MODELS; then
+    echo "FOUND:true"   
+else
+    echo "FOUND:false"
+fi
+""")
+        assert r.returncode == 0
+        assert "FOUND:false" in r.stdout

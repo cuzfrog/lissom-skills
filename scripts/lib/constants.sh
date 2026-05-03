@@ -7,6 +7,19 @@ AGENTS=(lissom-implementer lissom-planner lissom-researcher lissom-reviewer liss
 # Skill names (lissom production skills)
 SKILLS=(lissom-auto lissom-impl lissom-plan lissom-research lissom-review)
 
+# Target directories and their format identifiers
+declare -A TARGET_CONFIG=(
+    [".claude"]="claude"
+    [".opencode"]="opencode"
+)
+declare -A TARGET_MODEL_DEFAULT=(
+    ["claude"]="true"
+    ["opencode"]="false"
+)
+
+get_target_format()  { echo "${TARGET_CONFIG[$1]}"; }
+get_model_default()  { echo "${TARGET_MODEL_DEFAULT[$1]}"; }
+
 # Map agent filename to default model value (for Claude Code).
 # Args: basename of agent file (e.g. "lissom-implementer.md")
 # Returns: model name (haiku, sonnet, opus-4.6)

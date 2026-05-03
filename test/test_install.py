@@ -393,6 +393,35 @@ def test_install_opencode_with_model(tmp_path):
     assert "mode: subagent" in researcher
 
 
+def test_opencode_reinstall_preserves_model(tmp_path):
+    """OC2b: Reinstalling to opencode preserves existing model values and shows the model table."""
+    src, work = tmp_path / "src", tmp_path / "work"
+    src.mkdir(); work.mkdir()
+    make_src_tree(src, "2026-01-01T00:00:00")
+
+    # Initial install to opencode
+    result = run_install(src, work, env_extra={"LISSOM_YES": "1", "LISSOM_TARGET": ".opencode"})
+    assert result.returncode == 0
+    researcher = (work / ".opencode" / "agents" / "lissom-researcher.md").read_text()
+    assert "model: opencode-go/deepseek-v4-pro" in researcher
+    assert "┬" in result.stdout  # table shown
+
+    # Overwrite with a custom model
+    researcher_path = work / ".opencode" / "agents" / "lissom-researcher.md"
+    content = researcher_path.read_text()
+    content = content.replace("opencode-go/deepseek-v4-pro", "my-custom-model")
+    researcher_path.write_text(content)
+
+    # Reinstall (same version) — should preserve custom model
+    result = run_install(src, work, env_extra={"LISSOM_TARGET": ".opencode"})
+
+    assert result.returncode == 0
+    researcher = (work / ".opencode" / "agents" / "lissom-researcher.md").read_text()
+    assert "my-custom-model" in researcher       # custom model preserved
+    assert "┬" in result.stdout                  # model table shown
+    assert "my-custom-model" in result.stdout    # table shows preserved model
+
+
 def test_install_opencode_without_model(tmp_path):
     """OC3: Opencode installation without model preference excludes model field."""
     src, work = tmp_path / "src", tmp_path / "work"

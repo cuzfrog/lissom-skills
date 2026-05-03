@@ -23,108 +23,114 @@ classify_file() {
     fi
 }
 
+# Resolve model inclusion for an agent file installation.
+# Sets two nameref variables:
+#   model_include  — "true" if a model field should appear in output
+#   model_value    — explicit model value to use (empty = use format default)
+# Decision:
+#   - dest exists with a model field → preserve existing (model_value = existing)
+#   - new install + add_model_field=true → include flag on, value empty (format fills default)
+#   - otherwise → no model
+resolve_agent_model() {
+    local src="$1" dest="$2" add_model_field="$3"
+    local -n _include="$4" _value="$5"
+
+    if [[ -f "$dest" ]]; then
+        local existing
+        existing=$(get_model "$dest")
+        if [[ -n "$existing" ]]; then
+            _include="true"; _value="$existing"
+        else
+            _include="false"; _value=""
+        fi
+        return
+    fi
+    if $add_model_field; then
+        _include="true"; _value=""
+    else
+        _include="false"; _value=""
+    fi
+}
+
 # Copy a file with format-specific handling and conversion.
-# Handles .claude/ (Claude Code format) and .opencode/ (Opencode format) with conversion.
+# Uses path-type dispatch (agent | skill | other) to invoke the correct strategy
+# function for the given target_format.  Adding a new format requires only
+# defining _convert_{agent,skill,other}_${format}.
 # Args: src, dest, target_format, add_model_field
 copy_with_conversion() {
     local src="$1" dest="$2" target_format="$3" add_model_field="$4"
-    local basename_dest
-    basename_dest=$(basename "$dest")
-    
-    # JSON files (user_preference_questions.json) are copied verbatim regardless of format
-    if [[ "$basename_dest" == "user_preference_questions.json" ]]; then
-        cp "$src" "$dest"
-        return 0
+
+    if [[ "$(basename "$dest")" == "user_preference_questions.json" ]]; then
+        cp "$src" "$dest"; return 0
     fi
-    
-    # For .claude/ format, use existing model-handling logic
-    if [[ "$target_format" == "claude" ]]; then
-        # Only process agent files; copy others directly
-        if [[ "$dest" != *"/agents/"*.md ]]; then
-            cp "$src" "$dest"
-            return 0
-        fi
-        
-        # Validate existing file's YAML if it exists
-        if [[ -f "$dest" ]]; then
-            if ! validate_yaml_frontmatter "$dest"; then
-                echo "Error: $dest has malformed YAML frontmatter." >&2
-                echo "Please fix or remove this file manually and re-run installation." >&2
-                return 1
-            fi
-        fi
-        
-        # If this is an upgrade (dest exists), preserve existing model field (or absence)
-        if [[ -f "$dest" ]]; then
-            local existing_model
-            existing_model=$(get_model "$dest")
-            local src_content
-            src_content=$(cat "$src")
-            
-            # If existing file has a model field, preserve it
-            if [[ -n "$existing_model" ]]; then
-                add_model_to_content "$src_content" "$existing_model" > "$dest"
-            else
-                # No model field in existing file → preserve absence
-                cp "$src" "$dest"
-            fi
-        else
-            # New file: add model field if user accepted prompt
-            if $add_model_field; then
-                local default_model
-                default_model=$(get_default_model "$basename_dest")
-                if [[ -n "$default_model" ]]; then
-                    local src_content
-                    src_content=$(cat "$src")
-                    add_model_to_content "$src_content" "$default_model" > "$dest"
-                else
-                    cp "$src" "$dest"
-                fi
-            else
-                cp "$src" "$dest"
-            fi
-        fi
-        return 0
+
+    local path_type="other"
+    local model_include model_value
+    if [[ "$dest" == *"/agents/"*.md ]]; then
+        path_type="agent"
+        resolve_agent_model "$src" "$dest" "$add_model_field" model_include model_value
+    elif [[ "$dest" == *"/skills/"*"/SKILL.md" ]]; then
+        path_type="skill"
     fi
-    
-    # For .opencode/ format, apply conversion
-    if [[ "$target_format" == "opencode" ]]; then
-        # JSON files are already handled above
-        
-        # For agent files: convert frontmatter and tool names in body
-        if [[ "$dest" == *"/agents/"*.md ]]; then
-            # Validate source frontmatter before conversion
-            if ! validate_yaml_frontmatter "$src"; then
-                echo "Error: $src has malformed YAML frontmatter." >&2
-                return 1
-            fi
-            local src_content
-            src_content=$(cat "$src")
-            # Extract agent name from filename (e.g. "lissom-researcher.md" -> "lissom-researcher")
-            local agent_name="${basename_dest%.md}"
-            # Convert and write to dest
-            convert_agent_file "$src_content" "$agent_name" "$add_model_field" > "$dest"
-            return 0
-        fi
-        
-        # For skill files: convert tool names in body but keep frontmatter
-        if [[ "$dest" == *"/skills/"*"/SKILL.md" ]]; then
-            local src_content
-            src_content=$(cat "$src")
-            # Only convert tool names in body, skill frontmatter stays unchanged
-            convert_tool_names_in_body "$src_content" > "$dest"
-            return 0
-        fi
-        
-        # For other files, copy as-is
-        cp "$src" "$dest"
-        return 0
-    fi
-    
-    # Fallback
-    cp "$src" "$dest"
-    return 0
+
+    "_convert_${path_type}_${target_format}" "$src" "$dest" "$model_include" "$model_value"
 }
+
+# ── Claude Code strategy ────────────────────────────────────────────
+
+_convert_agent_claude() {
+    local src="$1" dest="$2" model_include="$3" model_value="$4"
+
+    if [[ -f "$dest" ]] && ! validate_yaml_frontmatter "$dest"; then
+        echo "Error: $dest has malformed YAML frontmatter." >&2
+        echo "Please fix or remove this file manually and re-run installation." >&2
+        return 1
+    fi
+
+    local src_content
+    src_content=$(cat "$src")
+    if [[ -n "$model_value" ]]; then
+        add_model_to_content "$src_content" "$model_value" > "$dest"
+    elif [[ "$model_include" == "true" ]]; then
+        local default_model
+        default_model=$(get_default_model "$(basename "$dest")")
+        if [[ -n "$default_model" ]]; then
+            add_model_to_content "$src_content" "$default_model" > "$dest"
+        else
+            cp "$src" "$dest"
+        fi
+    else
+        cp "$src" "$dest"
+    fi
+}
+
+_convert_skill_claude()   { cp "$1" "$2"; }
+_convert_other_claude()   { cp "$1" "$2"; }
+
+# ── Opencode strategy ───────────────────────────────────────────────
+
+_convert_agent_opencode() {
+    local src="$1" dest="$2" model_include="$3" model_value="$4"
+
+    if ! validate_yaml_frontmatter "$src"; then
+        echo "Error: $src has malformed YAML frontmatter." >&2
+        return 1
+    fi
+
+    local src_content agent_name
+    src_content=$(cat "$src")
+    agent_name="$(basename "$dest" .md)"
+    opencode_format_agent_file "$src_content" "$agent_name" "$model_include" "$model_value" > "$dest"
+}
+
+_convert_skill_opencode() {
+    local src="$1" dest="$2"
+    local src_content
+    src_content=$(cat "$src")
+    opencode_rewrite_body_tools "$src_content" > "$dest"
+}
+
+_convert_other_opencode() { cp "$1" "$2"; }
 
 # Check whether a target directory has lissom agent files installed.
 # Returns 0 (true) if target/agents/lissom-*.md exist, 1 otherwise.
@@ -149,4 +155,23 @@ install_files() {
         fi
         INSTALLED=$((INSTALLED + 1))
     done
+}
+
+# Collect agent→model mappings from installed agent files.
+# Populates the associative array named by $2.  Returns true if at least one model found.
+# Args: agents_directory, result_assoc_array_name
+collect_agent_models() {
+    local agents_dir="$1"
+    local -n result="$2"
+    local found=false
+    local f
+    for f in "$agents_dir"/*.md; do
+        [[ -f "$f" ]] || continue
+        local model
+        model=$(get_model "$f")
+        [[ -n "$model" ]] || continue
+        result[$(basename "$f" .md)]="$model"
+        found=true
+    done
+    $found
 }

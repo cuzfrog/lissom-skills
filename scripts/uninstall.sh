@@ -5,22 +5,18 @@ set -e  # Exit on error
 # Source constants
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
+
+_rmdir_if_empty() {
+    local dir="$1"
+    [[ -d "$dir" ]] && [[ -z "$(ls -A "$dir" 2>/dev/null)" ]] && rmdir "$dir"
+}
 
 uninstall_from() {
     local TARGET="$1"
     local REMOVED=0
-    local SKIPPED=0
 
-    if [[ ! -d "$TARGET" ]]; then
-        echo "Nothing to uninstall: $TARGET does not exist."
-        return
-    fi
-
-    echo "Uninstalling from $TARGET..."
-
-    # Remove agents - scan the agents directory for any files that were installed by lissom-skills
-    # This includes production (lissom-*) agent names
     if [[ -d "$TARGET/agents" ]]; then
         for agent_file in "$TARGET/agents"/*.md; do
             if [[ -f "$agent_file" ]]; then
@@ -32,64 +28,41 @@ uninstall_from() {
                 fi
             fi
         done
-        
-        # Remove empty agents directory
-        if [[ -d "$TARGET/agents" ]] && [[ -z "$(ls -A "$TARGET/agents")" ]]; then
-            rmdir "$TARGET/agents"
-        fi
+        _rmdir_if_empty "$TARGET/agents"
     fi
 
-    # Remove skills - scan the skills directory for any subdirectories that were installed by lissom-skills
-    # This includes production (lissom-*) skill names
     if [[ -d "$TARGET/skills" ]]; then
         for skill_dir in "$TARGET/skills"/*/; do
             if [[ -d "$skill_dir" ]]; then
                 local skill_name=$(basename "$skill_dir")
                 if [[ "$skill_name" =~ ^lissom- ]]; then
-                    # Remove SKILL.md file
                     if [[ -f "$skill_dir/SKILL.md" ]]; then
                         rm "$skill_dir/SKILL.md"
                         echo "  Removed $skill_dir/SKILL.md"
                         REMOVED=$((REMOVED + 1))
                     fi
-                    
-                    # Remove user_preference_questions.json if present
                     if [[ -f "$skill_dir/user_preference_questions.json" ]]; then
                         rm "$skill_dir/user_preference_questions.json"
                         echo "  Removed $skill_dir/user_preference_questions.json"
                         REMOVED=$((REMOVED + 1))
                     fi
-                    
-                    # Remove empty skill directory
-                    if [[ -z "$(ls -A "$skill_dir")" ]]; then
-                        rmdir "$skill_dir"
-                    fi
+                    _rmdir_if_empty "$skill_dir"
                 fi
             fi
         done
-        
-        # Remove empty skills directory
-        if [[ -d "$TARGET/skills" ]] && [[ -z "$(ls -A "$TARGET/skills")" ]]; then
-            rmdir "$TARGET/skills"
-        fi
+        _rmdir_if_empty "$TARGET/skills"
     fi
 
-    # Remove empty target directory
-    if [[ -d "$TARGET" ]] && [[ -z "$(ls -A "$TARGET")" ]]; then
-        rmdir "$TARGET"
+    if _rmdir_if_empty "$TARGET"; then
         echo "  Removed empty directory $TARGET"
     fi
 
-    echo ""
     echo "Removed $REMOVED files from $TARGET"
 }
 
-# Parse arguments
-if [[ -n "$1" ]]; then
-    echo "Usage: $0"
-    exit 1
-fi
+parse_no_args "$@"
 
 # Always scan both .claude/ and .opencode/
-uninstall_from "./.claude"
-uninstall_from "./.opencode"
+for target_dir in "${!TARGET_CONFIG[@]}"; do
+    uninstall_from "./$target_dir"
+done

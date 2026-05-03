@@ -5,23 +5,19 @@ set -e  # Exit on error
 # Source constants and utility functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
-source "$SCRIPT_DIR/scripts/lib/conversion.sh"
+source "$SCRIPT_DIR/scripts/lib/opencode.sh"
 source "$SCRIPT_DIR/scripts/lib/ui.sh"
 source "$SCRIPT_DIR/scripts/lib/frontmatter.sh"
 source "$SCRIPT_DIR/scripts/lib/install_ops.sh"
 
-# Parse arguments
-if [[ -n "$1" ]]; then
-    echo "Usage: $0"
-    exit 1
-fi
+parse_no_args "$@"
 
-# Determine target directory (prompt user for .claude/ vs .opencode/)
-# Initialize model preference (only relevant for .opencode/)
+# Determine target directory and format
 INSTALL_TARGET=$(prompt_target_directory)
 TARGET="./$INSTALL_TARGET"
-TARGET_FORMAT="claude"  # default to Claude Code format
+TARGET_FORMAT=$(get_target_format "$INSTALL_TARGET")
 ADD_MODEL_FIELD=false
 
 # Check for alternate target directory and warn if switching
@@ -49,10 +45,6 @@ if ! $TARGET_HAS_LISSOM && has_lissom_installation "$ALTERNATE_TARGET"; then
             exit 0
         fi
     fi
-fi
-
-if [[ "$INSTALL_TARGET" == ".opencode" ]]; then
-    TARGET_FORMAT="opencode"
 fi
 
 # When piped via curl, BASH_SOURCE[0] is empty so SCRIPT_DIR falls back to CWD.
@@ -117,7 +109,7 @@ done
 
 # Model configuration prompt — unified for all target formats
 if [[ $NEW_AGENT_COUNT -gt 0 ]]; then
-    model_default=$([[ "$TARGET_FORMAT" == "opencode" ]] && echo "false" || echo "true")
+    model_default=$(get_model_default "$TARGET_FORMAT")
     INCLUDE_MODEL=$(prompt_model_preference "$model_default")
     [[ "$INCLUDE_MODEL" == "true" ]] && ADD_MODEL_FIELD=true
 fi
@@ -163,18 +155,19 @@ if [[ ! -f "$specs_dest" ]]; then
 fi
 
 # Add .lissom/ to .gitignore if not already present
+gitignore_msg="# We recommend not to commit development doc. If you want to stage the content, comment out this line."
 if [[ -f ".gitignore" ]]; then
     if ! grep -q "^\.lissom/" ".gitignore"; then
         {
             echo ""
-            echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
+            echo "$gitignore_msg"
             echo ".lissom/"
         } >> ".gitignore"
         echo "Added .lissom/ to .gitignore"
     fi
 else
     {
-        echo "# We recommend not to commit development doc. If you want to stage the content, comment out this line."
+        echo "$gitignore_msg"
         echo ".lissom/"
     } > ".gitignore"
     echo "Created .gitignore with .lissom/"
@@ -192,23 +185,9 @@ echo "Skipped $SKIPPED existing files"
 
 # Display model configuration table if any agent has a model field
 if [[ -d "$TARGET/agents" ]]; then
-    AGENT_FILES=("$TARGET/agents"/*.md)
     declare -A AGENT_MODELS
-    
-    # Collect agents with model fields
-    for agent_file in "${AGENT_FILES[@]}"; do
-        if [[ -f "$agent_file" ]]; then
-            model_value=$(get_model "$agent_file")
-            if [[ -n "$model_value" ]]; then
-                MODELS_FOUND=true
-                agent_name=$(basename "$agent_file" .md)
-                AGENT_MODELS["$agent_name"]="$model_value"
-            fi
-        fi
-    done
-    
-    # Display table if at least one agent has a model
-    if $MODELS_FOUND; then
+    if collect_agent_models "$TARGET/agents" AGENT_MODELS; then
+        MODELS_FOUND=true
         echo ""
         display_model_table AGENT_MODELS
     fi
