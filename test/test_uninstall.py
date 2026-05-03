@@ -242,94 +242,25 @@ def call_uninstall_from(src: Path, work: Path, target: str, dry_run: str = "fals
     """
     Call uninstall_from() directly without running the script's main body.
 
-    Creates a minimal bash script that sources libs and defines only the
-    two functions (_rmdir_if_empty and uninstall_from), then calls
+    Sources the actual scripts/uninstall.sh (which has a BASH_SOURCE guard
+    that prevents the main body from executing when sourced), then calls
     uninstall_from with the given arguments.
     """
-    # Copy lib files so the wrapper can source them
     REPO_ROOT = Path(__file__).resolve().parent.parent
     lib_dest = src / "scripts" / "lib"
     lib_dest.mkdir(parents=True, exist_ok=True)
     for lib in ("common.sh", "constants.sh", "ui.sh"):
         shutil.copy(REPO_ROOT / "scripts" / "lib" / lib, lib_dest / lib)
+    shutil.copy(REPO_ROOT / "scripts" / "uninstall.sh", src / "uninstall.sh")
 
-    # Build a wrapper script that defines the two functions inline
     wrapper = src / "call_uninstall_from.sh"
     wrapper.write_text(f"""#!/usr/bin/env bash
 set -e
-SCRIPT_DIR={src}
+SCRIPT_DIR="{src}"
 source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 source "$SCRIPT_DIR/scripts/lib/ui.sh"
-
-_rmdir_if_empty() {{
-    local dir="$1"
-    [[ -d "$dir" ]] && [[ -z "$(ls -A "$dir" 2>/dev/null)" ]] && rmdir "$dir"
-}}
-
-uninstall_from() {{
-    local TARGET="$1"
-    local DRY_RUN="${{2:-false}}"
-    local REMOVED=0
-
-    if [[ -d "$TARGET/agents" ]]; then
-        for agent_file in "$TARGET/agents"/*.md; do
-            if [[ -f "$agent_file" ]]; then
-                local agent_name=$(basename "$agent_file" .md)
-                if [[ "$agent_name" =~ ^lissom- ]]; then
-                    if [[ "$DRY_RUN" == "true" ]]; then
-                        REMOVED=$((REMOVED + 1))
-                    else
-                        rm "$agent_file"
-                        echo "  Removed $agent_file"
-                        REMOVED=$((REMOVED + 1))
-                    fi
-                fi
-            fi
-        done
-        [[ "$DRY_RUN" != "true" ]] && _rmdir_if_empty "$TARGET/agents"
-    fi
-
-    if [[ -d "$TARGET/skills" ]]; then
-        for skill_dir in "$TARGET/skills"/*/; do
-            if [[ -d "$skill_dir" ]]; then
-                local skill_name=$(basename "$skill_dir")
-                if [[ "$skill_name" =~ ^lissom- ]]; then
-                    if [[ -f "$skill_dir/SKILL.md" ]]; then
-                        if [[ "$DRY_RUN" == "true" ]]; then
-                            REMOVED=$((REMOVED + 1))
-                        else
-                            rm "$skill_dir/SKILL.md"
-                            echo "  Removed $skill_dir/SKILL.md"
-                            REMOVED=$((REMOVED + 1))
-                        fi
-                    fi
-                    if [[ -f "$skill_dir/user_preference_questions.json" ]]; then
-                        if [[ "$DRY_RUN" == "true" ]]; then
-                            REMOVED=$((REMOVED + 1))
-                        else
-                            rm "$skill_dir/user_preference_questions.json"
-                            echo "  Removed $skill_dir/user_preference_questions.json"
-                            REMOVED=$((REMOVED + 1))
-                        fi
-                    fi
-                    [[ "$DRY_RUN" != "true" ]] && _rmdir_if_empty "$skill_dir"
-                fi
-            fi
-        done
-        [[ "$DRY_RUN" != "true" ]] && _rmdir_if_empty "$TARGET/skills"
-    fi
-
-    if [[ "$DRY_RUN" != "true" ]] && _rmdir_if_empty "$TARGET"; then
-        echo "  Removed empty directory $TARGET"
-    fi
-
-    if [[ "$DRY_RUN" == "true" ]]; then
-        echo "$REMOVED"
-    else
-        echo "Removed $REMOVED files from $TARGET"
-    fi
-}}
+source "$SCRIPT_DIR/uninstall.sh"
 
 uninstall_from "{target}" {dry_run}
 """)
