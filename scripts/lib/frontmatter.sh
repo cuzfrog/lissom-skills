@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Frontmatter parsing and manipulation functions for YAML frontmatter in .md files.
 
-# Extract a named scalar value from a file's YAML frontmatter (e.g. "version", "model").
+# Extract a named scalar value from a file's YAML frontmatter (e.g. "model").
 # Uses ^anchor so field names that are prefixes of each other do not collide.
 # Returns empty string if field is not found.
 _get_frontmatter_field() {
@@ -18,7 +18,6 @@ _get_frontmatter_field() {
     echo ""
 }
 
-get_version() { _get_frontmatter_field "$1" "version"; }
 get_model()   { _get_frontmatter_field "$1" "model"; }
 
 # Validate YAML frontmatter structure.

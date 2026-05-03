@@ -148,14 +148,13 @@ class TestOpencodeRewriteBodyTools:
 class TestOpencodeFormatFrontmatter:
     """Test opencode_format_frontmatter function"""
     
-    def test_preserves_name_version_description(self, script_dir: Path):
-        """Name, version, and description fields are preserved"""
+    def test_preserves_name_and_description(self, script_dir: Path):
+        """Name and description are preserved; no version in YAML"""
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test agent
 tools: Read, Write
 ---"
@@ -167,8 +166,10 @@ tools: Read, Write
             text=True,
         )
         assert "name: test-agent" in result.stdout
-        assert "version: 2026-01-01T00:00:00Z" in result.stdout
         assert "description: Test agent" in result.stdout
+        # Version must NOT appear as a YAML frontmatter field
+        fm_section = result.stdout.split("---")[1]
+        assert "version:" not in fm_section
     
     def test_adds_mode_and_temperature(self, script_dir: Path):
         """Adds mode: subagent and temperature: 0.1"""
@@ -177,7 +178,6 @@ tools: Read, Write
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -198,7 +198,6 @@ tools: Read
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, Read, Write
 ---"
@@ -221,7 +220,6 @@ tools: Bash, Read, Write
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read, Write
 ---"
@@ -244,7 +242,6 @@ tools: Read, Write
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -264,7 +261,6 @@ tools: Read
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -280,13 +276,12 @@ tools: Read
         assert "model:" not in fm_section
     
     def test_field_ordering(self, script_dir: Path):
-        """Fields appear in correct order: name, description, version, mode, temperature, permission"""
+        """Fields appear in correct order: ---, name, description, mode, temperature, permission"""
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test description
 tools: Read, Write
 ---"
@@ -297,19 +292,26 @@ tools: Read, Write
             capture_output=True,
             text=True,
         )
-        fm_lines = result.stdout.split("---")
+        # Result should start with ---, then YAML frontmatter
+        stdout = result.stdout
+        # First line should be ---
+        lines = stdout.split("\n")
+        assert lines[0] == "---"
+        
+        fm_lines = stdout.split("---")
         fm_section = fm_lines[1].strip().split("\n")
         
         fm_lines = [line for line in fm_section if line.strip()]
         
         name_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("name:")), -1)
         desc_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("description:")), -1)
-        version_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("version:")), -1)
         mode_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("mode:")), -1)
         temp_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("temperature:")), -1)
         perm_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("permission:")), -1)
         
-        assert name_idx < desc_idx < version_idx < mode_idx < temp_idx < perm_idx
+        assert name_idx < desc_idx < mode_idx < temp_idx < perm_idx
+        # Version must NOT appear in YAML frontmatter
+        assert "version:" not in fm_section
 
 
 class TestOpencodeFormatAgentFile:
@@ -320,15 +322,12 @@ class TestOpencodeFormatAgentFile:
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
-        content="---
+        content='---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: A test agent
 tools: Bash, Read, AskUserQuestion
 ---
-Use tool \\`Bash\\` and \\`Read\\` to work.
-Ask the user with \\`AskUserQuestion\\` when needed.
-"
+Use Tool `Bash` and `Read` and `AskUserQuestion` for this task.'
         opencode_format_agent_file "$content" "test-agent" "false"
         """
         result = subprocess.run(["bash", "-c", bash_code], capture_output=True, text=True)
@@ -357,14 +356,12 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         bash_code = f"""
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/opencode.sh"
-        content="---
+        content='---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Research agent
 tools: Read, WebFetch
 ---
-Research with \\`Read\\` and \\`WebFetch\\`.
-"
+Use Tool `Read` and `WebFetch` for research.'
         opencode_format_agent_file "$content" "lissom-researcher" "true"
         """
         result = subprocess.run(["bash", "-c", bash_code], capture_output=True, text=True)

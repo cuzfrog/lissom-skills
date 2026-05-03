@@ -1,6 +1,5 @@
 ---
 name: lissom-plan
-version: 2026-05-03T12:48:24Z
 description: Dispatches to lissom-planner to produce Plan.md for a given task_dir.
 argument-hint: <task_dir> [fix_cycle] [fix_threshold]
 ---

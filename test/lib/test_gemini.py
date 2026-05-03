@@ -37,14 +37,13 @@ def run_gemini_function(script_dir: Path, func_name: str, *args) -> str:
 class TestGeminiFormatAgentFrontmatter:
     """Test gemini_format_agent_frontmatter function"""
 
-    def test_preserves_name_version_description(self, script_dir: Path):
-        """Name, version, and description fields are preserved"""
+    def test_preserves_name_and_description(self, script_dir: Path):
+        """Name and description are preserved"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test agent
 tools: Read, Write
 ---"
@@ -57,8 +56,10 @@ tools: Read, Write
         )
         assert result.returncode == 0
         assert "name: test-agent" in result.stdout
-        assert "version: 2026-01-01T00:00:00Z" in result.stdout
         assert "description: Test agent" in result.stdout
+        # No version: line in YAML frontmatter
+        fm_section = result.stdout.split("---")[1]
+        assert "version:" not in fm_section
 
     def test_includes_model_when_requested(self, script_dir: Path):
         """Model field is included when include_model=true"""
@@ -67,7 +68,6 @@ tools: Read, Write
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -88,7 +88,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -111,7 +110,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -132,7 +130,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, Read, Write
 ---"
@@ -160,7 +157,6 @@ tools: Bash, Read, Write
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, AskUserQuestion, Read
 ---"
@@ -186,7 +182,6 @@ tools: Bash, AskUserQuestion, Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, NonExistentTool, Read
 ---"
@@ -204,13 +199,12 @@ tools: Bash, NonExistentTool, Read
         assert "NonExistentTool" not in fm_section
 
     def test_field_ordering(self, script_dir: Path):
-        """Fields appear in correct order: name, description, version, temperature, model, tools"""
+        """Fields appear in correct order: ---, name, description, temperature, model, tools"""
         bash_code = f'''
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test description
 tools: Bash, Read
 ---"
@@ -222,19 +216,26 @@ tools: Bash, Read
             text=True,
         )
         assert result.returncode == 0
-        fm_section = result.stdout.split("---")[1].strip().split("\n")
+        lines = result.stdout.strip().split("\n")
 
+        # First line should be opening ---
+        assert lines[0] == "---"
+
+        # After the opening ---, check field order
+        fm_lines = [line for line in lines[2:] if line.strip() and not line.startswith("---") or line == "---"]
+
+        # Re-split: everything between first --- and last --- is the YAML section
+        fm_section = result.stdout.split("---")[1].strip().split("\n")
         fm_lines = [line for line in fm_section if line.strip()]
 
         name_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("name:")), -1)
         desc_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("description:")), -1)
-        version_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("version:")), -1)
         temp_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("temperature:")), -1)
         model_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("model:")), -1)
         tools_idx = next((i for i, line in enumerate(fm_lines) if line.startswith("tools:")), -1)
 
-        assert name_idx < desc_idx < version_idx
-        assert version_idx < temp_idx
+        assert name_idx < desc_idx
+        assert desc_idx < temp_idx
         assert temp_idx < model_idx
         assert model_idx < tools_idx
 
@@ -245,7 +246,6 @@ tools: Bash, Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -266,7 +266,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -289,7 +288,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 ---"
         gemini_format_agent_frontmatter "$content" "test-agent" "false"
@@ -328,7 +326,6 @@ tools: Bash
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---
@@ -351,7 +348,6 @@ It should be preserved after conversion."
         source "{script_dir}/scripts/lib/constants.sh"
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 ---"
@@ -371,26 +367,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
-tools: Read
----"
-        gemini_format_agent_frontmatter "$content" "test-agent" "false"
-        '''
-        result = subprocess.run(
-            ["bash", "-c", bash_code],
-            capture_output=True, text=True
-        )
-        assert result.returncode != 0
-        assert "Missing required frontmatter fields" in result.stderr
-
-    def test_rejects_missing_version(self, script_dir: Path):
-        """Missing version field produces error on stderr"""
-        bash_code = f'''
-        source "{script_dir}/scripts/lib/constants.sh"
-        source "{script_dir}/scripts/lib/gemini.sh"
-        content="---
-name: test-agent
-description: Test
 tools: Read
 ---"
         gemini_format_agent_frontmatter "$content" "test-agent" "false"
@@ -409,7 +385,6 @@ tools: Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 ---"
@@ -439,7 +414,6 @@ tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
         for agent in "${{AGENTS[@]}}"; do
             content="---
 name: $agent
-version: 2026-01-01T00:00:00Z
 description: $agent description
 tools: Bash, Read
 ---"
@@ -465,7 +439,6 @@ tools: Bash, Read
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools: Read
 This body content should not appear"
@@ -487,7 +460,6 @@ This body content should not appear"
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: Test
 tools:
 ---"
@@ -513,7 +485,6 @@ class TestGeminiFormatSkillFrontmatter:
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-skill
-version: 2026-01-01T00:00:00Z
 description: A test skill
 argument-hint: <task_dir>
 ---"
@@ -535,7 +506,6 @@ argument-hint: <task_dir>
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-skill
-version: 2026-01-01T00:00:00Z
 description: A test skill
 argument-hint: <task_dir>
 ---"
@@ -592,26 +562,6 @@ Do something useful."
         assert result.returncode == 0
         assert "## Process" in result.stdout
         assert "Do something useful." in result.stdout
-
-    def test_strips_version(self, script_dir: Path):
-        """Version field is stripped from skill frontmatter"""
-        bash_code = f'''
-        source "{script_dir}/scripts/lib/constants.sh"
-        source "{script_dir}/scripts/lib/gemini.sh"
-        content="---
-name: test-skill
-version: 2026-01-01T00:00:00Z
-description: A test skill
----"
-        gemini_format_skill_frontmatter "$content"
-        '''
-        result = subprocess.run(
-            ["bash", "-c", bash_code],
-            capture_output=True, text=True
-        )
-        assert result.returncode == 0
-        fm_section = result.stdout.split("---")[1]
-        assert "version:" not in fm_section
 
     def test_strips_argument_hint(self, script_dir: Path):
         """argument-hint field is stripped from skill frontmatter"""
@@ -847,7 +797,6 @@ class TestGeminiFormatAgentFile:
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: test-agent
-version: 2026-01-01T00:00:00Z
 description: A test agent
 tools: Bash, Read, AskUserQuestion
 ---
@@ -861,14 +810,14 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         out = result.stdout
 
         assert "name: test-agent" in out
-        assert "version: 2026-01-01T00:00:00Z" in out
         assert "description: A test agent" in out
 
         # Verify model is absent when not requested
         assert "model:" not in out.split("---")[1]
 
-        # Tools as YAML list — AskUserQuestion included for Gemini
         fm_section = out.split("---")[1]
+
+        # Tools as YAML list — AskUserQuestion included for Gemini
         assert "tools:" in fm_section
         assert "  - run_shell_command" in fm_section
         assert "  - read_file" in fm_section
@@ -888,7 +837,6 @@ Ask the user with \\`AskUserQuestion\\` when needed.
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Research agent
 tools: Read, WebFetch
 ---
@@ -915,7 +863,6 @@ Research with \\`Read\\` and \\`WebFetch\\`.
         source "{script_dir}/scripts/lib/gemini.sh"
         content="---
 name: lissom-researcher
-version: 2026-01-01T00:00:00Z
 description: Research agent
 tools: Read
 ---
@@ -937,7 +884,6 @@ Research with \\`Read\\`.
         for agent in "${{AGENTS[@]}}"; do
             content="---
 name: $agent
-version: 2026-01-01T00:00:00Z
 description: $agent description
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
 ---

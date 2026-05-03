@@ -19,19 +19,18 @@ SKILLS = (
 )
 
 
-def make_opencode_frontmatter(agent_name: str, version: str, include_model: bool = False) -> str:
+def make_opencode_frontmatter(agent_name: str, include_model: bool = False) -> str:
     """
     Generate Opencode-style YAML frontmatter for an agent.
     
     Args:
         agent_name: Agent name (e.g. "lissom-researcher")
-        version: Version timestamp
         include_model: Whether to include model field
     
     Returns:
         Opencode frontmatter as string
     """
-    fm = f"---\nname: {agent_name}\ndescription: fixture\nversion: {version}\nmode: subagent\n"
+    fm = f"---\nname: {agent_name}\ndescription: fixture\nmode: subagent\n"
     
     if include_model:
         # Map agent names to Opencode models
@@ -48,13 +47,12 @@ def make_opencode_frontmatter(agent_name: str, version: str, include_model: bool
     return fm
 
 
-def make_qwen_frontmatter(agent_name: str, version: str, include_model: bool = False) -> str:
+def make_qwen_frontmatter(agent_name: str, include_model: bool = False) -> str:
     """
     Generate Qwen Code-style YAML frontmatter for an agent.
 
     Args:
         agent_name: Agent name (e.g. "lissom-researcher")
-        version: Version timestamp
         include_model: Whether to include model field
 
     Returns:
@@ -73,7 +71,7 @@ def make_qwen_frontmatter(agent_name: str, version: str, include_model: bool = F
     }
     tools_yaml = "\n".join(f"  - {t}" for t in tool_map.values())
 
-    fm = f"---\nname: {agent_name}\ndescription: fixture\nversion: {version}\n"
+    fm = f"---\nname: {agent_name}\ndescription: fixture\n"
 
     if include_model:
         model_map = {
@@ -90,13 +88,12 @@ def make_qwen_frontmatter(agent_name: str, version: str, include_model: bool = F
     return fm
 
 
-def make_gemini_frontmatter(agent_name: str, version: str, include_model: bool = False) -> str:
+def make_gemini_frontmatter(agent_name: str, include_model: bool = False) -> str:
     """
     Generate Gemini CLI-style YAML frontmatter for an agent.
 
     Args:
         agent_name: Agent name (e.g. "lissom-researcher")
-        version: Version timestamp
         include_model: Whether to include model field
 
     Returns:
@@ -115,7 +112,7 @@ def make_gemini_frontmatter(agent_name: str, version: str, include_model: bool =
     }
     tools_yaml = "\n".join(f"  - {t}" for t in tool_map.values())
 
-    fm = f"---\nname: {agent_name}\ndescription: fixture\nversion: {version}\n"
+    fm = f"---\nname: {agent_name}\ndescription: fixture\n"
     fm += "temperature: 0.1\n"
 
     if include_model:
@@ -134,14 +131,13 @@ def make_gemini_frontmatter(agent_name: str, version: str, include_model: bool =
 
 
 def make_src_tree(
-    src: Path, version: str, with_model: dict = None, target_format: str = "claude"
+    src: Path, with_model: dict = None, target_format: str = "claude"
 ) -> None:
     """
-    Create a fixture source tree with all agents and skills at the given version.
+    Create a fixture source tree with all agents and skills.
     
     Args:
         src: Root directory for the fixture tree
-        version: Version timestamp to use in all files
         with_model: Optional dict mapping agent names to model values.
                    If provided, adds model: field to specified agents.
                    Example: {"lissom-researcher": "opus-4.6", "lissom-planner": "sonnet"}
@@ -161,18 +157,18 @@ def make_src_tree(
         if target_format == "opencode":
             # Use Opencode format
             include_model = with_model and agent in with_model
-            frontmatter = make_opencode_frontmatter(agent, version, include_model)
+            frontmatter = make_opencode_frontmatter(agent, include_model)
         elif target_format == "qwen":
             # Use Qwen Code format
             include_model = with_model and agent in with_model
-            frontmatter = make_qwen_frontmatter(agent, version, include_model)
+            frontmatter = make_qwen_frontmatter(agent, include_model)
         elif target_format == "gemini":
             # Use Gemini CLI format
             include_model = with_model and agent in with_model
-            frontmatter = make_gemini_frontmatter(agent, version, include_model)
+            frontmatter = make_gemini_frontmatter(agent, include_model)
         else:
             # Use Claude Code format (default)
-            frontmatter = f"---\nname: {agent}\nversion: {version}\ndescription: fixture\ntools: Read, Write\n"
+            frontmatter = f"---\nname: {agent}\ndescription: fixture\ntools: Read, Write\n"
             if with_model and agent in with_model:
                 frontmatter += f"model: {with_model[agent]}\n"
             frontmatter += "---\nbody\n"
@@ -181,10 +177,8 @@ def make_src_tree(
     
     for skill in SKILLS:
         (src / "skills" / skill).mkdir(parents=True, exist_ok=True)
-        # Skills use the same frontmatter format in both Claude and Opencode
-        # (only name, description, version are used; Opencode ignores extra fields)
         (src / "skills" / skill / "SKILL.md").write_text(
-            f"---\nname: {skill}\nversion: {version}\ndescription: fixture\n---\nbody\n"
+            f"---\nname: {skill}\ndescription: fixture\n---\nbody\n"
         )
     (src / "templates").mkdir(parents=True, exist_ok=True)
     (src / "templates" / "Specs.md").write_text(
@@ -202,5 +196,5 @@ def make_malformed_agent(path: Path, agent_name: str) -> None:
         agent_name: Name of the agent (e.g., "lissom-researcher")
     """
     path.write_text(
-        f"---\nname: {agent_name}\nversion: 2026-01-01T00:00:00\ndescription: fixture\ntools: read\nbody without closing frontmatter\n"
+        f"---\nname: {agent_name}\ndescription: fixture\ntools: read\nbody without closing frontmatter\n"
     )

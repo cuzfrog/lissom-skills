@@ -1,6 +1,5 @@
 ---
 name: lissom-specs-reviewer
-version: 2026-05-03T12:48:24Z
 description: Evaluates and helps user refine specs.
 tools: Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---

@@ -49,7 +49,7 @@ opencode_rewrite_body_tools() {
 #   include_model - "true" or "false"
 # Returns: transformed frontmatter + body to stdout
 #
-# Field ordering: name, description, version, mode, model, temperature, permission
+# Field ordering: name, description, mode, model, temperature, permission
 opencode_format_frontmatter() {
     local content="$1"
     local agent_name="$2"
@@ -57,31 +57,31 @@ opencode_format_frontmatter() {
     local model_override="${4:-}"
 
     local fmt=0 fm_end=0 ln=0
-    local name_f="" desc_f="" ver_f="" tools_f="" other_f=""
+    local name_f="" desc_f="" tools_f="" other_f=""
     local line
 
     while IFS= read -r line; do
         ln=$((ln + 1))
         if [[ "$line" == "---" ]]; then
-            if [[ $fmt -eq 0 ]]; then fmt=1; echo "$line"
+            if [[ $fmt -eq 0 ]]; then fmt=1  # opening --- echoed later with comment
             else fm_end=$ln; break
             fi
         elif [[ $fmt -eq 1 ]]; then
             if   [[ "$line" =~ ^name:[[:space:]]*(.*)$ ]];        then name_f="name: ${BASH_REMATCH[1]}"
             elif [[ "$line" =~ ^description:[[:space:]]*(.*)$ ]]; then desc_f="description: ${BASH_REMATCH[1]}"
-            elif [[ "$line" =~ ^version:[[:space:]]*(.*)$ ]];     then ver_f="version: ${BASH_REMATCH[1]}"
             elif [[ "$line" =~ ^tools:[[:space:]]*(.*)$ ]];       then tools_f="${BASH_REMATCH[1]}"
             elif [[ -n "$line" ]]; then other_f+="$line"$'\n'
             fi
         fi
     done <<< "$content"
 
-    if [[ -z "$name_f" ]] || [[ -z "$ver_f" ]] || [[ -z "$desc_f" ]]; then
-        echo "Error: Missing required frontmatter fields (name, version, description)" >&2
+    if [[ -z "$name_f" ]] || [[ -z "$desc_f" ]]; then
+        echo "Error: Missing required frontmatter fields (name, description)" >&2
         return 1
     fi
 
-    echo "$name_f"; echo "$desc_f"; echo "$ver_f"
+    echo "---"
+    echo "$name_f"; echo "$desc_f"
     echo "mode: subagent"
     if [[ "$include_model" == "true" ]] || [[ -n "$model_override" ]]; then
         local model="${model_override:-$(get_opencode_model "$agent_name")}"

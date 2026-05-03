@@ -8,16 +8,6 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash dev/update-version-timestamp.sh",
-            "statusMessage": "Updating version timestamp..."
-          }
-        ]
-      },
-      {
         "matcher": "Write|Bash",
         "hooks": [
           {

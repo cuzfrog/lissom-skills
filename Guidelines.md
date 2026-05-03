@@ -32,10 +32,7 @@ Agents: Inputs → Idempotency → Process → Output → Constraints.
 
 
 ## Frontmatter
-Required fields for all definitions: `name`, `version`, `description`.
-Additional agent fields: `tools`, `model`.
-Optional: `argument-hint` (skills only, shown to the user as invocation hint).
-`description` must be one concise sentence. Multi-line YAML block scalars (`>`) are acceptable if the sentence is long.
+`description` must be one sentence.
 
 ## Checklist
 1. Is idempotency handled (in the agent)?
@@ -43,4 +40,4 @@ Optional: `argument-hint` (skills only, shown to the user as invocation hint).
 3. Are input and output contracts specific and accurate?
 4. Is `AskUserQuestion` used for all user interaction?
 5. Can a tool, hook, or non-LLM mechanism replace an LLM call?
-6. Is `TodoWrite` used to report task progress for user observability?
+
