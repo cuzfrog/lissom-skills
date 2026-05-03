@@ -9,6 +9,8 @@ directory and asserts postconditions.
 import os
 import shutil
 import subprocess
+import threading
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
 from conftest import AGENTS, SKILLS, make_src_tree, make_malformed_agent
@@ -849,3 +851,49 @@ def test_install_gemini_model_table(tmp_path):
     assert "┬" in result.stdout  # table border present
     assert "lissom-researcher" in result.stdout
     assert "gemini-3-pro-preview" in result.stdout
+
+
+# Remote install test: simulate curl-pipe installation
+
+
+class _RepoHandler(SimpleHTTPRequestHandler):
+    """HTTP handler that serves files from the repo root silently."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(REPO_ROOT), **kwargs)
+
+    def log_message(self, fmt, *args):
+        pass
+
+
+def test_remote_install_via_curl(tmp_path):
+    """Verify 'curl ... | bash' remote installation works."""
+    work = tmp_path / "work"
+    work.mkdir()
+
+    server = HTTPServer(("127.0.0.1", 0), _RepoHandler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    try:
+        result = subprocess.run(
+            ["bash", "-c",
+             f"curl -fsSL http://127.0.0.1:{port}/scripts/install.sh | bash"],
+            cwd=str(work),
+            env={
+                **os.environ,
+                "LISSOM_REPO": f"http://127.0.0.1:{port}",
+                "LISSOM_YES": "1",
+            },
+            capture_output=True, text=True, timeout=60,
+        )
+
+        assert result.returncode == 0, (
+            f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+        assert (work / ".claude" / "agents" / "lissom-researcher.md").is_file()
+        assert (work / ".claude" / "skills" / "lissom-auto" / "SKILL.md").is_file()
+        assert (work / ".lissom" / "tasks" / "T1" / "Specs.md").is_file()
+    finally:
+        server.shutdown()
