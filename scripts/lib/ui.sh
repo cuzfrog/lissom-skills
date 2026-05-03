@@ -21,7 +21,7 @@ prompt_target_directory() {
 
     # When stdin is piped (e.g. curl | bash) but a terminal is available,
     # read from /dev/tty to show the interactive menu.
-    if [[ -t 1 ]] && exec {_ui_tty_fd}</dev/tty 2>/dev/null; then
+    if [[ -t 2 ]] && exec {_ui_tty_fd}</dev/tty 2>/dev/null; then
         echo "Select installation target:" >&2
         echo "1) .claude (Claude Code and most CLIs)" >&2
         echo "2) .opencode (Opencode)" >&2

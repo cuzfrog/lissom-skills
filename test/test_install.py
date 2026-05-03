@@ -901,7 +901,7 @@ def test_remote_install_via_curl(tmp_path):
 
 
 def test_prompt_target_directory_via_dev_tty(tmp_path):
-    """prompt_target_directory reads from /dev/tty when stdin is piped but a terminal is available."""
+    """prompt_target_directory reads from /dev/tty when called via $() with piped stdin."""
     import pty
 
     pid, master_fd = pty.fork()
@@ -911,7 +911,9 @@ def test_prompt_target_directory_via_dev_tty(tmp_path):
         os.dup2(devnull, 0)
         os.close(devnull)
         os.chdir(str(REPO_ROOT))
-        os.execvp("bash", ["bash", "-c", "source scripts/lib/ui.sh && prompt_target_directory"])
+        os.execvp("bash", ["bash", "-c",
+            # Use $() like install.sh does on line 47
+            'source scripts/lib/ui.sh && target=$(prompt_target_directory) && echo "$target"'])
         os._exit(1)
 
     try:
@@ -922,6 +924,33 @@ def test_prompt_target_directory_via_dev_tty(tmp_path):
 
         # Send choice 4 (.gemini)
         os.write(master_fd, b"4\n")
+
+        _, status = os.waitpid(pid, 0)
+        assert os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0
+    finally:
+        os.close(master_fd)
+
+
+def test_prompt_target_directory_stdin_tty(tmp_path):
+    """prompt_target_directory uses select path when stdin is a TTY (normal interactive shell)."""
+    import pty
+
+    pid, master_fd = pty.fork()
+
+    if pid == 0:
+        os.chdir(str(REPO_ROOT))
+        os.execvp("bash", ["bash", "-c",
+            'source scripts/lib/ui.sh && target=$(prompt_target_directory) && echo "$target"'])
+        os._exit(1)
+
+    try:
+        # Child should be alive (blocked on select read)
+        time.sleep(1)
+        wpid, _ = os.waitpid(pid, os.WNOHANG)
+        assert wpid == 0, "Child exited early — select path not taken"
+
+        # Send choice 2 (.opencode)
+        os.write(master_fd, b"2\n")
 
         _, status = os.waitpid(pid, 0)
         assert os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0
