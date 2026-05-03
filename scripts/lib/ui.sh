@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # UI interaction functions for prompting users.
 
-# Prompt user to choose between .claude/ and .opencode/ target directories
-# Returns: target directory name (".claude" or ".opencode")
+# Prompt user to choose among .claude/, .opencode/, and .qwen/ target directories
+# Returns: target directory name (".claude", ".opencode", or ".qwen")
 # Respects LISSOM_TARGET (explicit target selection)
 # Respects LISSOM_YES=1 (defaults to ".claude" without prompting)
 prompt_target_directory() {
@@ -27,10 +27,12 @@ prompt_target_directory() {
     
     echo "Select installation target:" >&2
     local choice=".claude"
-    select choice in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)"; do
+    select choice in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)" ".qwen (Qwen Code)" ".gemini (Gemini CLI)"; do
         case "$REPLY" in
             1) choice=".claude"; break ;;
             2) choice=".opencode"; break ;;
+            3) choice=".qwen"; break ;;
+            4) choice=".gemini"; break ;;
             *) echo "Invalid choice. Try again." ;;
         esac
     done

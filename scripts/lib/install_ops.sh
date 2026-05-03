@@ -132,6 +132,60 @@ _convert_skill_opencode() {
 
 _convert_other_opencode() { cp "$1" "$2"; }
 
+# ── Qwen Code strategy ────────────────────────────────────────────────
+
+_convert_agent_qwen() {
+    local src="$1" dest="$2" model_include="$3" model_value="$4"
+
+    if ! validate_yaml_frontmatter "$src"; then
+        echo "Error: $src has malformed YAML frontmatter." >&2
+        return 1
+    fi
+
+    local src_content agent_name
+    src_content=$(cat "$src")
+    agent_name="$(basename "$dest" .md)"
+    qwen_format_agent_file "$src_content" "$agent_name" "$model_include" "$model_value" > "$dest"
+}
+
+_convert_skill_qwen() {
+    local src="$1" dest="$2"
+    local src_content
+    src_content=$(cat "$src")
+    local tmp
+    tmp=$(qwen_format_skill_frontmatter "$src_content") || return 1
+    qwen_rewrite_body_tools "$tmp" > "$dest"
+}
+
+_convert_other_qwen() { cp "$1" "$2"; }
+
+# ── Gemini CLI strategy ────────────────────────────────────────────────
+
+_convert_agent_gemini() {
+    local src="$1" dest="$2" model_include="$3" model_value="$4"
+
+    if ! validate_yaml_frontmatter "$src"; then
+        echo "Error: $src has malformed YAML frontmatter." >&2
+        return 1
+    fi
+
+    local src_content agent_name
+    src_content=$(cat "$src")
+    agent_name="$(basename "$dest" .md)"
+    gemini_format_agent_file "$src_content" "$agent_name" "$model_include" "$model_value" > "$dest"
+}
+
+_convert_skill_gemini() {
+    local src="$1" dest="$2"
+    local src_content
+    src_content=$(cat "$src")
+    local tmp
+    tmp=$(gemini_format_skill_frontmatter "$src_content") || return 1
+    gemini_rewrite_body_tools "$tmp" > "$dest"
+}
+
+_convert_other_gemini() { cp "$1" "$2"; }
+
 # Check whether a target directory has lissom agent files installed.
 # Returns 0 (true) if target/agents/lissom-*.md exist, 1 otherwise.
 has_lissom_installation() {

@@ -8,6 +8,7 @@ AGENTS = (
     "lissom-planner",
     "lissom-researcher",
     "lissom-reviewer",
+    "lissom-specs-reviewer",
 )
 SKILLS = (
     "lissom-auto",
@@ -47,6 +48,91 @@ def make_opencode_frontmatter(agent_name: str, version: str, include_model: bool
     return fm
 
 
+def make_qwen_frontmatter(agent_name: str, version: str, include_model: bool = False) -> str:
+    """
+    Generate Qwen Code-style YAML frontmatter for an agent.
+
+    Args:
+        agent_name: Agent name (e.g. "lissom-researcher")
+        version: Version timestamp
+        include_model: Whether to include model field
+
+    Returns:
+        Qwen Code frontmatter as string
+    """
+    # Qwen Code tool mapping (consistent with CLAUDE_TO_QWEN_TOOL in constants.sh)
+    tool_map = {
+        "Bash": "run_shell_command",
+        "Read": "read_file",
+        "Write": "write_file",
+        "Edit": "edit",
+        "Glob": "glob",
+        "Grep": "grep_search",
+        "WebFetch": "web_fetch",
+        "WebSearch": "web_search",
+    }
+    tools_yaml = "\n".join(f"  - {t}" for t in tool_map.values())
+
+    fm = f"---\nname: {agent_name}\ndescription: fixture\nversion: {version}\n"
+
+    if include_model:
+        model_map = {
+            "lissom-implementer": "qwen3-coder-plus",
+            "lissom-planner": "qwen3.6-plus",
+            "lissom-researcher": "qwen3.6-plus",
+            "lissom-reviewer": "qwen3.6-plus",
+            "lissom-specs-reviewer": "qwen3.6-plus",
+        }
+        model = model_map.get(agent_name, "qwen3.6-plus")
+        fm += f"model: {model}\n"
+
+    fm += f"tools:\n{tools_yaml}\n---\nbody\n"
+    return fm
+
+
+def make_gemini_frontmatter(agent_name: str, version: str, include_model: bool = False) -> str:
+    """
+    Generate Gemini CLI-style YAML frontmatter for an agent.
+
+    Args:
+        agent_name: Agent name (e.g. "lissom-researcher")
+        version: Version timestamp
+        include_model: Whether to include model field
+
+    Returns:
+        Gemini CLI frontmatter as string (with temperature: 0.1)
+    """
+    tool_map = {
+        "Bash": "run_shell_command",
+        "Read": "read_file",
+        "Write": "write_file",
+        "Edit": "replace",
+        "Glob": "glob",
+        "Grep": "grep_search",
+        "WebFetch": "web_fetch",
+        "WebSearch": "google_web_search",
+        "AskUserQuestion": "ask_user",
+    }
+    tools_yaml = "\n".join(f"  - {t}" for t in tool_map.values())
+
+    fm = f"---\nname: {agent_name}\ndescription: fixture\nversion: {version}\n"
+    fm += "temperature: 0.1\n"
+
+    if include_model:
+        model_map = {
+            "lissom-implementer": "gemini-3-flash-preview",
+            "lissom-planner": "gemini-3-flash-preview",
+            "lissom-researcher": "gemini-3-pro-preview",
+            "lissom-reviewer": "gemini-3-flash-preview",
+            "lissom-specs-reviewer": "gemini-3-flash-preview",
+        }
+        model = model_map.get(agent_name, "gemini-3-flash-preview")
+        fm += f"model: {model}\n"
+
+    fm += f"tools:\n{tools_yaml}\n---\nbody\n"
+    return fm
+
+
 def make_src_tree(
     src: Path, version: str, with_model: dict = None, target_format: str = "claude"
 ) -> None:
@@ -76,6 +162,14 @@ def make_src_tree(
             # Use Opencode format
             include_model = with_model and agent in with_model
             frontmatter = make_opencode_frontmatter(agent, version, include_model)
+        elif target_format == "qwen":
+            # Use Qwen Code format
+            include_model = with_model and agent in with_model
+            frontmatter = make_qwen_frontmatter(agent, version, include_model)
+        elif target_format == "gemini":
+            # Use Gemini CLI format
+            include_model = with_model and agent in with_model
+            frontmatter = make_gemini_frontmatter(agent, version, include_model)
         else:
             # Use Claude Code format (default)
             frontmatter = f"---\nname: {agent}\nversion: {version}\ndescription: fixture\ntools: Read, Write\n"
