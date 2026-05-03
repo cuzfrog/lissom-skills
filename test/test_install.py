@@ -9,6 +9,7 @@ directory and asserts postconditions.
 import os
 import shutil
 import subprocess
+import time
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -897,3 +898,32 @@ def test_remote_install_via_curl(tmp_path):
         assert (work / ".lissom" / "tasks" / "T1" / "Specs.md").is_file()
     finally:
         server.shutdown()
+
+
+def test_prompt_target_directory_via_dev_tty(tmp_path):
+    """prompt_target_directory reads from /dev/tty when stdin is piped but a terminal is available."""
+    import pty
+
+    pid, master_fd = pty.fork()
+
+    if pid == 0:
+        devnull = os.open("/dev/null", os.O_RDONLY)
+        os.dup2(devnull, 0)
+        os.close(devnull)
+        os.chdir(str(REPO_ROOT))
+        os.execvp("bash", ["bash", "-c", "source scripts/lib/ui.sh && prompt_target_directory"])
+        os._exit(1)
+
+    try:
+        # Child should be alive (blocked on /dev/tty read), not exited with .claude
+        time.sleep(1)
+        wpid, _ = os.waitpid(pid, os.WNOHANG)
+        assert wpid == 0, "Child exited early — /dev/tty path not taken"
+
+        # Send choice 4 (.gemini)
+        os.write(master_fd, b"4\n")
+
+        _, status = os.waitpid(pid, 0)
+        assert os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0
+    finally:
+        os.close(master_fd)
