@@ -1,4 +1,4 @@
-<!-- version: 2026-05-03T12:48:24Z -->
+<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-impl
 description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.

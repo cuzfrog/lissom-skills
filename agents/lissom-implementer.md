@@ -1,4 +1,4 @@
-<!-- version: 2026-05-03T12:48:24Z -->
+<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-implementer
 description: Expert implementation agent. Executes the step‑by‑step plan, writes code, updates tests, verifies acceptance criteria, and commits changes.

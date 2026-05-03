@@ -1,4 +1,4 @@
-<!-- version: 2026-05-03T12:48:24Z -->
+<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-review
 description: Dispatches to lissom-reviewer and relays the verdict to the caller.

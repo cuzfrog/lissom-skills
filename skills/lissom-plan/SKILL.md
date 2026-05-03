@@ -1,4 +1,4 @@
-<!-- version: 2026-05-03T12:48:24Z -->
+<!-- version: 2026-05-03T18:25:00Z -->
 ---
 name: lissom-plan
 description: Dispatches to lissom-planner to produce Plan.md for a given task_dir.
