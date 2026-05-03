@@ -67,6 +67,31 @@ prompt_model_preference() {
     fi
 }
 
+# Prompt user to confirm uninstallation of files.
+# Returns: "true" or "false" on stdout
+# Respects: LISSOM_YES=1 → "true" (skip prompt, proceed with uninstall)
+# Non-TTY stdin → "true" (non-interactive default is proceed)
+prompt_uninstall_confirmation() {
+    local reply
+
+    if [[ "${LISSOM_YES:-}" == "1" ]]; then
+        echo "true"; return 0
+    fi
+
+    if [[ ! -t 0 ]]; then
+        echo "true"; return 0
+    fi
+
+    echo -n "Remove these files? [y/N] " >&2
+    read -n 1 -r reply
+    echo >&2
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
 # Display an adaptive-width table of agent → model mappings.
 # Args: name of an associative array variable (agent_name → model_value)
 display_model_table() {

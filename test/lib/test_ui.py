@@ -2,8 +2,12 @@
 Unit tests for ui.sh functions.
 Tests for:
 - display_model_table() - adaptive-width table for agent models
+- prompt_uninstall_confirmation() - uninstall confirmation prompt
 """
+import os
+import pty
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -19,6 +23,37 @@ source "$SCRIPT_DIR/scripts/lib/ui.sh"
         ["bash", "-c", bash_code],
         capture_output=True,
         text=True,
+    )
+
+
+def run_ui_function_with_pty(script_dir: Path, bash_body: str, input_str: str = "") -> subprocess.CompletedProcess:
+    """Run bash code with ui.sh loaded in a pseudo-terminal for interactive testing."""
+    bash_code = f"""#!/usr/bin/env bash
+SCRIPT_DIR="{script_dir}"
+source "$SCRIPT_DIR/scripts/lib/ui.sh"
+
+{bash_body}
+"""
+    master_fd, slave_fd = pty.openpty()
+    proc = subprocess.Popen(
+        ["bash", "-c", bash_code],
+        stdin=slave_fd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    os.close(slave_fd)
+
+    if input_str:
+        os.write(master_fd, input_str.encode())
+        time.sleep(0.05)
+
+    stdout_bytes, stderr_bytes = proc.communicate(timeout=5)
+    os.close(master_fd)
+    return subprocess.CompletedProcess(
+        args=proc.args,
+        returncode=proc.returncode,
+        stdout=stdout_bytes.decode() if stdout_bytes else "",
+        stderr=stderr_bytes.decode() if stderr_bytes else "",
     )
 
 
@@ -194,3 +229,87 @@ display_model_table MODELS
         for line in lines:
             if line.startswith("│ ") and "Agent" not in line:
                 assert len(line) == len(sep), f"Data line {len(line)} != separator {len(sep)}: {line}"
+
+
+
+
+
+class TestPromptUninstallConfirmation:
+    """prompt_uninstall_confirmation() returns "true"/"false" for uninstall confirmation."""
+
+    def test_lissom_yes_bypasses_prompt(self, script_dir):
+        """LISSOM_YES=1 returns 'true' without prompting."""
+        r = run_ui_function(script_dir, """
+LISSOM_YES=1 prompt_uninstall_confirmation
+""")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "true"
+
+    def test_non_tty_returns_true(self, script_dir):
+        """Non-TTY stdin returns 'true' (non-interactive default is proceed)."""
+        # Without PTY, stdin is not a TTY
+        r = run_ui_function(script_dir, """
+prompt_uninstall_confirmation
+""")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "true"
+
+    def test_interactive_y_returns_true(self, script_dir):
+        """Interactive y input returns 'true'."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="y")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "true"
+
+    def test_interactive_Y_returns_true(self, script_dir):
+        """Interactive Y input returns 'true'."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="Y")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "true"
+
+    def test_interactive_empty_returns_false(self, script_dir):
+        """Empty input (default no) returns 'false'."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="\n")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "false"
+
+    def test_interactive_n_returns_false(self, script_dir):
+        """n input returns 'false'."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="n")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "false"
+
+    def test_interactive_N_returns_false(self, script_dir):
+        """N input returns 'false'."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="N")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "false"
+
+    def test_interactive_other_returns_false(self, script_dir):
+        """Any other input (e.g., 'x') returns 'false'."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="x")
+        assert r.returncode == 0
+        assert r.stdout.strip() == "false"
+
+    def test_prompt_text_goes_to_stderr(self, script_dir):
+        """Prompt message is written to stderr, not stdout."""
+        r = run_ui_function_with_pty(script_dir, """
+prompt_uninstall_confirmation
+""", input_str="y")
+        assert r.returncode == 0
+        assert r.stderr != ""  # prompt text on stderr
+        assert "Remove these files?" in r.stderr
+        assert "[y/N]" in r.stderr
+        # stdout should only be the result
+        assert r.stdout.strip() == "true"
