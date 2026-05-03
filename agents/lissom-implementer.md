@@ -22,7 +22,7 @@ Report the existing completion without re-executing if any met:
 1. Run `git status --short` and note any pre-existing unrelated changes.
 2. Read `<task_dir>/<step_file>` and implement the changes. Write or update tests to cover the changed behaviour according to the acceptance criterion.
 3. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
-4. Record the step in `<task_dir>/Impl-record.json`. Commit only files modified for this step. Update the entry in `<task_dir>/Impl-record.json` with the commit SHA.
+4. Commit only files modified for this step. Update the entry in `<task_dir>/Impl-record.json`.
 5. Report completion to the caller.
 
 ### Failure conditions

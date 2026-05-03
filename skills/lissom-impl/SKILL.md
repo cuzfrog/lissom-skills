@@ -22,6 +22,6 @@ Enumerate `Step-*.md` and `Fix-*.md` files in `<task_dir>/` in numeric order. Fo
 ## Completion
 
 Write `<task_dir>/Impl-summary.md` containing:
-- Summary
 - Steps completed with commit SHAs from `<task_dir>/Impl-record.json`
-- Any deviations or issues from the plan
+- Any deviations from the plan
+- Any issues met during the implementation.
