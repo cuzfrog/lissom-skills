@@ -5,28 +5,12 @@ Converts Claude Code agent/skill .md files to Gemini CLI format.
 Ports logic from the backed-up gemini.sh.
 """
 
-import re
-
 from scripts.lib.constants import (
     CLAUDE_TO_GEMINI_BODY,
     CLAUDE_TO_GEMINI_TOOL,
     GEMINI_MODEL_MAP,
 )
-from scripts.lib.frontmatter import parse_frontmatter
-
-
-def _rewrite_body_tools(content: str) -> str:
-    """
-    Replace backtick-wrapped Claude Code tool names with Gemini CLI equivalents.
-    Uses CLAUDE_TO_GEMINI_BODY from constants.py.
-    """
-    keys = list(CLAUDE_TO_GEMINI_BODY.keys())
-    pattern = r'`(' + '|'.join(re.escape(k) for k in keys) + r')`'
-
-    def _replacer(m: re.Match) -> str:
-        return f'`{CLAUDE_TO_GEMINI_BODY[m.group(1)]}`'
-
-    return re.sub(pattern, _replacer, content)
+from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
 
 
 def convert_agent(content: str, agent_name: str) -> str:
@@ -70,7 +54,7 @@ def convert_agent(content: str, agent_name: str) -> str:
 
     new_content = "\n".join(lines) + "\n"
     if body:
-        body = _rewrite_body_tools(body)
+        body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
         new_content += body
 
     return new_content
@@ -100,7 +84,7 @@ def convert_skill(content: str, skill_name: str) -> str:
 
     new_content = "\n".join(lines) + "\n"
     if body:
-        body = _rewrite_body_tools(body)
+        body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
         new_content += body
 
     return new_content

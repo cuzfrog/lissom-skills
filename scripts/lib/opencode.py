@@ -5,29 +5,12 @@ Converts Claude Code agent/skill .md files to Opencode format.
 Ports logic from the backed-up opencode.sh.
 """
 
-import re
-
 from scripts.lib.constants import (
     OPENCODE_MODEL_MAP,
     TOOL_NAME_MAPPING,
     TOOL_TO_PERMISSION,
 )
-from scripts.lib.frontmatter import parse_frontmatter
-
-
-def _rewrite_body_tools(content: str) -> str:
-    """
-    Replace backtick-wrapped Claude Code tool names with Opencode equivalents.
-    Uses TOOL_NAME_MAPPING from constants.py.
-    Only matches tool names inside backticks: `Bash`, `Read`, etc.
-    """
-    keys = list(TOOL_NAME_MAPPING.keys())
-    pattern = r'`(' + '|'.join(re.escape(k) for k in keys) + r')`'
-
-    def _replacer(m: re.Match) -> str:
-        return f'`{TOOL_NAME_MAPPING[m.group(1)]}`'
-
-    return re.sub(pattern, _replacer, content)
+from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
 
 
 def convert_agent(content: str, agent_name: str) -> str:
@@ -73,7 +56,7 @@ def convert_agent(content: str, agent_name: str) -> str:
     new_content = "\n".join(lines) + "\n"
     if body:
         # Rewrite body tool names
-        body = _rewrite_body_tools(body)
+        body = rewrite_backtick_tools(body, TOOL_NAME_MAPPING)
         new_content += body
 
     return new_content
@@ -90,4 +73,4 @@ def convert_skill(content: str, skill_name: str) -> str:
     Returns: converted content string.
     """
     # Only rewrite body tool names — frontmatter preserved
-    return _rewrite_body_tools(content)
+    return rewrite_backtick_tools(content, TOOL_NAME_MAPPING)

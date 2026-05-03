@@ -5,28 +5,12 @@ Converts Claude Code agent/skill .md files to Qwen Code format.
 Ports logic from the backed-up qwen.sh.
 """
 
-import re
-
 from scripts.lib.constants import (
     CLAUDE_TO_QWEN_BODY,
     CLAUDE_TO_QWEN_TOOL,
     QWEN_MODEL_MAP,
 )
-from scripts.lib.frontmatter import parse_frontmatter
-
-
-def _rewrite_body_tools(content: str) -> str:
-    """
-    Replace backtick-wrapped Claude Code tool names with Qwen Code equivalents.
-    Uses CLAUDE_TO_QWEN_BODY from constants.py.
-    """
-    keys = list(CLAUDE_TO_QWEN_BODY.keys())
-    pattern = r'`(' + '|'.join(re.escape(k) for k in keys) + r')`'
-
-    def _replacer(m: re.Match) -> str:
-        return f'`{CLAUDE_TO_QWEN_BODY[m.group(1)]}`'
-
-    return re.sub(pattern, _replacer, content)
+from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
 
 
 def convert_agent(content: str, agent_name: str) -> str:
@@ -68,7 +52,7 @@ def convert_agent(content: str, agent_name: str) -> str:
 
     new_content = "\n".join(lines) + "\n"
     if body:
-        body = _rewrite_body_tools(body)
+        body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
         new_content += body
 
     return new_content
@@ -97,7 +81,7 @@ def convert_skill(content: str, skill_name: str) -> str:
 
     new_content = "\n".join(lines) + "\n"
     if body:
-        body = _rewrite_body_tools(body)
+        body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
         new_content += body
 
     return new_content

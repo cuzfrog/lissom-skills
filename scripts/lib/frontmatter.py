@@ -123,3 +123,26 @@ def inject_field(content: str, field_name: str, value: str,
     # Append before closing ---
     lines.insert(frontmatter_end, f"{field_name}: {value}\n")
     return "".join(lines)
+
+
+def rewrite_backtick_tools(content: str, mapping: dict[str, str]) -> str:
+    """
+    Replace backtick-wrapped tool names with their target-platform equivalents.
+
+    Builds a regex alternation from the mapping keys and replaces each
+    `ToolName` occurrence with `mapped_name`.  Only matches tool names
+    inside backticks.
+
+    Args:
+        content: Markdown body text.
+        mapping: Dict mapping source tool names to target tool names.
+
+    Returns: content with backtick-wrapped tool names rewritten.
+    """
+    keys = list(mapping.keys())
+    pattern = r'`(' + '|'.join(re.escape(k) for k in keys) + r')`'
+
+    def _replacer(m: re.Match) -> str:
+        return f'`{mapping[m.group(1)]}`'
+
+    return re.sub(pattern, _replacer, content)
