@@ -92,7 +92,9 @@ uninstall_from() {
 
 # Only run the main body when executed directly (not sourced)
 # This allows sourcing for testing individual functions like uninstall_from()
-if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+# When piped via stdin (curl | bash), BASH_SOURCE[0] is empty,
+# so we treat that as direct execution.
+if [[ -n "${BASH_SOURCE[0]}" ]] && [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     return
 fi
 
