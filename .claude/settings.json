@@ -12,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/update-version-timestamp.sh",
+            "command": "bash dev/update-version-timestamp.sh",
             "statusMessage": "Updating version timestamp..."
           }
         ]
@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/check-install-scripts.sh"
+            "command": "bash dev/check-install-scripts.sh"
           }
         ]
       }

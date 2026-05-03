@@ -18,7 +18,7 @@
 - Reinforced specs - no surprise dev experience.
 
 #### When to use?
-- I have one task, help me refine the specs and automate it.
+- I have an idea, help me refine the specs and automate the implementation.
 
 #### When not to use?
 - Trivial tasks.
@@ -38,15 +38,18 @@ research ─┘ auto ──►   +   ──► plan ──► impl ──► rev
 ```
 
 ## Installation
-Install into your project's `.claude/`:
+Install into your project's `.claude/` or `.opencode/`:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/install.sh | bash -s -- --project
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/install.sh | bash
 ```
-or home directory (`~/.claude/`) with `--user`
 
 ## Here We Go!
 1. Update your specs at `.lissom/tasks/T1/Specs.md`
 2. **Run** `/lissom-auto T1` - get interviewed and wait for the job done!
+
+### Best practices
+- Reference to project documentation in your `Specs.md`. This saves exploration.
+- Ensure test methods are clearly defined. A simple `/init` would help to add in the `CLAUDE.md`.
 
 ## Configuration
 
@@ -68,13 +71,13 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 
 ## Uninstallation
 
-Remove all installed files from the target directory:
+Remove all installed files from both `.claude/` and `.opencode/` directories in the current project:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
 ```
 
-Removes from both `./.claude/` and `~/.claude/`. Pass `--project` or `--user` to target only one. Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
+Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
 
 ## Author
 Cause Chung <cuzfrog@gmail.com> (Claude Certified)

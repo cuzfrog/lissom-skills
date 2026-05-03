@@ -20,7 +20,7 @@ Report the existing completion without re-executing if any met:
 ## Process
 
 1. Run `git status --short` and note any pre-existing unrelated changes.
-2. Read `<task_dir>/<step_file>` and implement the changes. Write or update tests to cover the changed behaviour according to the acceptance criterion.
+2. Read `<task_dir>/<step_file>` and implement the changes. Write or update tests to cover the changed behaviour according to the acceptance criterion. When implementing, prefer extending existing patterns and reusing shared abstractions identified in the step file. If a step introduces functionality similar to existing code, extract the commonality into a shared abstraction rather than duplicating. Name functions and classes to reflect their actual specificity — for instance, a function that handles only JSON config files should not be named `process_file`.
 3. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
 4. Commit only files modified for this step. Update the entry in `<task_dir>/Impl-record.json`.
 5. Report completion to the caller.
