@@ -98,4 +98,4 @@ echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
 echo "- Invoke '/lissom-auto T1', get interviewed and wait for the job to be done!"
 
 # 11. Clean up temp directory
-[[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR"
+[[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true

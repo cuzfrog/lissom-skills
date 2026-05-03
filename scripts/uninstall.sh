@@ -136,6 +136,4 @@ for target_dir in "${!TARGET_CONFIG[@]}"; do
 done
 
 # Clean up temp directory used when fetching from GitHub
-if [[ -n "$CLEANUP_TMPDIR" ]]; then
-    rm -rf "$CLEANUP_TMPDIR"
-fi
+[[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true
