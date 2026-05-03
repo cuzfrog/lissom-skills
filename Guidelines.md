@@ -32,7 +32,10 @@ Agents: Inputs → Idempotency → Process → Output → Constraints.
 
 
 ## Frontmatter
-Required fields for all definitions: `name`, `version`, `description`.
+Required fields for all definitions: `name`, `description`.
+Required top comment on line 1: `<!-- version: ISO8601-timestamp -->`.
+All definitions must begin with the version comment before the `---` frontmatter delimiter.
+Example: `<!-- version: 2026-05-03T12:48:24Z -->`.
 Additional agent fields: `tools`, `model`.
 Optional: `argument-hint` (skills only, shown to the user as invocation hint).
 `description` must be one concise sentence. Multi-line YAML block scalars (`>`) are acceptable if the sentence is long.
