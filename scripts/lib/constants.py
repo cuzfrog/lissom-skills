@@ -51,20 +51,10 @@ OPENCODE_MODEL_MAP = {
 
 # Agent name → Qwen Code model
 QWEN_MODEL_MAP = {
-    "lissom-implementer": "qwen3-coder-plus",
-    "lissom-planner": "qwen3.6-plus",
-    "lissom-researcher": "qwen3.6-plus",
-    "lissom-reviewer": "qwen3.6-plus",
-    "lissom-specs-reviewer": "qwen3.6-plus",
 }
 
 # Agent name → Gemini model
 GEMINI_MODEL_MAP = {
-    "lissom-implementer": "gemini-3-flash-preview",
-    "lissom-planner": "gemini-3-flash-preview",
-    "lissom-researcher": "gemini-3-pro-preview",
-    "lissom-reviewer": "gemini-3-flash-preview",
-    "lissom-specs-reviewer": "gemini-3-flash-preview",
 }
 
 # Claude Code tool name → Opencode permission key
