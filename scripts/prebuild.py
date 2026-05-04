@@ -32,10 +32,16 @@ MODEL_MAPS = {
 def generate_readme(target: str) -> str:
     model_map = MODEL_MAPS[target]
 
-    lines = ["| Agent | Model |", "| --- | --- |"]
-    for agent in AGENTS:
-        model = model_map.get(agent, "empty (inherit)")
-        lines.append(f"| {agent} | {model} |")
+    models = [model_map.get(agent, "empty (inherit)") for agent in AGENTS]
+    agent_width = max(len("Agent"), max(len(a) for a in AGENTS))
+    model_width = max(len("Model"), max(len(m) for m in models))
+
+    lines = []
+    header = f"{'Agent':<{agent_width}}  {'Model':<{model_width}}"
+    lines.append(header)
+    lines.append("-" * agent_width + "  " + "-" * model_width)
+    for agent, model in zip(AGENTS, models):
+        lines.append(f"{agent:<{agent_width}}  {model:<{model_width}}")
 
     return "\n".join(lines) + "\n"
 

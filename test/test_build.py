@@ -108,7 +108,7 @@ class TestQwenConverter:
         content = "---\nname: test-agent\ndescription: test\ntools: Bash, Read, AskUserQuestion\n---\nUse `Bash` and `AskUserQuestion`.\n"
         result = qwen_convert_agent(content, "lissom-researcher")
         assert "name: test-agent" in result
-        assert "model: qwen3.6-plus" in result
+        assert "model:" not in result  # map is empty
         assert "  - run_shell_command" in result
         assert "  - read_file" in result
         assert "  - question" not in result.split("---")[0]  # not in frontmatter
@@ -126,10 +126,10 @@ class TestQwenConverter:
         assert "`grep_search`" in result
 
     def test_agent_implementer_model(self):
-        """lissom-implementer gets qwen3-coder-plus model."""
+        """When QWEN_MODEL_MAP is empty, no model field is set."""
         content = "---\nname: lissom-implementer\ndescription: impl\ntools: Bash\n---\nbody\n"
         result = qwen_convert_agent(content, "lissom-implementer")
-        assert "model: qwen3-coder-plus" in result
+        assert "model:" not in result
 
     def test_agent_args_shifted(self):
         """Qwen agent output has $0 → $1, $1 → $2."""
@@ -155,7 +155,7 @@ class TestGeminiConverter:
         content = "---\nname: test-agent\ndescription: test\ntools: Bash, Edit, WebSearch, AskUserQuestion\n---\nUse `Bash` and `AskUserQuestion`.\n"
         result = gemini_convert_agent(content, "lissom-researcher")
         assert "temperature: 0.1" in result
-        assert "model: gemini-3-pro-preview" in result
+        assert "model:" not in result  # map is empty
         assert "  - run_shell_command" in result
         assert "  - replace" in result
         assert "  - google_web_search" in result
@@ -357,7 +357,7 @@ class TestBuildScript:
             assert "model: opencode-go/deepseek-v4-pro" in content
 
     def test_qwen_zip_contents(self, tmp_path):
-        """Qwen zip has converted content."""
+        """Qwen zip has converted content, no model field when map is empty."""
         make_build_fixture(tmp_path)
         subprocess.run(
             ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
@@ -366,11 +366,11 @@ class TestBuildScript:
 
         with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-qwen.zip") as zf:
             content = zf.read(".qwen/agents/lissom-implementer.md").decode()
-            assert "model: qwen3-coder-plus" in content
+            assert "model:" not in content
             assert "  - run_shell_command" in content
 
     def test_gemini_zip_contents(self, tmp_path):
-        """Gemini zip has converted content."""
+        """Gemini zip has converted content, no model field when map is empty."""
         make_build_fixture(tmp_path)
         subprocess.run(
             ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
@@ -380,7 +380,7 @@ class TestBuildScript:
         with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-gemini.zip") as zf:
             content = zf.read(".gemini/agents/lissom-researcher.md").decode()
             assert "temperature: 0.1" in content
-            assert "model: gemini-3-pro-preview" in content
+            assert "model:" not in content
             assert "  - ask_user" in content
 
     def test_templates_and_preferences_copied(self, tmp_path):
@@ -448,11 +448,11 @@ class TestBuildScript:
                 assert "install-readme.txt" in names, f"missing install-readme.txt in {shortname}"
 
     def test_install_readme_content(self):
-        """generate_readme produces correct content per target."""
+        """generate_readme produces plain text table with correct content per target."""
         # claude target: table header, agent names, specific models
         claude_readme = generate_readme("claude")
-        assert "| Agent | Model |" in claude_readme
-        assert "| --- | --- |" in claude_readme
+        assert "Agent" in claude_readme
+        assert "Model" in claude_readme
         assert "lissom-implementer" in claude_readme
         assert "sonnet" in claude_readme
 
@@ -461,3 +461,19 @@ class TestBuildScript:
         for agent in AGENTS:
             assert agent in qwen_readme
             assert "empty (inherit)" in qwen_readme
+
+    def test_install_readme_table_dynamic_width(self):
+        """Table widths accommodate differing agent name and model lengths."""
+        claude_readme = generate_readme("claude")
+        lines = claude_readme.splitlines()
+        # header, separator, then 5 agent rows
+        assert len(lines) == 7
+        header = lines[0]
+        separator = lines[1]
+        # header contains "Agent" and "Model" aligned
+        assert header.startswith("Agent")
+        # separator has same width as header
+        assert len(separator) == len(header)
+        # each data row has same width as header
+        for line in lines[2:]:
+            assert len(line) == len(header)

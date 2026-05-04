@@ -37,12 +37,13 @@ def convert_agent(content: str, agent_name: str) -> str:
     # Parse tools: "Bash, Read, AskUserQuestion" → list
     tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-    model = QWEN_MODEL_MAP.get(agent_name, "qwen3.6-plus")
+    model = QWEN_MODEL_MAP.get(agent_name)
 
     lines = ["---"]
     lines.append(f"name: {name}")
     lines.append(f"description: {description}")
-    lines.append(f"model: {model}")
+    if model is not None:
+        lines.append(f"model: {model}")
     lines.append("tools:")
     for tool in tool_list:
         qwen_tool = CLAUDE_TO_QWEN_TOOL.get(tool)
