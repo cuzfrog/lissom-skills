@@ -15,6 +15,7 @@ import pytest
 
 from scripts.lib.constants import AGENTS, SKILLS
 from scripts.lib.frontmatter import inject_field, parse_frontmatter
+from scripts.prebuild import generate_readme
 from scripts.lib.opencode import convert_agent as opencode_convert_agent
 from scripts.lib.opencode import convert_skill as opencode_convert_skill
 from scripts.lib.qwen import convert_agent as qwen_convert_agent
@@ -352,3 +353,32 @@ class TestBuildScript:
         )
         assert result.returncode == 0
         assert "warn" in result.stdout.lower()
+
+    def test_zip_contains_install_readme(self, tmp_path):
+        """Each of the four zips contains install-readme.txt at the root level."""
+        make_build_fixture(tmp_path)
+        subprocess.run(
+            ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
+            check=True, capture_output=True,
+        )
+
+        for shortname in ("claude", "opencode", "qwen", "gemini"):
+            zip_path = tmp_path / "dist" / f"lissom-skills-{shortname}.zip"
+            with zipfile.ZipFile(zip_path) as zf:
+                names = zf.namelist()
+                assert "install-readme.txt" in names, f"missing install-readme.txt in {shortname}"
+
+    def test_install_readme_content(self):
+        """generate_readme produces correct content per target."""
+        # claude target: table header, agent names, specific models
+        claude_readme = generate_readme("claude")
+        assert "| Agent | Model |" in claude_readme
+        assert "| --- | --- |" in claude_readme
+        assert "lissom-implementer" in claude_readme
+        assert "sonnet" in claude_readme
+
+        # qwen target: empty model map → all agents show empty (inherit)
+        qwen_readme = generate_readme("qwen")
+        for agent in AGENTS:
+            assert agent in qwen_readme
+            assert "empty (inherit)" in qwen_readme
