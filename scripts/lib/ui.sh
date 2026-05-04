@@ -21,15 +21,14 @@ prompt_target_directory() {
 
     # When stdin is piped (e.g. curl | bash) but a terminal is available,
     # read from /dev/tty to show the interactive menu.
-    if [[ -t 2 ]] && exec {_ui_tty_fd}</dev/tty 2>/dev/null; then
+    if [[ -t 2 ]] && ( : </dev/tty ) 2>/dev/null; then
         echo "Select installation target:" >&2
         echo "1) .claude (Claude Code and most CLIs)" >&2
         echo "2) .opencode (Opencode)" >&2
         echo "3) .qwen (Qwen Code)" >&2
         echo "4) .gemini (Gemini CLI)" >&2
         echo -n "Choice [1]: " >&2
-        read -r _ui_reply <&${_ui_tty_fd}
-        exec {_ui_tty_fd}<&-
+        read -r _ui_reply </dev/tty
         case "${_ui_reply:-1}" in
             1|"") echo ".claude" ;;
             2) echo ".opencode" ;;
