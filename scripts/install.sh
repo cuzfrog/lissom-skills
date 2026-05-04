@@ -51,6 +51,20 @@ prompt_target_directory() {
     echo ".claude"
 }
 
+prompt_overwrite() {
+    local dir="$1"
+    if [[ "${LISSOM_YES:-}" == "1" ]]; then
+        echo "true"; return 0
+    elif ( : </dev/tty ) 2>/dev/null; then
+        echo -n "$dir already exists and is not empty. Overwrite all files? (y/N) " >&2
+        read -n 1 -r _ow_reply </dev/tty
+        echo >&2
+        [[ $_ow_reply =~ ^[Yy]$ ]] && echo "true" || echo "false"
+        return 0
+    fi
+    echo "false"
+}
+
 if [[ "$1" == "--source-only" ]]; then
     [[ "${BASH_SOURCE[0]}" != "${0}" ]] && return || exit 0
 fi
@@ -69,15 +83,7 @@ case "$INSTALL_TARGET" in
 esac
 
 if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
-    OVERWRITE=false
-    if [[ "${LISSOM_YES:-}" == "1" ]]; then
-        OVERWRITE=true
-    elif [[ -t 0 ]]; then
-        read -p "$TARGET already exists and is not empty. Overwrite all files? (y/N) " -n 1 -r
-        echo
-        [[ $REPLY =~ ^[Yy]$ ]] && OVERWRITE=true
-    fi
-    if ! $OVERWRITE; then
+    if [[ "$(prompt_overwrite "$TARGET")" != "true" ]]; then
         echo "Installation cancelled."
         exit 0
     fi
@@ -89,19 +95,10 @@ echo "Downloading $ZIP..."
 curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"
 
 echo "Installing to $TARGET..."
-unzip -o "$ZIP_FILE"
+unzip -o "$ZIP_FILE" -x ".lissom/*"
+unzip -n "$ZIP_FILE" ".lissom/*"
 
 rm -f "$ZIP_FILE"
-
-specs_dir=".lissom/tasks/T1"
-specs_dest="$specs_dir/Specs.md"
-if [[ ! -f "$specs_dest" ]]; then
-    mkdir -p "$specs_dir"
-    if [[ -f "$TARGET/templates/Specs.md" ]]; then
-        cp "$TARGET/templates/Specs.md" "$specs_dest"
-        echo "Created sample $specs_dest"
-    fi
-fi
 
 gitignore_msg="# We recommend not to commit development doc. If you want to stage the content, comment out this line."
 if [[ -f ".gitignore" ]]; then

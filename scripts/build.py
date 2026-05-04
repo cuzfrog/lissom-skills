@@ -136,6 +136,12 @@ def build(root: Path) -> None:
                 specs_content, encoding="utf-8"
             )
 
+            # Stage Specs.md at its installed location (.lissom/tasks/T1/)
+            # so install.sh can use 'unzip -n' to skip it on re-installs
+            lissom_dir = staging / ".lissom" / "tasks" / "T1"
+            lissom_dir.mkdir(parents=True, exist_ok=True)
+            (lissom_dir / "Specs.md").write_text(specs_content, encoding="utf-8")
+
             # Copy preferences (optional)
             if preferences_content is not None:
                 auto_dir = staging / target_dir / "skills" / "lissom-auto"
