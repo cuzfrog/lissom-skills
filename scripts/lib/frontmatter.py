@@ -125,6 +125,11 @@ def inject_field(content: str, field_name: str, value: str,
     return "".join(lines)
 
 
+def shift_args(body: str) -> str:
+    """Increment all `$N` arg references by 1 (e.g. `$0` → `$1`, `$9` → `$10`)."""
+    return re.sub(r'\$(\d+)', lambda m: f'${int(m.group(1)) + 1}', body)
+
+
 def rewrite_backtick_tools(content: str, mapping: dict[str, str]) -> str:
     """
     Replace backtick-wrapped tool names with their target-platform equivalents.
