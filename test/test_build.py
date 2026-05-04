@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from scripts.lib.constants import AGENTS, SKILLS
-from scripts.lib.frontmatter import inject_field, parse_frontmatter
+from scripts.lib.frontmatter import inject_field, parse_frontmatter, shift_args
 from scripts.prebuild import generate_readme
 from scripts.lib.opencode import convert_agent as opencode_convert_agent
 from scripts.lib.opencode import convert_skill as opencode_convert_skill
@@ -131,6 +131,21 @@ class TestQwenConverter:
         result = qwen_convert_agent(content, "lissom-implementer")
         assert "model: qwen3-coder-plus" in result
 
+    def test_agent_args_shifted(self):
+        """Qwen agent output has $0 → $1, $1 → $2."""
+        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0` and `$1`.\n"
+        result = qwen_convert_agent(content, "lissom-researcher")
+        assert "`$1`" in result
+        assert "`$2`" in result
+        assert "`$0`" not in result
+
+    def test_skill_args_shifted(self):
+        """Qwen skill output has $0 → $1."""
+        content = "---\nname: test\ndescription: test\n---\nUse `$0`.\n"
+        result = qwen_convert_skill(content, "lissom-auto")
+        assert "`$1`" in result
+        assert "`$0`" not in result
+
 
 # ── Gemini Converter Tests ───────────────────────────────────────────
 
@@ -167,6 +182,37 @@ class TestGeminiConverter:
         skill_result = gemini_convert_skill(skill_content, "lissom-test")
         assert "temperature: 0.1" in agent_result
         assert "temperature:" not in skill_result
+
+    def test_agent_args_shifted(self):
+        """Gemini agent output has $0 → $1."""
+        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0` and `$1`.\n"
+        result = gemini_convert_agent(content, "lissom-researcher")
+        assert "`$1`" in result
+        assert "`$2`" in result
+        assert "`$0`" not in result
+
+    def test_skill_args_shifted(self):
+        """Gemini skill output has $0 → $1."""
+        content = "---\nname: test\ndescription: test\n---\nUse `$0`.\n"
+        result = gemini_convert_skill(content, "lissom-auto")
+        assert "`$1`" in result
+        assert "`$0`" not in result
+
+
+# ── Opencode Args Unaffected Tests ───────────────────────────────────
+
+class TestOpenCodeArgsNotShifted:
+    def test_opencode_agent_args_not_shifted(self):
+        """Opencode agent output keeps $0 unchanged."""
+        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0`.\n"
+        result = opencode_convert_agent(content, "lissom-researcher")
+        assert "`$0`" in result
+
+    def test_opencode_skill_args_not_shifted(self):
+        """Opencode skill output keeps $0 unchanged."""
+        content = "---\nname: test\ndescription: test\n---\nUse `$0`.\n"
+        result = opencode_convert_skill(content, "lissom-auto")
+        assert "`$0`" in result
 
 
 # ── Claude Model Injection Tests ─────────────────────────────────────
@@ -226,6 +272,39 @@ class TestFrontmatterParser:
         assert "description" in fields
         assert "tools" in fields
         assert body.strip()
+
+
+# ── Shift Args Tests ─────────────────────────────────────────────────
+
+class TestShiftArgs:
+    def test_shift_0_to_1(self):
+        """$0 becomes $1."""
+        assert shift_args("`$0`") == "`$1`"
+
+    def test_shift_1_to_2(self):
+        """$1 becomes $2."""
+        assert shift_args("`$1` and `$2`") == "`$2` and `$3`"
+
+    def test_shift_10_to_11(self):
+        """$10 becomes $11 (multi-digit)."""
+        assert shift_args("`$10`") == "`$11`"
+
+    def test_no_matches(self):
+        """No dollar sign returns input unchanged."""
+        assert shift_args("no args here") == "no args here"
+
+    def test_shift_9_to_10(self):
+        """$9 becomes $10 (boundary)."""
+        assert shift_args("`$9`") == "`$10`"
+
+    def test_mixed_no_dollar(self):
+        """Text without $ is not affected."""
+        assert shift_args("plain text") == "plain text"
+
+    def test_multiple_shifts(self):
+        """Multiple $N references all shifted."""
+        result = shift_args("`$0` and `$1` then `$2`")
+        assert result == "`$1` and `$2` then `$3`"
 
 
 # ── Build Integration Tests ──────────────────────────────────────────
