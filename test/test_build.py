@@ -335,7 +335,7 @@ class TestBuildScript:
             names = zf.namelist()
             assert ".claude/agents/lissom-researcher.md" in names
             assert ".claude/skills/lissom-auto/SKILL.md" in names
-            assert ".claude/templates/Specs.md" in names
+            assert ".lissom/tasks/T1/Specs.md" in names
 
             content = zf.read(".claude/agents/lissom-researcher.md").decode()
             assert "model: opus-4.6" in content
@@ -381,8 +381,8 @@ class TestBuildScript:
             assert "model: gemini-3-pro-preview" in content
             assert "  - ask_user" in content
 
-    def test_templates_and_preferences_copied(self, tmp_path):
-        """templates/Specs.md and user_preference_questions.json are in each zip."""
+    def test_specs_and_preferences_copied(self, tmp_path):
+        """.lissom/tasks/T1/Specs.md and user_preference_questions.json are in each zip."""
         make_build_fixture(tmp_path)
         subprocess.run(
             ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
@@ -390,17 +390,11 @@ class TestBuildScript:
         )
 
         for shortname in ("claude", "opencode", "qwen", "gemini"):
-            expected_target = f".{shortname}"
-            if shortname == "claude":
-                expected_target = ".claude"
-            elif shortname == "opencode":
-                expected_target = ".opencode"
-
             zip_path = tmp_path / "dist" / f"lissom-skills-{shortname}.zip"
             with zipfile.ZipFile(zip_path) as zf:
                 names = zf.namelist()
-                assert f"{expected_target}/templates/Specs.md" in names, f"missing Specs.md in {shortname}"
-                assert f"{expected_target}/skills/lissom-auto/user_preference_questions.json" in names, f"missing prefs in {shortname}"
+                assert ".lissom/tasks/T1/Specs.md" in names, f"missing Specs.md in {shortname}"
+                assert f".{shortname}/skills/lissom-auto/user_preference_questions.json" in names, f"missing prefs in {shortname}"
 
     def test_build_idempotent(self, tmp_path):
         """Running build.py twice succeeds (overwrites zips)."""
