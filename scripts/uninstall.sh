@@ -1,28 +1,41 @@
 #!/usr/bin/env bash
 
-set -e  # Exit on error
+set -e
 
-RAW_REPO="${LISSOM_RAW_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
-CLEANUP_TMPDIR=""
+declare -A TARGET_CONFIG=(
+    [".claude"]="claude"
+    [".opencode"]="opencode"
+    [".qwen"]="qwen"
+    [".gemini"]="gemini"
+)
 
-cleanup() { [[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true; }
-trap cleanup EXIT
+parse_no_args() {
+    if [[ -n "$1" ]]; then
+        echo "Usage: uninstall.sh"
+        exit 1
+    fi
+}
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
-[[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+prompt_uninstall_confirmation() {
+    local reply
 
-if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
-    SCRIPT_DIR="$(mktemp -d)"
-    CLEANUP_TMPDIR="$SCRIPT_DIR"
-    mkdir -p "$SCRIPT_DIR/scripts/lib"
-    for f in common.sh constants.sh ui.sh; do
-        curl -fsSL "$RAW_REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
-    done
-fi
+    if [[ "${LISSOM_YES:-}" == "1" ]]; then
+        echo "true"; return 0
+    fi
 
-source "$SCRIPT_DIR/scripts/lib/common.sh"
-source "$SCRIPT_DIR/scripts/lib/constants.sh"
-source "$SCRIPT_DIR/scripts/lib/ui.sh"
+    if [[ ! -t 0 ]]; then
+        echo "true"; return 0
+    fi
+
+    echo -n "Remove these files? [y/N] " >&2
+    read -n 1 -r reply
+    echo >&2
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
 
 _rmdir_if_empty() {
     local dir="$1"
@@ -93,17 +106,12 @@ uninstall_from() {
     fi
 }
 
-# Only run the main body when executed directly (not sourced)
-# This allows sourcing for testing individual functions like uninstall_from()
-# When piped via stdin (curl | bash), BASH_SOURCE[0] is empty,
-# so we treat that as direct execution.
 if [[ -n "${BASH_SOURCE[0]}" ]] && [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     return
 fi
 
 parse_no_args "$@"
 
-# ── Phase 1: Count lissom files per target ──────────────────────────
 declare -A COUNTS
 TOTAL=0
 for target_dir in "${!TARGET_CONFIG[@]}"; do
@@ -112,7 +120,6 @@ for target_dir in "${!TARGET_CONFIG[@]}"; do
     TOTAL=$((TOTAL + COUNT))
 done
 
-# ── Phase 2: Report ─────────────────────────────────────────────────
 if [[ $TOTAL -eq 0 ]]; then
     echo "No lissom-skills files found to remove."
     exit 0
@@ -126,17 +133,14 @@ for target_dir in "${!TARGET_CONFIG[@]}"; do
 done
 echo "Total: $TOTAL file(s)"
 
-# ── Phase 3: Confirm ────────────────────────────────────────────────
 CONFIRMED=$(prompt_uninstall_confirmation)
 if [[ "$CONFIRMED" != "true" ]]; then
     echo "Uninstall cancelled."
     exit 0
 fi
 
-# ── Phase 4: Remove ─────────────────────────────────────────────────
 for target_dir in "${!TARGET_CONFIG[@]}"; do
     if [[ ${COUNTS["$target_dir"]} -gt 0 ]]; then
         uninstall_from "./$target_dir"
     fi
 done
-

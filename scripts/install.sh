@@ -2,39 +2,78 @@
 set -e
 
 REPO="${LISSOM_REPO:-https://github.com/cuzfrog/lissom-skills}"
-RAW_REPO="${LISSOM_RAW_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
-CLEANUP_TMPDIR=""
 
-cleanup() {
-    [[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true
-    rm -f lissom-skills-tmp.zip
-}
+cleanup() { rm -f lissom-skills-tmp.zip; }
 trap cleanup EXIT
 
-# 1. Resolve SCRIPT_DIR (mirror the old install.sh approach for curl | bash)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
-[[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+parse_no_args() {
+    if [[ -n "$1" ]]; then
+        echo "Usage: install.sh"
+        exit 1
+    fi
+}
 
-if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
-    SCRIPT_DIR="$(mktemp -d)"
-    CLEANUP_TMPDIR="$SCRIPT_DIR"
-    mkdir -p "$SCRIPT_DIR/scripts/lib"
-    for f in common.sh constants.sh ui.sh; do
-        curl -fsSL "$RAW_REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
-    done
+prompt_target_directory() {
+    [[ -n "${LISSOM_TARGET:-}" ]] && { echo "$LISSOM_TARGET"; return 0; }
+    [[ "${LISSOM_YES:-}" == "1" ]] && { echo ".claude"; return 0; }
+
+    if [[ -t 0 ]]; then
+        echo "Select installation target:" >&2
+        select _ in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)" ".qwen (Qwen Code)" ".gemini (Gemini CLI)"; do
+            case "$REPLY" in
+                1) echo ".claude"; return 0 ;;
+                2) echo ".opencode"; return 0 ;;
+                3) echo ".qwen"; return 0 ;;
+                4) echo ".gemini"; return 0 ;;
+                *) echo "Invalid choice. Try again." >&2 ;;
+            esac
+        done
+    fi
+
+    if [[ -t 2 ]] && ( : </dev/tty ) 2>/dev/null; then
+        echo "Select installation target:" >&2
+        echo "1) .claude (Claude Code and most CLIs)" >&2
+        echo "2) .opencode (Opencode)" >&2
+        echo "3) .qwen (Qwen Code)" >&2
+        echo "4) .gemini (Gemini CLI)" >&2
+        echo -n "Choice: " >&2
+        read -r _ui_reply </dev/tty
+        case "${_ui_reply:-1}" in
+            1|"") echo ".claude" ;;
+            2) echo ".opencode" ;;
+            3) echo ".qwen" ;;
+            4) echo ".gemini" ;;
+            *) echo "Invalid choice, defaulting to .claude." >&2; echo ".claude" ;;
+        esac
+        return 0
+    fi
+
+    echo ".claude"
+}
+
+prompt_overwrite() {
+    local dir="$1"
+    if [[ "${LISSOM_YES:-}" == "1" ]]; then
+        echo "true"; return 0
+    elif ( : </dev/tty ) 2>/dev/null; then
+        echo -n "$dir already exists and is not empty. Overwrite all files? (y/N) " >&2
+        read -n 1 -r _ow_reply </dev/tty
+        echo >&2
+        [[ $_ow_reply =~ ^[Yy]$ ]] && echo "true" || echo "false"
+        return 0
+    fi
+    echo "false"
+}
+
+if [[ "$1" == "--source-only" ]]; then
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]] && return || exit 0
 fi
-
-source "$SCRIPT_DIR/scripts/lib/common.sh"
-source "$SCRIPT_DIR/scripts/lib/constants.sh"
-source "$SCRIPT_DIR/scripts/lib/ui.sh"
 
 parse_no_args "$@"
 
-# 2. Prompt for target directory (same as before)
 INSTALL_TARGET=$(prompt_target_directory)
 TARGET="./$INSTALL_TARGET"
 
-# 3. Map target to zip name
 case "$INSTALL_TARGET" in
     .claude)   ZIP="lissom-skills-claude.zip" ;;
     .opencode) ZIP="lissom-skills-opencode.zip" ;;
@@ -43,47 +82,24 @@ case "$INSTALL_TARGET" in
     *) echo "Error: Unknown target $INSTALL_TARGET" >&2; exit 1 ;;
 esac
 
-# 4. If target directory already exists and is non-empty, prompt for overwrite
 if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
-    OVERWRITE=false
-    if [[ "${LISSOM_YES:-}" == "1" ]]; then
-        OVERWRITE=true
-    elif [[ -t 0 ]]; then
-        read -p "$TARGET already exists and is not empty. Overwrite all files? (y/N) " -n 1 -r
-        echo
-        [[ $REPLY =~ ^[Yy]$ ]] && OVERWRITE=true
-    fi
-    if ! $OVERWRITE; then
+    if [[ "$(prompt_overwrite "$TARGET")" != "true" ]]; then
         echo "Installation cancelled."
         exit 0
     fi
 fi
 
-# 5. Download the zip from GitHub releases
 ZIP_URL="$REPO/releases/latest/download/$ZIP"
 ZIP_FILE="lissom-skills-tmp.zip"
 echo "Downloading $ZIP..."
 curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"
 
-# 6. Unzip to current working directory
 echo "Installing to $TARGET..."
-unzip -o "$ZIP_FILE"
+unzip -o "$ZIP_FILE" -x ".lissom/*"
+unzip -n "$ZIP_FILE" ".lissom/*"
 
-# 7. Clean up zip file
 rm -f "$ZIP_FILE"
 
-# 8. Create sample Specs.md (copy from installed template)
-specs_dir=".lissom/tasks/T1"
-specs_dest="$specs_dir/Specs.md"
-if [[ ! -f "$specs_dest" ]]; then
-    mkdir -p "$specs_dir"
-    if [[ -f "$TARGET/templates/Specs.md" ]]; then
-        cp "$TARGET/templates/Specs.md" "$specs_dest"
-        echo "Created sample $specs_dest"
-    fi
-fi
-
-# 9. Add .lissom/ to .gitignore if not already present
 gitignore_msg="# We recommend not to commit development doc. If you want to stage the content, comment out this line."
 if [[ -f ".gitignore" ]]; then
     if ! grep -q "^\.lissom/" ".gitignore"; then
@@ -95,12 +111,10 @@ else
     echo "Created .gitignore with .lissom/"
 fi
 
-# 10. Print summary
-echo ""
-echo "Installation complete!"
-echo "Installed to $TARGET"
+echo "┌─┐"
+echo "│L│░ LISSOM  |  Installation complete!"
+echo "└─┘  SKILLS  |  Installed to $TARGET"
 echo ""
 echo "Next steps:"
 echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
 echo "- Invoke '/lissom-auto T1', get interviewed and wait for the job to be done!"
-

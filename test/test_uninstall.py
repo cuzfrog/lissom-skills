@@ -184,18 +184,12 @@ def call_uninstall_from(src: Path, work: Path, target: str, dry_run: str = "fals
     """
     lib_dest = src / "scripts" / "lib"
     lib_dest.mkdir(parents=True, exist_ok=True)
-    for lib in ("common.sh", "constants.sh", "ui.sh"):
-        shutil.copy(REPO_ROOT / "scripts" / "lib" / lib, lib_dest / lib)
     shutil.copy(REPO_ROOT / "scripts" / "uninstall.sh", src / "uninstall.sh")
 
     wrapper = src / "call_uninstall_from.sh"
     wrapper.write_text(f"""#!/usr/bin/env bash
 set -e
-SCRIPT_DIR="{src}"
-source "$SCRIPT_DIR/scripts/lib/common.sh"
-source "$SCRIPT_DIR/scripts/lib/constants.sh"
-source "$SCRIPT_DIR/scripts/lib/ui.sh"
-source "$SCRIPT_DIR/uninstall.sh"
+source "$(dirname "$0")/uninstall.sh"
 
 uninstall_from "{target}" {dry_run}
 """)
