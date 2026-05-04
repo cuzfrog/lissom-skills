@@ -22,6 +22,19 @@
 - **Idempotency** — hussle-free resume with minimal state.
 - **Hammered Specs** — no surprise dev experience.
 
+<table>
+  <tr>
+    <th>/gsd-autonomous</th>
+    <th>/lissom-auto</th>
+  </tr>
+  <tr>
+    <td><img src="./doc/qwen_context_gsd.png" alt="GSD context" /></td>
+    <td><img src="./doc/qwen_context_ls.png" alt="LISSOM context" /></td>
+  </tr>
+</table>
+(Context after a 10m task on a small local model with Qwen Code)
+
+
 #### When to use?
 - I have an idea, help me refine the specs and automate the implementation.
 
@@ -57,6 +70,16 @@ Supported:
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode).
 - `.gemini/` [Gemini CLI](https://geminicli.com/).
 
+### Uninstallation
+
+Remove all installed files from both `.claude/` and `.opencode/` directories in the current project:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
+```
+
+Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
+
 ---
 
 ## Here We Go!
@@ -69,7 +92,7 @@ Supported:
 ### Best practices
 
 - Reference to project documentation in your `Specs.md`. This saves exploration.
-- Ensure test methods are clearly defined (e.g. in `CLAUDE.md`)
+- Define test methods clearly (e.g. in `CLAUDE.md`)
 
 ---
 
@@ -90,18 +113,6 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 | `user_attention` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
 | `fix_threshold` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
 | `spec_review_required` | `yes` — Review and refine specs before research; `no` — Skip spec review |
-
----
-
-## Uninstallation
-
-Remove all installed files from both `.claude/` and `.opencode/` directories in the current project:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
-```
-
-Only files originally installed by this bundle are removed — any custom files you added are left untouched. Empty directories are cleaned up automatically.
 
 ---
 
