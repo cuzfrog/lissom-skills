@@ -508,14 +508,14 @@ def test_remote_install_via_curl(tmp_path):
             f.unlink()
 
 
-# ── Regression tests: ui.sh prompt functions ────────────────────────
+# ── Regression tests: prompt functions ──────────────────────────────
 
 def test_prompt_target_directory_stdout_clean(tmp_path):
     """Regression: prompt_target_directory outputs only the target name to stdout."""
     for target in (".claude", ".opencode", ".qwen", ".gemini"):
         result = subprocess.run(
             ["bash", "-c", f"""
-                source scripts/lib/ui.sh
+                source scripts/install.sh --source-only
                 LISSOM_TARGET={target} prompt_target_directory
             """],
             capture_output=True, text=True,
