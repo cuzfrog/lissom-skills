@@ -285,6 +285,42 @@ def test_empty_target_dir_preserved(tmp_path, install_server):
     assert (work / ".claude" / "agents" / "lissom-researcher.md").is_file()
 
 
+def test_frontmatter_fields_preserved_on_overwrite(tmp_path, install_server):
+    """Custom model/temperature fields in existing files survive overwrite."""
+    work = tmp_path / "work"
+    work.mkdir()
+    _, port = install_server
+
+    target = work / ".claude"
+    (target / "agents").mkdir(parents=True)
+    custom = (
+        "---\nname: lissom-researcher\ndescription: custom\ntools: Bash, Read\n"
+        "model: my-custom-model\ntemperature: 0.5\n---\nCustom body.\n"
+    )
+    (target / "agents" / "lissom-researcher.md").write_text(custom)
+
+    result = subprocess.run(
+        ["bash", str(INSTALL_SH)],
+        cwd=str(work),
+        env={
+            **os.environ,
+            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_TARGET": ".claude",
+            "LISSOM_YES": "1",
+        },
+        capture_output=True, text=True, timeout=30,
+    )
+
+    assert result.returncode == 0
+    content = (target / "agents" / "lissom-researcher.md").read_text()
+    assert "model: my-custom-model" in content
+    assert "temperature: 0.5" in content
+    assert "my-custom-model" in result.stdout
+    assert "lissom-researcher" in result.stdout
+    assert "empty (inherit)" in result.stdout
+    assert "(edit in" in result.stdout
+
+
 def test_remote_install_via_curl(tmp_path, install_server):
     """Simulate curl | bash flow with HTTP server serving zips."""
     work = tmp_path / "work"
