@@ -29,7 +29,6 @@ from scripts.lib.constants import (
     TARGET_CONFIG,
 )
 from scripts.lib.frontmatter import inject_field
-from scripts.prebuild import generate_readme
 from scripts.lib.opencode import convert_agent as opencode_convert_agent
 from scripts.lib.opencode import convert_skill as opencode_convert_skill
 from scripts.lib.qwen import convert_agent as qwen_convert_agent
@@ -100,10 +99,6 @@ def build(root: Path) -> None:
             (staging / target_dir / "agents").mkdir(parents=True)
             (staging / target_dir / "skills").mkdir(parents=True)
             (staging / target_dir / "templates").mkdir(parents=True)
-
-            # Generate install-readme.txt
-            readme_content = generate_readme(shortname)
-            (staging / "install-readme.txt").write_text(readme_content, encoding="utf-8")
 
             # Convert agents
             for agent_name, source_content in agent_contents.items():

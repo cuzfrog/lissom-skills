@@ -57,7 +57,6 @@ def make_build_fixture(root: Path) -> None:
     for py_file in (REPO_ROOT / "scripts" / "lib").glob("*.py"):
         shutil.copy2(py_file, scripts_dest / py_file.name)
     shutil.copy2(REPO_ROOT / "scripts" / "build.py", root / "scripts" / "build.py")
-    shutil.copy2(REPO_ROOT / "scripts" / "prebuild.py", root / "scripts" / "prebuild.py")
 
 
 # ── OpenCode Converter Tests ─────────────────────────────────────────
