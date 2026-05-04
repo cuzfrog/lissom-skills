@@ -95,27 +95,42 @@ ZIP_FILE="lissom-skills-tmp.zip"
 echo "Downloading $ZIP..."
 curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"
 
-declare -A SAVED_FIELDS
+SAVED_KEYS=()
+SAVED_VALUES=()
 
 save_frontmatter_fields() {
     local dir="$1"
-    local field value
+    local field value key
     while IFS= read -r -d '' file; do
         for field in "${NO_OVERWRITE_FRONTMATTER_FIELDS[@]}"; do
             value=$(sed -n "/^---$/,/^---$/ s|^${field}: *||p" "$file" | head -1)
             if [[ -n "$value" ]]; then
-                SAVED_FIELDS["${file}|${field}"]="$value"
+                key="${file}|${field}"
+                SAVED_KEYS+=("$key")
+                SAVED_VALUES+=("$value")
             fi
         done
     done < <(find "$dir" -name '*.md' -print0 2>/dev/null)
 }
 
+find_saved_value() {
+    local search_key="$1"
+    local i
+    for i in "${!SAVED_KEYS[@]}"; do
+        if [[ "${SAVED_KEYS[$i]}" == "$search_key" ]]; then
+            echo "${SAVED_VALUES[$i]}"
+            return 0
+        fi
+    done
+    return 1
+}
+
 restore_frontmatter_fields() {
-    local key path field value
-    for key in "${!SAVED_FIELDS[@]}"; do
-        path="${key%|*}"
-        field="${key##*|}"
-        value="${SAVED_FIELDS[$key]}"
+    local i path field value
+    for i in "${!SAVED_KEYS[@]}"; do
+        path="${SAVED_KEYS[$i]%|*}"
+        field="${SAVED_KEYS[$i]##*|}"
+        value="${SAVED_VALUES[$i]}"
         if grep -q "^${field}:" "$path"; then
             sed -i "s|^${field}:.*|${field}: ${value}|" "$path"
         else
@@ -137,8 +152,8 @@ print_agent_models() {
         [[ -f "$file" ]] || continue
         name="$(basename "$file" .md)"
         key="${file}|model"
-        if [[ -n "${SAVED_FIELDS[$key]+x}" ]]; then
-            model="${SAVED_FIELDS[$key]}"
+        if model=$(find_saved_value "$key"); then
+            : # model already set
         else
             model="$(sed -n '/^---$/,/^---$/ s|^model: *||p' "$file" | head -1)"
             [[ -z "$model" ]] && model="empty (inherit)"
@@ -174,7 +189,7 @@ echo "Installing to $TARGET..."
 unzip -oq "$ZIP_FILE" -x ".lissom/*"
 unzip -nq "$ZIP_FILE" ".lissom/*"
 
-if [[ ${#SAVED_FIELDS[@]} -gt 0 ]]; then
+if [[ ${#SAVED_KEYS[@]} -gt 0 ]]; then
     restore_frontmatter_fields
 fi
 

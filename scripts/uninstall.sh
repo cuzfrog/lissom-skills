@@ -2,12 +2,7 @@
 
 set -e
 
-declare -A TARGET_CONFIG=(
-    [".claude"]="claude"
-    [".opencode"]="opencode"
-    [".qwen"]="qwen"
-    [".gemini"]="gemini"
-)
+TARGET_DIRS=(".claude" ".opencode" ".qwen" ".gemini")
 
 parse_no_args() {
     if [[ -n "$1" ]]; then
@@ -112,11 +107,11 @@ fi
 
 parse_no_args "$@"
 
-declare -A COUNTS
+COUNTS=()
 TOTAL=0
-for target_dir in "${!TARGET_CONFIG[@]}"; do
+for target_dir in "${TARGET_DIRS[@]}"; do
     COUNT=$(uninstall_from "./$target_dir" true)
-    COUNTS["$target_dir"]=$COUNT
+    COUNTS+=("$COUNT")
     TOTAL=$((TOTAL + COUNT))
 done
 
@@ -126,9 +121,10 @@ if [[ $TOTAL -eq 0 ]]; then
 fi
 
 echo "The following lissom-skills files will be removed:"
-for target_dir in "${!TARGET_CONFIG[@]}"; do
-    if [[ ${COUNTS["$target_dir"]} -gt 0 ]]; then
-        echo "  $target_dir/ -> ${COUNTS["$target_dir"]} file(s)"
+for i in "${!TARGET_DIRS[@]}"; do
+    target_dir="${TARGET_DIRS[$i]}"
+    if [[ ${COUNTS[$i]} -gt 0 ]]; then
+        echo "  $target_dir/ -> ${COUNTS[$i]} file(s)"
     fi
 done
 echo "Total: $TOTAL file(s)"
@@ -139,8 +135,9 @@ if [[ "$CONFIRMED" != "true" ]]; then
     exit 0
 fi
 
-for target_dir in "${!TARGET_CONFIG[@]}"; do
-    if [[ ${COUNTS["$target_dir"]} -gt 0 ]]; then
+for i in "${!TARGET_DIRS[@]}"; do
+    target_dir="${TARGET_DIRS[$i]}"
+    if [[ ${COUNTS[$i]} -gt 0 ]]; then
         uninstall_from "./$target_dir"
     fi
 done
