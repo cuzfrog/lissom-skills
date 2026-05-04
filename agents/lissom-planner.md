@@ -42,6 +42,7 @@ Produce either a `Step-dependency-graph.md` or `Fix-dependency-graph-<N>.md` wit
 
 ## Output
 
+### Plan And Step files
 Write (or overwrite) `<task_dir>/Plan.md` with:
 
 - **Goal** – one sentence stating what the task achieves.
@@ -52,6 +53,12 @@ Write (or overwrite) `<task_dir>/Plan.md` with:
 For every step, write a `Step-<N>.md` file in `<task_dir>/` with:
   - What to do (files to create/edit, function signatures, design pattern to apply if any)
   - Acceptance criterion (how the implementer verifies it is done)
+
+### Dependency graph files
+Write (or overwrite) `Step-dependency-graph.md` or `Fix-dependency-graph-<N>.md` with:
+
+- **Dependency Graph** - a mermaid graph of the steps and their dependencies.
+- **Parallelism opportunities** - a list of waves indicating which steps can be done in parallel.
 
 ## Constraints
 

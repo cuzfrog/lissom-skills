@@ -22,6 +22,7 @@ A Claude Code skill and agent set designed to be specific and reliable.
 
 ## Test Method
 - `scripts/` changes must follow TDD workflow.
+- When implementing `.sh` scripts, must take into consideration that the script will be pipelined into `bash`, so user input should be read from tty.
 - Use `pytest` to execute tests. Run a single test file: `pytest test/test_install.py -v`
 - Use `/tmp/tests/**` as the workspace for test cases that require file operations.
 
