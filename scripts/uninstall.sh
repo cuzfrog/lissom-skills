@@ -2,9 +2,24 @@
 
 set -e  # Exit on error
 
-# Source constants
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RAW_REPO="${LISSOM_RAW_REPO:-https://raw.githubusercontent.com/cuzfrog/lissom-skills/main}"
+CLEANUP_TMPDIR=""
+
+cleanup() { [[ -n "$CLEANUP_TMPDIR" ]] && rm -rf "$CLEANUP_TMPDIR" || true; }
+trap cleanup EXIT
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
 [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]] && SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
+
+if [[ ! -f "$SCRIPT_DIR/scripts/lib/common.sh" ]]; then
+    SCRIPT_DIR="$(mktemp -d)"
+    CLEANUP_TMPDIR="$SCRIPT_DIR"
+    mkdir -p "$SCRIPT_DIR/scripts/lib"
+    for f in common.sh constants.sh ui.sh; do
+        curl -fsSL "$RAW_REPO/scripts/lib/$f" -o "$SCRIPT_DIR/scripts/lib/$f"
+    done
+fi
+
 source "$SCRIPT_DIR/scripts/lib/common.sh"
 source "$SCRIPT_DIR/scripts/lib/constants.sh"
 source "$SCRIPT_DIR/scripts/lib/ui.sh"
@@ -80,7 +95,9 @@ uninstall_from() {
 
 # Only run the main body when executed directly (not sourced)
 # This allows sourcing for testing individual functions like uninstall_from()
-if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+# When piped via stdin (curl | bash), BASH_SOURCE[0] is empty,
+# so we treat that as direct execution.
+if [[ -n "${BASH_SOURCE[0]}" ]] && [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     return
 fi
 
@@ -122,3 +139,4 @@ for target_dir in "${!TARGET_CONFIG[@]}"; do
         uninstall_from "./$target_dir"
     fi
 done
+
