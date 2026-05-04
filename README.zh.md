@@ -22,6 +22,19 @@
 - **幂等性** — 最小状态，无忧恢复。
 - **严谨规范** — 无惊喜的开发体验。
 
+<table>
+  <tr>
+    <th>/gsd-autonomous</th>
+    <th>/lissom-auto</th>
+  </tr>
+  <tr>
+    <td><img src="./doc/qwen_context_gsd.png" alt="GSD context" /></td>
+    <td><img src="./doc/qwen_context_ls.png" alt="LISSOM context" /></td>
+  </tr>
+</table>
+（在小型本地模型 Qwen Code 上运行 10 分钟任务后的上下文）
+
+
 #### 何时使用？
 - 我有一个想法，帮我完善规范并自动化实现。
 
@@ -57,6 +70,16 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
 - `.gemini/` [Gemini CLI](https://geminicli.com/)。
 
+### 卸载
+
+删除当前项目中 `.claude/` 和 `.opencode/` 目录中的所有已安装文件：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
+```
+
+仅移除该工具包安装的文件，您自行添加的文件不会被删除。空目录会自动清理。
+
 ---
 
 ## 开始使用
@@ -90,18 +113,6 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 | `user_attention` | `default` — 对主要问题进行访谈；`auto` — 尽量自动处理；`focused` — 详细追问 |
 | `fix_threshold` | `warning` — 修复关键和警告问题；`critical` — 仅关键问题；`suggestion` — 全部问题 |
 | `spec_review_required` | `yes` — 在研究前评审和完善规范；`no` — 跳过规范评审 |
-
----
-
-## 卸载
-
-删除当前项目中 `.claude/` 和 `.opencode/` 目录中的所有已安装文件：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
-```
-
-仅移除该工具包安装的文件，您自行添加的文件不会被删除。空目录会自动清理。
 
 ---
 

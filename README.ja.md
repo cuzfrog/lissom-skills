@@ -22,6 +22,19 @@
 - **冪等性** — 最小限の状態で気軽に再開。
 - **厳格な仕様** — 驚きのない開発体験。
 
+<table>
+  <tr>
+    <th>/gsd-autonomous</th>
+    <th>/lissom-auto</th>
+  </tr>
+  <tr>
+    <td><img src="./doc/qwen_context_gsd.png" alt="GSD context" /></td>
+    <td><img src="./doc/qwen_context_ls.png" alt="LISSOM context" /></td>
+  </tr>
+</table>
+（小型ローカルモデル Qwen Code で10分タスク実行後のコンテキスト）
+
+
 #### いつ使うのか？
 - アイデアがある。仕様を詰めて実装を自動化したい。
 
@@ -57,6 +70,16 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
 - `.gemini/` [Gemini CLI](https://geminicli.com/)。
 
+### アンインストール
+
+カレントプロジェクトの `.claude/` および `.opencode/` ディレクトリからインストール済みファイルをすべて削除：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
+```
+
+このバンドルでインストールされたファイルのみが削除されます。手動で追加したファイルはそのまま残ります。空になったディレクトリは自動的に整理されます。
+
 ---
 
 ## さあ始めよう！
@@ -90,18 +113,6 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 | `user_attention` | `default` — 主要な懸念事項をインタビュー；`auto` — 自動運転（ベストエフォート）；`focused` — 網羅的な質問 |
 | `fix_threshold` | `warning` — 致命的および警告を修正；`critical` — 致命的のみ；`suggestion` — すべての指摘 |
 | `spec_review_required` | `yes` — リサーチ前に仕様をレビュー・改善；`no` — 仕様レビューをスキップ |
-
----
-
-## アンインストール
-
-カレントプロジェクトの `.claude/` および `.opencode/` ディレクトリからインストール済みファイルをすべて削除：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
-```
-
-このバンドルでインストールされたファイルのみが削除されます。手動で追加したファイルはそのまま残ります。空になったディレクトリは自動的に整理されます。
 
 ---
 
