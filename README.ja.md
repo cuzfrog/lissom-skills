@@ -22,6 +22,17 @@
 - **冪等性** — 最小限の状態で気軽に再開。
 - **厳格な仕様** — 驚きのない開発体験。
 
+<table>
+  <tr>
+    <th>GSD</th>
+    <th>LISSOM</th>
+  </tr>
+  <tr>
+    <td><img src="doc/qwne_context_gsd.png" width="50%" alt="GSD context" /></td>
+    <td><img src="doc/qwne_context_ls.png" width="50%" alt="LISSOM context" /></td>
+  </tr>
+</table>
+
 #### いつ使うのか？
 - アイデアがある。仕様を詰めて実装を自動化したい。
 

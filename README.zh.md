@@ -22,6 +22,17 @@
 - **幂等性** — 最小状态，无忧恢复。
 - **严谨规范** — 无惊喜的开发体验。
 
+<table>
+  <tr>
+    <th>GSD</th>
+    <th>LISSOM</th>
+  </tr>
+  <tr>
+    <td><img src="doc/qwne_context_gsd.png" width="50%" alt="GSD context" /></td>
+    <td><img src="doc/qwne_context_ls.png" width="50%" alt="LISSOM context" /></td>
+  </tr>
+</table>
+
 #### 何时使用？
 - 我有一个想法，帮我完善规范并自动化实现。
 
