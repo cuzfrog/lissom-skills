@@ -3,7 +3,7 @@ set -e
 
 REPO="${LISSOM_REPO:-https://github.com/cuzfrog/lissom-skills}"
 
-cleanup() { rm -f lissom-skills-tmp.zip; }
+cleanup() { rm -f lissom-skills-tmp.zip install-readme.txt; }
 trap cleanup EXIT
 
 parse_no_args() {
@@ -98,7 +98,15 @@ echo "Installing to $TARGET..."
 unzip -o "$ZIP_FILE" -x ".lissom/*"
 unzip -n "$ZIP_FILE" ".lissom/*"
 
-rm -f "$ZIP_FILE"
+if [[ -f "install-readme.txt" ]]; then
+    echo ""
+    cat "install-readme.txt"
+    echo ""
+    echo "Agent models can be edited later in $TARGET/agents/"
+    echo ""
+fi
+
+rm -f "$ZIP_FILE" install-readme.txt
 
 gitignore_msg="# We recommend not to commit development doc. If you want to stage the content, comment out this line."
 if [[ -f ".gitignore" ]]; then
