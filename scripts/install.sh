@@ -2,6 +2,7 @@
 set -e
 
 REPO="${LISSOM_REPO:-https://github.com/cuzfrog/lissom-skills}"
+NO_OVERWRITE_FRONTMATTER_FIELDS=('model' 'temperature')
 
 cleanup() { rm -f lissom-skills-tmp.zip; }
 trap cleanup EXIT
@@ -94,9 +95,85 @@ ZIP_FILE="lissom-skills-tmp.zip"
 echo "Downloading $ZIP..."
 curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"
 
+declare -A SAVED_FIELDS
+
+save_frontmatter_fields() {
+    local dir="$1"
+    local field value
+    while IFS= read -r -d '' file; do
+        for field in "${NO_OVERWRITE_FRONTMATTER_FIELDS[@]}"; do
+            value=$(sed -n "/^---$/,/^---$/ s|^${field}: *||p" "$file" | head -1)
+            if [[ -n "$value" ]]; then
+                SAVED_FIELDS["${file}|${field}"]="$value"
+            fi
+        done
+    done < <(find "$dir" -name '*.md' -print0 2>/dev/null)
+}
+
+restore_frontmatter_fields() {
+    local key path field value
+    for key in "${!SAVED_FIELDS[@]}"; do
+        path="${key%|*}"
+        field="${key##*|}"
+        value="${SAVED_FIELDS[$key]}"
+        if grep -q "^${field}:" "$path"; then
+            sed -i "s|^${field}:.*|${field}: ${value}|" "$path"
+        else
+            awk -v line="${field}: ${value}" '
+                /^---$/ { c++; if(c==2) { print line } }
+                { print }
+            ' "$path" > "$path.tmp" && mv "$path.tmp" "$path"
+        fi
+    done
+}
+
+print_agent_models() {
+    local agents_dir="$TARGET/agents"
+    [[ -d "$agents_dir" ]] || return 0
+
+    local -a names models
+    local file name model key
+    for file in "$agents_dir"/*.md; do
+        [[ -f "$file" ]] || continue
+        name="$(basename "$file" .md)"
+        key="${file}|model"
+        model="${SAVED_FIELDS[$key]:-empty (inherit)}"
+        names+=("$name")
+        models+=("$model")
+    done
+    ((${#names[@]})) || return 0
+
+    local name_width=0 model_width=0 i
+    for i in "${!names[@]}"; do
+        ((${#names[i]} > name_width)) && name_width=${#names[i]}
+        ((${#models[i]} > model_width)) && model_width=${#models[i]}
+    done
+    name_width=$((name_width > 5 ? name_width : 5))
+    model_width=$((model_width > 5 ? model_width : 5))
+
+    echo ""
+    printf "  %-${name_width}s  %s\n" "Agent" "Model"
+    printf "  %-${name_width}s  %s\n" "$(printf '%*s' "$name_width" '' | tr ' ' '-')" "$(printf '%*s' "$model_width" '' | tr ' ' '-')"
+    for i in "${!names[@]}"; do
+        printf "  %-${name_width}s  %s\n" "${names[$i]}" "${models[$i]}"
+    done
+    echo "  (edit in $TARGET/agents/ to customize)"
+    echo ""
+}
+
+if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
+    save_frontmatter_fields "$TARGET"
+fi
+
 echo "Installing to $TARGET..."
-unzip -o "$ZIP_FILE" -x ".lissom/*"
-unzip -n "$ZIP_FILE" ".lissom/*"
+unzip -oq "$ZIP_FILE" -x ".lissom/*"
+unzip -nq "$ZIP_FILE" ".lissom/*"
+
+if [[ ${#SAVED_FIELDS[@]} -gt 0 ]]; then
+    restore_frontmatter_fields
+fi
+
+print_agent_models
 
 rm -f "$ZIP_FILE"
 
@@ -112,8 +189,8 @@ else
 fi
 
 echo "┌─┐"
-echo "│L│░ LISSOM  |  Installation complete!"
-echo "└─┘  SKILLS  |  Installed to $TARGET"
+echo "│L│░ LISSOM  |  Installation complete,"
+echo "└─┘  SKILLS  |  Happy hacking!"
 echo ""
 echo "Next steps:"
 echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
