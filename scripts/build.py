@@ -98,7 +98,6 @@ def build(root: Path) -> None:
             # Create directory structure
             (staging / target_dir / "agents").mkdir(parents=True)
             (staging / target_dir / "skills").mkdir(parents=True)
-            (staging / target_dir / "templates").mkdir(parents=True)
 
             # Convert agents
             for agent_name, source_content in agent_contents.items():
@@ -130,11 +129,6 @@ def build(root: Path) -> None:
                 skill_dir = staging / target_dir / "skills" / skill_name
                 skill_dir.mkdir(parents=True, exist_ok=True)
                 (skill_dir / "SKILL.md").write_text(output, encoding="utf-8")
-
-            # Copy templates
-            (staging / target_dir / "templates" / "Specs.md").write_text(
-                specs_content, encoding="utf-8"
-            )
 
             # Stage Specs.md at its installed location (.lissom/tasks/T1/)
             # so install.sh can use 'unzip -n' to skip it on re-installs

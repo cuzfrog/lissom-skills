@@ -137,7 +137,12 @@ print_agent_models() {
         [[ -f "$file" ]] || continue
         name="$(basename "$file" .md)"
         key="${file}|model"
-        model="${SAVED_FIELDS[$key]:-empty (inherit)}"
+        if [[ -n "${SAVED_FIELDS[$key]+x}" ]]; then
+            model="${SAVED_FIELDS[$key]}"
+        else
+            model="$(sed -n '/^---$/,/^---$/ s|^model: *||p' "$file" | head -1)"
+            [[ -z "$model" ]] && model="empty (inherit)"
+        fi
         names+=("$name")
         models+=("$model")
     done

@@ -11,7 +11,7 @@ argument-hint: <task_id>
 ## Preference resolution
 
 1. Load `.lissom/settings.local.json` from the project root. It may be absent or empty — treat either as no preferences set.
-2. Load `user_preference_questions.json` from this skill's directory. Each entry has a `preference_arg` key (the preference name).
+2. Load `<skill_dir>/user_preference_questions.json` from this skill's directory. Each entry has a `preference_arg` key (the preference name).
 3. For each preference, check if it is present in `settings.local.json`. If set, use it.
 4. For any preference not found in `settings.local.json`:
     - Inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."

@@ -285,6 +285,34 @@ def test_empty_target_dir_preserved(tmp_path, install_server):
     assert (work / ".claude" / "agents" / "lissom-researcher.md").is_file()
 
 
+def test_print_agent_models_shows_models_on_fresh_install(tmp_path, install_server):
+    """print_agent_models reads model values from files on first install (SAVED_FIELDS empty)."""
+    work = tmp_path / "work"
+    work.mkdir()
+    _, port = install_server
+
+    result = subprocess.run(
+        ["bash", str(INSTALL_SH)],
+        cwd=str(work),
+        env={
+            **os.environ,
+            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_TARGET": ".claude",
+            "LISSOM_YES": "1",
+        },
+        capture_output=True, text=True, timeout=30,
+    )
+
+    assert result.returncode == 0, (
+        f"stdout: {result.stdout}\nstderr: {result.stderr}"
+    )
+    # On fresh install, models should be read from the extracted files, not "empty (inherit)"
+    assert "sonnet" in result.stdout
+    assert "lissom-researcher" in result.stdout
+    # Should NOT show "empty (inherit)" when files have model values
+    assert "empty (inherit)" not in result.stdout
+
+
 def test_frontmatter_fields_preserved_on_overwrite(tmp_path, install_server):
     """Custom model/temperature fields in existing files survive overwrite."""
     work = tmp_path / "work"
@@ -317,7 +345,7 @@ def test_frontmatter_fields_preserved_on_overwrite(tmp_path, install_server):
     assert "temperature: 0.5" in content
     assert "my-custom-model" in result.stdout
     assert "lissom-researcher" in result.stdout
-    assert "empty (inherit)" in result.stdout
+    assert "sonnet" in result.stdout
     assert "(edit in" in result.stdout
 
 
