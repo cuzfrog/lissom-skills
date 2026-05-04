@@ -96,9 +96,9 @@ else
 fi
 
 # 10. Print summary
-echo ""
-echo "Installation complete!"
-echo "Installed to $TARGET"
+echo "┌─┐"
+echo "│L│░ LISSOM  |  Installation complete!"
+echo "└─┘  SKILLS  |  Installed to $TARGET"
 echo ""
 echo "Next steps:"
 echo "- A sample Specs.md has been created at .lissom/tasks/T1/Specs.md"
