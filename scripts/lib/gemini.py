@@ -38,14 +38,13 @@ def convert_agent(content: str, agent_name: str) -> str:
     # Parse tools: "Bash, Read, AskUserQuestion" → list
     tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-    model = GEMINI_MODEL_MAP.get(agent_name)
+    model = GEMINI_MODEL_MAP.get(agent_name, "gemini-3-flash-preview")
 
     lines = ["---"]
     lines.append(f"name: {name}")
     lines.append(f"description: {description}")
     lines.append("temperature: 0.1")
-    if model is not None:
-        lines.append(f"model: {model}")
+    lines.append(f"model: {model}")
     lines.append("tools:")
     for tool in tool_list:
         gemini_tool = CLAUDE_TO_GEMINI_TOOL.get(tool)
