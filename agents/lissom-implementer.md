@@ -58,5 +58,6 @@ Read the existing file if it exists. Append the step entry (whether `sha` or `er
 ## Constraints
 
 - Do not modify, stage, or commit pre-existing unrelated changes.
+- Do not track or commit .gitignored files.
 - Do not touch anything outside the step's scope.
 - Do not push to remote.
