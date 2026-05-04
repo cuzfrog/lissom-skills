@@ -10,7 +10,7 @@ from scripts.lib.constants import (
     CLAUDE_TO_QWEN_TOOL,
     QWEN_MODEL_MAP,
 )
-from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
+from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools, shift_args
 
 
 def convert_agent(content: str, agent_name: str) -> str:
@@ -53,6 +53,7 @@ def convert_agent(content: str, agent_name: str) -> str:
     new_content = "\n".join(lines) + "\n"
     if body:
         body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
+        body = shift_args(body)
         new_content += body
 
     return new_content
@@ -82,6 +83,7 @@ def convert_skill(content: str, skill_name: str) -> str:
     new_content = "\n".join(lines) + "\n"
     if body:
         body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
+        body = shift_args(body)
         new_content += body
 
     return new_content
