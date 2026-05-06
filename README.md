@@ -39,7 +39,7 @@
 - I have an idea, help me refine the specs and automate the implementation.
 
 #### When not to use?
-- Trivial tasks — do it in one agent.
+- Trivial or small tasks.
 - Exploratory tasks — use `/explore`.
 
 ### Basic Workflow
@@ -91,8 +91,8 @@ Only files originally installed by this bundle are removed — any custom files 
 
 ### Best practices
 
-- Reference to project documentation in your `Specs.md`. This saves exploration.
-- Define test methods clearly (e.g. in `CLAUDE.md`)
+- Use a simple [grill-me](doc/grill-me.md) skill to build the `Specs.md`.
+- Define test methods (development cycle) clearly (e.g. in `CLAUDE.md`)
 
 ---
 
