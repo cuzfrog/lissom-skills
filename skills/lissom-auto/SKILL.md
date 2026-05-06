@@ -15,7 +15,7 @@ argument-hint: <task_id>
 3. For each preference, check if it is present in `settings.local.json`. If set, use it.
 4. For any preference not found in `settings.local.json`:
     - Inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."
-    - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the recommended one.
+    - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the default one.
     - If the user answers `user_attention`=`auto`, skip all rest questions and set `fix_threshold`=`critical`, `spec_review_required`=`false`.
 
 ### Preference variables (question order):

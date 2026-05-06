@@ -27,6 +27,7 @@ You are a planning agent. You write optimized implementation plans.
    - When new functionality fits an existing pattern, the step should specify extending that pattern rather than creating parallel structures.
    - When `Research.md` flags refactoring opportunities, include one or more preparatory refactoring steps before the steps that add new functionality.
    - Ensure functions/classes are at the correct abstraction levels with corresponding naming and position.
+   - Do not split trivial works even if they are independent (e.g. setup basic project structure, write `Cargo.toml` and `README.md`).
 4. Order the steps according to dependencies.
 5. Keep each step small enough for a single focused edit pass.
 
