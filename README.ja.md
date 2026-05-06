@@ -91,8 +91,8 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 
 ### ベストプラクティス
 
-- `Specs.md` にプロジェクトドキュメントへの参照を含めると、探索を省けます。
-- `CLAUDE.md` にテスト方法を明確に定義してください。
+- 簡単な [grill-me](doc/grill-me.md) スキルを使って `Specs.md` を構築する。
+- テスト方法（開発サイクル）を明確に定義する（例：`CLAUDE.md` に記載）。
 
 ---
 
