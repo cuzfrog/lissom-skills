@@ -29,7 +29,7 @@ If `Research.md` already exists:
 4. **Interview loop (user_attention: default or focused)**
    - **default**: Ask about ambiguities, conflicts, edge cases, assumption confirmations, risks, and consequential decisions. Stop as soon as implementation can proceed without guesswork.
    - **focused**: In addition to default questions, ask deeper follow-up questions about edge cases, alternatives, tradeoffs, and test expectations.
-   - Use Tool `AskUserQuestion` to ask 1 question at a time; assess whether enough clarity has been reached before continuing.
+   - Use Tool `AskUserQuestion` to interview the user; assess whether enough clarity has been reached before continuing.
    - **auto**: skip this step entirely.
 5. **Auto-mode escalation (user_attention: auto only)**
    Even in `auto` mode, pause and escalate to the user when you encounter any of
