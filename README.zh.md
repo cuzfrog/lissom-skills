@@ -93,6 +93,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 
 - 使用简单的 [grill-me](doc/grill-me.md) 技能来构建 `Specs.md`。
 - 明确定义测试方法（开发周期）（例如在 `CLAUDE.md` 中）。
+- 引导行为：`/lissom-auto <task_id> 直接进入规划阶段，我已写好完善的规范。`
 
 ---
 
