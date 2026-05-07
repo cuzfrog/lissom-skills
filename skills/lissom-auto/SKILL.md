@@ -7,6 +7,7 @@ argument-hint: <task_id>
 ## Inputs
 
 - `task_id` = "$0"
+- `extra_info` = $ARGUMENTS (optional)
 
 ## Preference resolution
 
@@ -15,13 +16,15 @@ argument-hint: <task_id>
 3. For each preference, check if it is present in `settings.local.json`. If set, use it.
 4. For any preference not found in `settings.local.json`:
     - Inform user: "Preferences can be set in `.lissom/settings.local.json`, see README."
+    - If the user answers `user_attention`=`auto` or `extra_info` demands auto processing, skip all rest questions and set `fix_threshold`=`critical`, `spec_review_required`=`false`.
+    - If the user answers `spec_review_required`=`true`, set `research_required`=`true` and skip that question.
     - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the default one.
-    - If the user answers `user_attention`=`auto`, skip all rest questions and set `fix_threshold`=`critical`, `spec_review_required`=`false`.
 
 ### Preference variables (question order):
 - `user_attention` = `default`, `auto`, `focused`
 - `fix_threshold` = `warning`, `critical`, `suggestion`
-- `spec_review_required` = `true`, `false`
+- `spec_review_required` = `false`, `true`
+- `research_required` = `true`, `false`
 
 ## Task Directory Resolution
 1. `task_dir` = `.lissom/tasks/<task_id>` or `.lissom/tasks/backlog/<task_id>`
@@ -33,7 +36,7 @@ argument-hint: <task_id>
 
 ## Execution
 0. Use Tool `TodoWrite` to track progress.
-1. Invoke `lissom-research` with `task_dir`, `user_attention`, and `spec_review_required`. Verify `Research.md` exists; retry once on missing, then fail with `Research.md missing after retry`.
+1. Invoke `lissom-research` with `task_dir`, `user_attention`, `spec_review_required`, and `research_required`. Wait for completion. If `spec_review_required` and `research_required` are both `false`, skip this step.
 2. Invoke `lissom-plan` with `task_dir`. Verify `Plan.md` exists; retry once on missing.
 3. Invoke `lissom-impl` with `task_dir`. Verify `Impl-summary.md` exists; retry once on missing.
 4. Invoke `lissom-review` with `task_dir`. Verify `Review.md` exists; retry once on missing.
@@ -63,6 +66,7 @@ After 3 cycles with persistent issues, report failure and direct the user to `Re
 - Never write code, plans, or research directly. Delegate all work by invoking the named sub-skills above.
 - If a sub-skill escalates a blocking question, use Tool `AskUserQuestion` to relay it to the user and pass the answer back.
 - If a skill is interrupted mid-run, re-invoke it (skills are idempotent).
+- Follow user instructions optionally from `extra_info`.
 
 ## Definition of done
 - These artifacts exist in `.lissom/tasks/<task_id>/`: `Research.md`, `Plan.md`, `Impl-summary.md`, `Review.md`.
