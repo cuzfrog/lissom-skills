@@ -104,7 +104,8 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 {
   "user_attention": "default",
   "fix_threshold": "warning",
-  "spec_review_required": "yes"
+  "spec_review_required": "false",
+  "research_required": "true"
 }
 ```
 
@@ -112,7 +113,8 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 |---|---|
 | `user_attention` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
 | `fix_threshold` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
-| `spec_review_required` | `yes` — Review and refine specs before research; `no` — Skip spec review |
+| `spec_review_required` | `false` — Skip spec review; `true` — Review and refine specs before research |
+| `research_required` | `true` — Perform research before implementation; `false` — Skip research if the specs are already sufficient |
 
 ---
 

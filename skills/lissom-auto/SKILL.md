@@ -1,13 +1,14 @@
 ---
 name: lissom-auto
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
-argument-hint: <task_id>
+argument-hint: <task_id> [extra_info]
 ---
 
 ## Inputs
 
-- `task_id` = "$0"
-- `extra_info` = $ARGUMENTS (optional)
+- `args` = $ARGUMENTS
+- `task_id` = args[0]
+- `extra_info` = args[1..] (optional)
 
 ## Preference resolution
 
