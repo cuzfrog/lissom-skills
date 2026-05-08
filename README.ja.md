@@ -93,6 +93,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 
 - 簡単な [grill-me](doc/grill-me.md) スキルを使って `Specs.md` を構築する。
 - テスト方法（開発サイクル）を明確に定義する（例：`CLAUDE.md` に記載）。
+- 動作の制御：`/lissom-auto <task_id> 直接計画フェーズに進んでください。仕様はすでに十分に書かれています。`
 
 ---
 
@@ -104,7 +105,8 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 {
   "user_attention": "default",
   "fix_threshold": "warning",
-  "spec_review_required": "yes"
+  "spec_review_required": "yes",
+  "research_required": "yes"
 }
 ```
 
@@ -113,6 +115,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 | `user_attention` | `default` — 主要な懸念事項をインタビュー；`auto` — 自動運転（ベストエフォート）；`focused` — 網羅的な質問 |
 | `fix_threshold` | `warning` — 致命的および警告を修正；`critical` — 致命的のみ；`suggestion` — すべての指摘 |
 | `spec_review_required` | `yes` — リサーチ前に仕様をレビュー・改善；`no` — 仕様レビューをスキップ |
+| `research_required` | `yes` — 実装前にリサーチを実施；`no` — 仕様が十分な場合はリサーチをスキップ |
 
 ---
 

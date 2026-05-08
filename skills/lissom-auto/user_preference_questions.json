@@ -52,13 +52,31 @@
     "preference_arg": "spec_review_required",
     "options": [
       {
+        "label": "No",
+        "description": "No, the specs are fine as they are.",
+        "value": "no"
+      },
+      {
         "label": "Yes",
         "description": "Review the specs with me and refine them until they're solid before implementation.",
+        "value": "yes"
+      }
+    ]
+  },
+  {
+    "question": "Should I do a deep research based on the specs before implementation?",
+    "header": "Research Requirement",
+    "multiSelect": false,
+    "preference_arg": "research_required",
+    "options": [
+      {
+        "label": "Yes",
+        "description": "Conduct deep research based on the specs before implementation.",
         "value": "yes"
       },
       {
         "label": "No",
-        "description": "No, the specs are fine as they are.",
+        "description": "No, the specs already cover every nook and cranny.",
         "value": "no"
       }
     ]

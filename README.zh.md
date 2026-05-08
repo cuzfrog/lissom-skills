@@ -93,6 +93,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 
 - 使用简单的 [grill-me](doc/grill-me.md) 技能来构建 `Specs.md`。
 - 明确定义测试方法（开发周期）（例如在 `CLAUDE.md` 中）。
+- 引导行为：`/lissom-auto <task_id> 直接进入规划阶段，我已写好完善的规范。`
 
 ---
 
@@ -104,7 +105,8 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 {
   "user_attention": "default",
   "fix_threshold": "warning",
-  "spec_review_required": "yes"
+  "spec_review_required": "yes",
+  "research_required": "yes"
 }
 ```
 
@@ -113,6 +115,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 | `user_attention` | `default` — 对主要问题进行访谈；`auto` — 尽量自动处理；`focused` — 详细追问 |
 | `fix_threshold` | `warning` — 修复关键和警告问题；`critical` — 仅关键问题；`suggestion` — 全部问题 |
 | `spec_review_required` | `yes` — 在研究前评审和完善规范；`no` — 跳过规范评审 |
+| `research_required` | `yes` — 实现前进行研究；`no` — 若规范已足够则跳过研究 |
 
 ---
 

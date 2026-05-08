@@ -93,6 +93,7 @@ Only files originally installed by this bundle are removed — any custom files 
 
 - Use a simple [grill-me](doc/grill-me.md) skill to build the `Specs.md`.
 - Define test methods (development cycle) clearly (e.g. in `CLAUDE.md`)
+- Steer the behavior: `/lissom-auto <task_id> Directly go to plan phase, I have a well-written spec already.`
 
 ---
 
@@ -104,7 +105,8 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 {
   "user_attention": "default",
   "fix_threshold": "warning",
-  "spec_review_required": "yes"
+  "spec_review_required": "false",
+  "research_required": "true"
 }
 ```
 
@@ -112,7 +114,8 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 |---|---|
 | `user_attention` | `default` — Interview for major concerns; `auto` — Best effort auto pilot; `focused` — Exhaustive questioning |
 | `fix_threshold` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
-| `spec_review_required` | `yes` — Review and refine specs before research; `no` — Skip spec review |
+| `spec_review_required` | `false` — Skip spec review; `true` — Review and refine specs before research |
+| `research_required` | `true` — Perform research before implementation; `false` — Skip research if the specs are already sufficient |
 
 ---
 

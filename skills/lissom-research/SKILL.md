@@ -8,7 +8,8 @@ argument-hint: <task_dir> [user_attention] [spec_review_required]
 
 - `task_dir` = "$0"
 - `user_attention` = "$1" (optional): `default` (default), `auto`, or `focused`
-- `spec_review_required` = "$2" (optional): `yes` (default) or `no`
+- `spec_review_required` = "$2" (optional): `no` (default) or `yes`
+- `research_required` = "$3" (optional): `yes` (default) or `no`
 
 ## Process
 
@@ -21,7 +22,7 @@ Execute sequentially:
    - Any other return value: treat as success and proceed.
    - If `<task_dir>/Specs.md` does not exist or is empty after the agent returns, escalate immediately.
 
-2. Use Tool `Agent` to spawn `lissom-researcher`, passing it the `task_dir` and `user_attention`.
+2. **Conditional**: Skip this step if `research_required` is `no`. Otherwise: Use Tool `Agent` to spawn `lissom-researcher`, passing it the `task_dir` and `user_attention`.
 
 ## Completion
 
