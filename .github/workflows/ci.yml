@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'agents/**'
+      - 'skills/**'
+      - 'templates/**'
   pull_request:
     branches: [main]
 
