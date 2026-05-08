@@ -59,7 +59,7 @@ For every step, write a `Step-<N>.md` file in `<task_dir>/` with:
 Write (or overwrite) `Step-dependency-graph.md` or `Fix-dependency-graph-<N>.md` with:
 
 - **Dependency Graph** - a mermaid graph of the steps and their dependencies.
-- **Parallelism opportunities** - a list of waves indicating which steps can be done in parallel.
+- **Execution Order** - a list of waves containing 1 or more steps.
 
 ## Constraints
 
