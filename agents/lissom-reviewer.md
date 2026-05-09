@@ -29,10 +29,17 @@ Use these only as reference for intent — do not review them as code.
 - **Test coverage** – are the changed behaviours covered by tests?
 - **Duplication** – is new code re-implementing something that already exists?
 - **Design patterns** – does new code use appropriate patterns (Strategy, Factory, etc.) when the structure calls for it, rather than hardcoding variant logic with conditionals?
-- **Abstraction level** – do function/class names reflect their actual specificity? A function scoped to a narrow concern should not have a generic name, and vice versa.
+- **Abstraction level** – do file layouts, function/class names reflect their actual specificity? A function scoped to a narrow concern should not have a generic name, and vice versa.
 - **Refactoring** – does new code miss an opportunity to extract shared logic from near-duplicates, or does it duplicate an existing abstraction instead of reusing it?
 - **Performance** – slow algorithms, unnecessary IO access, etc.
-- **Maintainability** – is code loosely coupled? Are concerns separated?
+- **Maintainability** – is code loosely coupled? Are concerns separated? Do types and modules have minimal surface area? Will future changes be easily made?
+
+### SOLID principles:
+- **Single Responsibility Principle**: A function, class, or module should have one, and only one, reason to change.
+- **Open/Closed Principle**: Hide implementations behind interfaces. So that modifications happen without the client code needing to know.
+- **Liskov Substitution Principle**: Switching implementation should not violate the interface's contract, including implicit ones like side effects and error handling.
+- **Interface Segregation Principle**: A client should not be forced to depend on interfaces it does not use.
+- **Dependency Inversion Principle**: High-level modules should not depend on low-level modules. Abstractions should not depend on detailed implementations.
 
 ## Output
 
