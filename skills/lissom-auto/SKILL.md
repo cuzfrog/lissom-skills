@@ -21,11 +21,12 @@ argument-hint: <task_id> [extra_info]
     - If the user answers `spec_review_required`=`true`, set `research_required`=`true` and skip that question.
     - Use Tool `AskUserQuestion` to prompt the user using the entry's question/options. The first option in each question is the default one.
 
-### Preference variables (question order):
+### Preference variables (first options are defaults):
 - `user_attention` = `default`, `auto`, `focused`
 - `fix_threshold` = `warning`, `critical`, `suggestion`
 - `spec_review_required` = `false`, `true`
 - `research_required` = `true`, `false`
+- `impl_delegation` = `single`, `multiple` (do not ask question)
 
 ## Task Directory Resolution
 1. `task_dir` = `.lissom/tasks/<task_id>` or `.lissom/tasks/backlog/<task_id>`
@@ -39,7 +40,7 @@ argument-hint: <task_id> [extra_info]
 0. Use Tool `TodoWrite` to track progress.
 1. Invoke `lissom-research` with `task_dir`, `user_attention`, `spec_review_required`, and `research_required`. Wait for completion. If `spec_review_required` and `research_required` are both `false`, skip this step.
 2. Invoke `lissom-plan` with `task_dir`. Verify `Plan.md` exists; retry once on missing.
-3. Invoke `lissom-impl` with `task_dir`. Verify `Impl-summary.md` exists; retry once on missing.
+3. Invoke `lissom-impl` with `task_dir` and `impl_delegation`. Verify `Impl-summary.md` exists; retry once on missing.
 4. Invoke `lissom-review` with `task_dir`. Verify `Review.md` exists; retry once on missing.
 5. Parse `Review.md` to decide whether to enter the fix loop:
   - Search for heading `**Critical**`. If found and followed by content before the next heading, critical issues exist.

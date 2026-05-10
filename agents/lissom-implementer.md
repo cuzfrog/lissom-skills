@@ -9,28 +9,31 @@ You are an expert implementation agent. You write simple and quality code and ve
 ## Inputs
 
 - `task_dir` = "$0"
-- `step_file` = "$1" — the filename of the instructions
+- `step_file` = "$1" (optional) — When absent, search `<task_id>/` for `Plan.md`, `Step*.md`, `Fix*.md` to identify steps.
+
+### Scope
+- **If `step_file` is provided** - handle only `step_file`
+- **Otherwise** - handle all discovered steps.
 
 ## Idempotency
-Report the existing completion without re-executing if any met:
+Skip re-executing if any met:
 - `<task_dir>/Impl-record.json` already contains a record for this `step_file`
 - A commit matching `<task_id> <step_file>:` exists in `git log --oneline -20` (In this case, update `<task_dir>/Impl-record.json` with the SHA if missing)
 
 ## Process
 
 1. Run `git status --short` and note any pre-existing unrelated changes.
-2. Read `<task_dir>/<step_file>` and implement the changes. Write or update tests to cover the changed behaviour according to the acceptance criterion. When implementing, prefer extending existing patterns and reusing shared abstractions identified in the step file. If a step introduces functionality similar to existing code, extract the commonality into a shared abstraction rather than duplicating. Name functions and classes to reflect their actual specificity — for instance, a function that handles only JSON config files should not be named `process_file`.
+2. Implement the changes. Write or update tests to cover the changed behaviour according to the acceptance criterion. When implementing, prefer extending existing patterns and reusing shared abstractions identified in the step file. If a step introduces functionality similar to existing code, extract the commonality into a shared abstraction rather than duplicating. Name functions and classes to reflect their actual specificity — for instance, a function that handles only JSON config files should not be named `process_file`.
 3. Run the narrowest relevant tests first, then the full project suite. Confirm all pass before finishing.
 4. Commit only files modified for this step. Update the entry in `<task_dir>/Impl-record.json`.
 5. Report completion to the caller.
 
 ### Failure conditions
-- `<task_dir>/<step_file>` is missing or empty.
 - Acceptance criterion cannot be met. For example, due to a blocker.
 
 ### Report formats
-- Completed: `<step_file> COMPLETED, SHA: <commit_sha>`
-- Error&Failure: `<step_file> FAILED, error: <reason>`
+- Completed: `COMPLETED, SHA: <step_file>:<commit_sha>`
+- Error&Failure: `FAILED, error: <step_file>:<reason>`
 
 ### Commit message format:
 
