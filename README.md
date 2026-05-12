@@ -36,7 +36,7 @@
 
 
 #### When to use?
-- I have an idea, help me refine the specs and automate the implementation.
+- I have a scoped idea, help me refine the specs and automate the implementation.
 
 #### When not to use?
 - Trivial or small tasks.
@@ -72,7 +72,7 @@ Supported:
 
 ### Uninstallation
 
-Remove all installed files from both `.claude/` and `.opencode/` directories in the current project:
+Remove all installed files from the current project:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
@@ -94,6 +94,7 @@ Only files originally installed by this bundle are removed — any custom files 
 - Use a simple [grill-me](doc/grill-me.md) skill to build the `Specs.md`.
 - Define test methods (development cycle) clearly (e.g. in `CLAUDE.md`)
 - Steer the behavior: `/lissom-auto <task_id> Directly go to plan phase, I have a well-written spec already.`
+- Review architecture and code structure.
 
 ---
 
@@ -116,7 +117,7 @@ Set preferences in `.lissom/settings.local.json` to avoid being asked each run:
 | `fix_threshold` | `warning` — Fix critical & warnings; `critical` — Critical only; `suggestion` — All issues |
 | `spec_review_required` | `false` — Skip spec review; `true` — Review and refine specs before research |
 | `research_required` | `true` — Perform research before implementation; `false` — Skip research if the specs are already sufficient |
-| `impl_delegation` | `single` — Perform impl in one subagent (faster in most cases); `multiple` — Perform impl in multiple subagents (if impl context is too large, usually not necessary) |
+| `impl_delegation` | `single` — Perform impl in one subagent (faster in most cases); `multiple` — Perform impl in multiple subagents (if impl scope is large; usually not necessary) |
 ---
 
 ## Links
