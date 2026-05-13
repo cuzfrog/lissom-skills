@@ -94,7 +94,7 @@ Only files originally installed by this bundle are removed — any custom files 
 - Use a simple [grill-me](doc/grill-me.md) skill to build the `Specs.md`.
 - Define test methods (development cycle) clearly (e.g. in `CLAUDE.md`)
 - Steer the behavior: `/lissom-auto <task_id> Directly go to plan phase, I have a well-written spec already.`
-- Review architecture and code structure.
+- Review architecture and code structure. You should understand your code.
 
 ---
 
