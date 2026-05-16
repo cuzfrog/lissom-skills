@@ -69,7 +69,7 @@ Supported:
 - `.opencode/` [OpenCode](https://opencode.ai).
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode).
 - `.gemini/` [Gemini CLI](https://geminicli.com/).
-- `.pi/` [Pi CLI](https://github.com/earendil-works/pi).
+- `.pi/` [Pi CLI](https://github.com/earendil-works/pi) — requires [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents).
 
 ### Uninstallation
 
