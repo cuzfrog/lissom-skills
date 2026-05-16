@@ -416,7 +416,6 @@ def test_remote_uninstall_via_curl(tmp_path):
             cwd=str(work),
             env={
                 **os.environ,
-                "LISSOM_REPO": f"http://127.0.0.1:{port}",
                 "LISSOM_YES": "1",
             },
             capture_output=True, text=True, timeout=60,
@@ -448,7 +447,6 @@ def test_remote_uninstall_nothing_to_remove(tmp_path):
             cwd=str(work),
             env={
                 **os.environ,
-                "LISSOM_REPO": f"http://127.0.0.1:{port}",
                 "LISSOM_YES": "1",
             },
             capture_output=True, text=True, timeout=60,

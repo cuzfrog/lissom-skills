@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="${LISSOM_REPO:-https://github.com/cuzfrog/lissom-skills}"
+# Install from local dist: LISSOM_DOWNLOAD_PATH=file:///path/to/lissom-skills/dist ./scripts/install.sh
+DOWNLOAD_PATH="${LISSOM_DOWNLOAD_PATH:-https://github.com/cuzfrog/lissom-skills/releases/latest/download}"
 NO_OVERWRITE_FRONTMATTER_FIELDS=('model' 'temperature')
 
 cleanup() { rm -f lissom-skills-tmp.zip; }
@@ -94,7 +95,7 @@ if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
     fi
 fi
 
-ZIP_URL="$REPO/releases/latest/download/$ZIP"
+ZIP_URL="$DOWNLOAD_PATH/$ZIP"
 ZIP_FILE="lissom-skills-tmp.zip"
 echo "Downloading $ZIP..."
 curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"

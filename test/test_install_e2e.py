@@ -106,7 +106,7 @@ def test_fresh_install_creates_target_tree(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -135,7 +135,7 @@ def test_overwrite_confirmation_accepted(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -161,7 +161,7 @@ def test_overwrite_declined_exits(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
         },
         capture_output=True, text=True, timeout=30,
@@ -184,7 +184,7 @@ def test_install_samples_specs(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -209,7 +209,7 @@ def test_install_adds_gitignore(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -231,7 +231,7 @@ def test_install_cleans_up_zip(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -254,7 +254,7 @@ def test_install_target(tmp_path, install_server, target):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": target,
             "LISSOM_YES": "1",
         },
@@ -278,7 +278,7 @@ def test_empty_target_dir_preserved(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -300,7 +300,7 @@ def test_print_agent_models_shows_models_on_fresh_install(tmp_path, install_serv
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -336,7 +336,7 @@ def test_frontmatter_fields_preserved_on_overwrite(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -365,7 +365,7 @@ def test_remote_install_via_curl(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },

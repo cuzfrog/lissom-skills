@@ -10,8 +10,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def _discover_files():
     files = []
-    files.extend(REPO_ROOT.glob("agents/*.md"))
-    files.extend(REPO_ROOT.glob("skills/*/SKILL.md"))
+    files.extend((REPO_ROOT / "src" / "agents").glob("*.md"))
+    files.extend((REPO_ROOT / "src" / "skills").glob("*/SKILL.md"))
     return sorted(files)
 
 
