@@ -1,6 +1,6 @@
 ---
 name: lissom-research
-description: Dispatches to lissom-specs-reviewer then lissom-researcher to produce Research.md for a given task ID.
+description: Dispatches lissom-specs-reviewer and then lissom-researcher agents optionally to refine the specification and produce the research document given an explicit task_dir, which contains the original specification.
 argument-hint: <task_dir> [user_attention] [spec_review_required]
 ---
 

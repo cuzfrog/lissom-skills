@@ -1,6 +1,6 @@
 ---
 name: lissom-impl
-description: Dispatch to lissom-implementer agent to execute plan steps and verify completion.
+description: Dispatch to lissom-implementer agent to execute the implementation given an explicit task_dir, which contains the plan.
 argument-hint: <task_dir>
 ---
 
