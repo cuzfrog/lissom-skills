@@ -5,22 +5,14 @@ Provides a single entry point ``get_converter`` that maps short target
 names to the correct Converter subclass instance.
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from scripts.lib.converter import Converter
-
-
-# ── Registry ─────────────────────────────────────────────────────────
 from scripts.lib.claude_code import ClaudeCodeConverter
 from scripts.lib.opencode import OpencodeConverter
 from scripts.lib.qwen import QwenConverter
 from scripts.lib.gemini import GeminiConverter
 from scripts.lib.pi import PiConverter
+from scripts.lib.converter import Converter
 
-_registry: dict[str, "Converter"] = {
+_registry: dict[str, Converter] = {
     "claude": ClaudeCodeConverter(),
     "opencode": OpencodeConverter(),
     "qwen": QwenConverter(),
@@ -29,7 +21,7 @@ _registry: dict[str, "Converter"] = {
 }
 
 
-def get_converter(shortname: str) -> "Converter":
+def get_converter(shortname: str) -> Converter:
     """Return a Converter instance for the given target shortname.
 
     Args:
