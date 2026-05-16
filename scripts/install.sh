@@ -148,10 +148,6 @@ restore_frontmatter_fields() {
 
 print_agent_models() {
     local agents_dir="$TARGET/agents"
-    # Pi target stores agents in .pi/extensions/agents/
-    if [[ "$INSTALL_TARGET" == ".pi" ]]; then
-        agents_dir="$TARGET/extensions/agents"
-    fi
     [[ -d "$agents_dir" ]] || return 0
 
     local -a names models

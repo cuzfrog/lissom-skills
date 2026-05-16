@@ -133,6 +133,16 @@ CLAUDE_TO_GEMINI_TOOL = {
     "AskUserQuestion": "ask_user",
 }
 
+# Claude Code tool name → Pi --tools flag name
+CLAUDE_TO_PI_TOOL_FLAG = {
+    "Bash": "bash",
+    "Read": "read",
+    "Write": "write",
+    "Edit": "edit",
+    "Glob": "find,ls",
+    "Grep": "grep",
+}
+
 # Claude Code tool name → Pi body text name
 CLAUDE_TO_PI_BODY = {
     "Bash": "bash",
@@ -144,16 +154,6 @@ CLAUDE_TO_PI_BODY = {
     "WebFetch": "web_fetch",
     "WebSearch": "web_search",
     "AskUserQuestion": "ask_user",
-}
-
-# Claude Code tool name → Pi --tools flag name (for extension runtime)
-CLAUDE_TO_PI_TOOL_FLAG = {
-    "Bash": "bash",
-    "Read": "read",
-    "Write": "write",
-    "Edit": "edit",
-    "Glob": "find,ls",
-    "Grep": "grep",
 }
 
 # Claude Code tool name → Gemini CLI body text name

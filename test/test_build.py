@@ -60,12 +60,7 @@ def make_build_fixture(root: Path) -> None:
         shutil.copy2(py_file, scripts_dest / py_file.name)
     shutil.copy2(REPO_ROOT / "scripts" / "build.py", root / "scripts" / "build.py")
 
-    # Copy Pi extension source files
-    pi_ext_dest = root / "src" / "pi-extensions"
-    pi_ext_dest.mkdir(parents=True, exist_ok=True)
-    for f in (REPO_ROOT / "src" / "pi-extensions").glob("*"):
-        if f.is_file():
-            shutil.copy2(f, pi_ext_dest / f.name)
+
 
 
 # ── OpenCode Converter Tests ─────────────────────────────────────────
@@ -317,12 +312,12 @@ class TestShiftArgs:
 # ── Pi Converter Tests ───────────────────────────────────────────────
 
 class TestPiConverter:
-    def test_convert_skill_rewrites_agent_tool(self):
-        """`Agent` → `lissom-agent` in body text."""
+    def test_convert_skill_preserves_agent_tool_name(self):
+        """`Agent` preserved in body text (pi-subagents exposes Agent natively)."""
         content = "---\nname: lissom-auto\ndescription: fixture\n---\nUse `Agent` to delegate work.\n"
         result = pi_convert_skill(content, "lissom-auto")
-        assert "`lissom-agent`" in result
-        assert "`Agent`" not in result
+        assert "`Agent`" in result
+        assert "`lissom-agent`" not in result
 
     def test_convert_skill_preserves_frontmatter(self):
         """name, description, argument-hint unchanged."""
@@ -471,7 +466,7 @@ class TestBuildScript:
                 assert prefs_path in names, f"missing prefs in {shortname}"
 
     def test_pi_zip_structure(self, tmp_path):
-        """Pi zip has correct directory layout with extension files."""
+        """Pi zip has correct directory layout (agents at .pi/agents/)."""
         make_build_fixture(tmp_path)
         subprocess.run(
             ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
@@ -480,9 +475,7 @@ class TestBuildScript:
 
         with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
             names = zf.namelist()
-            assert ".pi/extensions/lissom-agent.ts" in names
-            assert ".pi/extensions/package.json" in names
-            assert ".pi/extensions/agents/lissom-researcher.md" in names
+            assert ".pi/agents/lissom-researcher.md" in names
             assert ".pi/skills/lissom-auto/SKILL.md" in names
             assert ".lissom/tasks/T1/Specs.md" in names
 
@@ -495,16 +488,16 @@ class TestBuildScript:
         )
 
         with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
-            content = zf.read(".pi/extensions/agents/lissom-researcher.md").decode()
+            content = zf.read(".pi/agents/lissom-researcher.md").decode()
             assert "`bash`" in content
             assert "`Bash`" not in content
             assert "`read`" in content
             assert "model:" not in content
             assert "tools:" not in content
 
-    def test_pi_zip_skill_content(self, tmp_path):
-        """Pi skill has lissom-agent tool name (when present in source)."""
-        # Create a skill with Agent reference to verify conversion
+    def test_pi_zip_skill_preserves_agent_tool_name(self, tmp_path):
+        """Pi skill preserves `Agent` (pi-subagents exposes Agent natively)."""
+        # Create a skill with Agent reference to verify no rewrite
         make_build_fixture(tmp_path)
         # Overwrite one skill with an Agent reference
         skill_path = tmp_path / "src" / "skills" / "lissom-plan" / "SKILL.md"
@@ -519,20 +512,8 @@ class TestBuildScript:
 
         with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
             content = zf.read(".pi/skills/lissom-plan/SKILL.md").decode()
-            assert "`lissom-agent`" in content
-            assert "`Agent`" not in content
-
-    def test_pi_zip_extension_files(self, tmp_path):
-        """package.json has name 'lissom-skills'."""
-        make_build_fixture(tmp_path)
-        subprocess.run(
-            ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
-            check=True, capture_output=True,
-        )
-
-        with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
-            pkg = zf.read(".pi/extensions/package.json").decode()
-            assert '"name": "lissom-skills"' in pkg
+            assert "`Agent`" in content
+            assert "`lissom-agent`" not in content
 
     def test_build_idempotent(self, tmp_path):
         """Running build.py twice succeeds (overwrites zips)."""

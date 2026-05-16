@@ -4,7 +4,7 @@ Pi CLI format converter.
 Converts Claude Code agent/skill .md files to Pi format.
 """
 
-from scripts.lib.constants import CLAUDE_TO_PI_BODY
+from scripts.lib.constants import CLAUDE_TO_PI_BODY, CLAUDE_TO_PI_TOOL_FLAG
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
 
 
@@ -16,7 +16,9 @@ def convert_agent(content: str, agent_name: str) -> str:
     1. Parse frontmatter → extract name, description, tools.
     2. Build new frontmatter:
        - name, description (preserved)
-       - tools: field stripped (tools are passed via CLI --tools)
+       - tools: field preserved with tool names converted to Pi --tools
+         flag names via CLAUDE_TO_PI_TOOL_FLAG
+         (the LLM reads the frontmatter naturally at runtime)
        - No model, no temperature (subagent inherits Pi defaults).
     3. Rewrite body tool names using CLAUDE_TO_PI_BODY map.
     4. $0, $1, etc. argument references stay unchanged.
@@ -28,9 +30,27 @@ def convert_agent(content: str, agent_name: str) -> str:
     name = fields.get("name", agent_name)
     description = fields.get("description", "")
 
+    # Convert tools field to Pi --tools flag names so the LLM can read them from frontmatter
+    tools_raw = fields.get("tools", "")
+    if tools_raw:
+        pi_tools = []
+        for t in tools_raw.split(","):
+            t = t.strip()
+            if t in CLAUDE_TO_PI_TOOL_FLAG:
+                mapped = CLAUDE_TO_PI_TOOL_FLAG[t]
+                # Some entries (Glob) map to comma-separated multiple flags
+                pi_tools.extend(p.strip() for p in mapped.split(","))
+            else:
+                pi_tools.append(t)
+        tools_str = ", ".join(pi_tools)
+    else:
+        tools_str = ""
+
     lines = ["---"]
     lines.append(f"name: {name}")
     lines.append(f"description: {description}")
+    if tools_str:
+        lines.append(f"tools: {tools_str}")
     lines.append("---")
 
     new_content = "\n".join(lines) + "\n"
@@ -45,15 +65,14 @@ def convert_skill(content: str, skill_name: str) -> str:
     """
     Convert a Claude Code skill SKILL.md to Pi format.
 
-    Transformations:
-    - Replace `Agent` → `lissom-agent` in body text.
-    - Frontmatter preserved as-is.
-    - Other tool names (Bash, Read, etc.) remain unchanged
-      because skills instruct the main agent, which already knows
-      its tool names.
+    With tintinweb/pi-subagents, the Agent tool is exposed as `Agent`,
+    matching Claude Code's naming — no tool name rewriting needed.
 
-    Returns: converted content string.
+    Frontmatter preserved as-is.
+    Other tool names (Bash, Read, etc.) remain unchanged
+    because skills instruct the main agent, which already knows
+    its tool names.
+
+    Returns: content unchanged.
     """
-    # Only rewrite `Agent` → `lissom-agent`
-    # All other backtick tool names stay unchanged
-    return rewrite_backtick_tools(content, {"Agent": "lissom-agent"})
+    return content

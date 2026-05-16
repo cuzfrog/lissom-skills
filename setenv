@@ -1,0 +1,14 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-${(%):-%x}}")" &> /dev/null && pwd)
+
+# Check if 'which python' returns a path inside .venv; if so, skip venv setup
+PYTHON_PATH=$(which python)
+if [[ "$PYTHON_PATH" == "$SCRIPT_DIR/venv"* ]]; then
+        echo "Python in .venv already active: $PYTHON_PATH"
+else
+        python3 -m venv "$SCRIPT_DIR/venv"
+        source "$SCRIPT_DIR/venv/bin/activate"
+        echo "Python virtual environment activated."
+        echo "---"
+fi

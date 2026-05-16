@@ -42,39 +42,6 @@ uninstall_from() {
     local DRY_RUN="${2:-false}"
     local REMOVED=0
 
-    # Pi target: remove extension files
-    if [[ "$TARGET" == "./.pi" ]]; then
-        for ext_file in "$TARGET/extensions/lissom-agent.ts" "$TARGET/extensions/package.json"; do
-            if [[ -f "$ext_file" ]]; then
-                if [[ "$DRY_RUN" == "true" ]]; then
-                    REMOVED=$((REMOVED + 1))
-                else
-                    rm "$ext_file"
-                    echo "  Removed $ext_file"
-                    REMOVED=$((REMOVED + 1))
-                fi
-            fi
-        done
-        if [[ -d "$TARGET/extensions/agents" ]]; then
-            for agent_file in "$TARGET/extensions/agents"/*.md; do
-                if [[ -f "$agent_file" ]]; then
-                    local agent_name=$(basename "$agent_file" .md)
-                    if [[ "$agent_name" =~ ^lissom- ]]; then
-                        if [[ "$DRY_RUN" == "true" ]]; then
-                            REMOVED=$((REMOVED + 1))
-                        else
-                            rm "$agent_file"
-                            echo "  Removed $agent_file"
-                            REMOVED=$((REMOVED + 1))
-                        fi
-                    fi
-                fi
-            done
-            [[ "$DRY_RUN" != "true" ]] && _rmdir_if_empty "$TARGET/extensions/agents"
-            [[ "$DRY_RUN" != "true" ]] && _rmdir_if_empty "$TARGET/extensions"
-        fi
-    fi
-
     if [[ -d "$TARGET/agents" ]]; then
         for agent_file in "$TARGET/agents"/*.md; do
             if [[ -f "$agent_file" ]]; then

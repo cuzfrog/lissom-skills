@@ -36,13 +36,8 @@ def make_install_zip(root: Path, target: str = ".claude") -> Path:
     zip_path = dist_dir / f"lissom-skills-{shortname}.zip"
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        # Pi target uses a different directory layout
-        if target == ".pi":
-            agents_prefix = ".pi/extensions/agents"
-            skills_prefix = ".pi/skills"
-        else:
-            agents_prefix = f"{target}/agents"
-            skills_prefix = f"{target}/skills"
+        agents_prefix = f"{target}/agents"
+        skills_prefix = f"{target}/skills"
 
         for agent in AGENTS:
             content = (
@@ -57,8 +52,7 @@ def make_install_zip(root: Path, target: str = ".claude") -> Path:
             )
             zf.writestr(f"{skills_prefix}/{skill}/SKILL.md", content)
 
-        if target != ".pi":
-            zf.writestr(f"{target}/templates/Specs.md", "# Sample Specs\n")
+        zf.writestr(f"{target}/templates/Specs.md", "# Sample Specs\n")
         zf.writestr(".lissom/tasks/T1/Specs.md", "# Sample Specs\n")
 
     return zip_path
@@ -268,11 +262,7 @@ def test_install_target(tmp_path, install_server, target):
     )
 
     assert result.returncode == 0
-    # Pi target stores agents in extensions/ subdirectory
-    if target == ".pi":
-        assert (work / target / "extensions" / "agents" / "lissom-researcher.md").is_file()
-    else:
-        assert (work / target / "agents" / "lissom-researcher.md").is_file()
+    assert (work / target / "agents" / "lissom-researcher.md").is_file()
 
 
 def test_empty_target_dir_preserved(tmp_path, install_server):

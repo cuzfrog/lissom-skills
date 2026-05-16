@@ -355,22 +355,18 @@ def test_uninstall_gemini(tmp_path):
 
 
 def test_uninstall_pi(tmp_path):
-    """UP1: Uninstall finds and removes files from .pi/ with Pi-specific layout."""
+    """UP1: Uninstall finds and removes files from .pi/ (standard layout)."""
     src, work = tmp_path / "src", tmp_path / "work"
     src.mkdir(); work.mkdir()
 
-    # Create Pi-specific directory layout
+    # Create Pi directory layout (same as other targets)
     pi_dir = work / ".pi"
-    (pi_dir / "extensions" / "agents").mkdir(parents=True)
+    (pi_dir / "agents").mkdir(parents=True)
     (pi_dir / "skills").mkdir(parents=True)
 
-    # Extension files
-    (pi_dir / "extensions" / "lissom-agent.ts").write_text("// extension code")
-    (pi_dir / "extensions" / "package.json").write_text('{"name": "lissom-skills"}')
-
-    # Agents in extensions/agents/
+    # Agents in agents/
     for agent in ("lissom-researcher", "lissom-implementer"):
-        (pi_dir / "extensions" / "agents" / f"{agent}.md").write_text(
+        (pi_dir / "agents" / f"{agent}.md").write_text(
             f"---\nname: {agent}\n---\nbody\n"
         )
 
@@ -378,18 +374,15 @@ def test_uninstall_pi(tmp_path):
     (pi_dir / "skills" / "lissom-auto").mkdir(parents=True)
     (pi_dir / "skills" / "lissom-auto" / "SKILL.md").write_text("---\nname: lissom-auto\n---\nbody\n")
 
-    assert (pi_dir / "extensions" / "lissom-agent.ts").exists()
-    assert (pi_dir / "extensions" / "agents" / "lissom-researcher.md").exists()
+    assert (pi_dir / "agents" / "lissom-researcher.md").exists()
     assert (pi_dir / "skills" / "lissom-auto" / "SKILL.md").exists()
 
     result = run_uninstall(src, work)
 
     assert result.returncode == 0
-    assert not (pi_dir / "extensions" / "lissom-agent.ts").exists()
-    assert not (pi_dir / "extensions" / "package.json").exists()
-    assert not (pi_dir / "extensions" / "agents").exists()
-    assert not (pi_dir / "extensions").exists()
+    assert not (pi_dir / "agents").exists()
     assert not (pi_dir / "skills").exists()
+    assert not (pi_dir).exists()
     assert ".pi/ ->" in result.stdout
 
 

@@ -5,13 +5,12 @@ Build orchestrator: reads agent/skill sources, converts per target, produces zip
 Usage:
     python scripts/build.py [--root <project_root>]
 
-No CLI arguments by default — always builds all four targets.
+No CLI arguments by default — always builds all targets (claude, opencode, qwen, gemini, pi).
 Output goes to dist/ (created if missing).
 """
 
 import argparse
 import os
-import shutil
 import sys
 import tempfile
 import zipfile
@@ -93,36 +92,15 @@ def build(root: Path) -> None:
     # ── 3. Build per target ───────────────────────────────────────
     os.makedirs(dist_dir, exist_ok=True)
 
-    pi_extensions_src = root / "src" / "pi-extensions"
-
     for target_dir, shortname in TARGET_CONFIG.items():
         print(f"Building {target_dir} ({shortname})...")
 
         with tempfile.TemporaryDirectory(prefix=f"build-{shortname}-") as tmpdir:
             staging = Path(tmpdir)
-
-            if shortname == "pi":
-                # Pi-specific layout
-                agents_dst = staging / ".pi" / "extensions" / "agents"
-                skills_dst = staging / ".pi" / "skills"
-                agents_dst.mkdir(parents=True)
-                skills_dst.mkdir(parents=True)
-
-                # Copy extension files
-                extensions_dst = staging / ".pi" / "extensions"
-                shutil.copy2(
-                    pi_extensions_src / "lissom-agent.ts",
-                    extensions_dst / "lissom-agent.ts",
-                )
-                shutil.copy2(
-                    pi_extensions_src / "package.json",
-                    extensions_dst / "package.json",
-                )
-            else:
-                agents_dst = staging / target_dir / "agents"
-                skills_dst = staging / target_dir / "skills"
-                agents_dst.mkdir(parents=True)
-                skills_dst.mkdir(parents=True)
+            agents_dst = staging / target_dir / "agents"
+            skills_dst = staging / target_dir / "skills"
+            agents_dst.mkdir(parents=True)
+            skills_dst.mkdir(parents=True)
 
             # Convert agents
             for agent_name, source_content in agent_contents.items():
