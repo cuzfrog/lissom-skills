@@ -26,7 +26,7 @@ class OpencodeConverter(Converter):
         2. Build new frontmatter:
            - name, description (preserved)
            - mode: subagent (always added)
-           - model: <opencode model for agent_name> (always injected)
+           - model: <opencode model for agent_name> (only when mapped)
            - temperature: 0.1 (always added)
            - permission: block — map each Claude Code tool to its Opencode
              permission key with "allow" value (2-space indent).
@@ -43,13 +43,14 @@ class OpencodeConverter(Converter):
         # Parse tools: "Bash, Read, AskUserQuestion" → list
         tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-        model = OPENCODE_MODEL_MAP.get(agent_name, "opencode-go/qwen3.6-plus")
+        model = OPENCODE_MODEL_MAP.get(agent_name)
 
         lines = ["---"]
         lines.append(f"name: {name}")
         lines.append(f"description: {description}")
         lines.append("mode: subagent")
-        lines.append(f"model: {model}")
+        if model:
+            lines.append(f"model: {model}")
         lines.append("temperature: 0.1")
         lines.append("permission:")
         for tool in tool_list:

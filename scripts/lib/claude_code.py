@@ -19,17 +19,20 @@ class ClaudeCodeConverter(Converter):
         Convert a source agent .md file to Claude Code format.
 
         The source is already in Claude Code format — the only transformation
-        is injecting a default ``model:`` field into the frontmatter using the
-        per-agent model map (CLAUDE_MODEL_MAP).  Agents not in the map fall
-        back to ``sonnet``.
+        is injecting a ``model:`` field into the frontmatter using the
+        per-agent model map (CLAUDE_MODEL_MAP).  Agents not in the map
+        are passed through unchanged.
 
         Returns: content with model field injected.
         """
-        model = CLAUDE_MODEL_MAP.get(agent_name, "sonnet")
-        try:
-            output = inject_field(content, "model", model, after_field="tools")
-        except ValueError:
-            output = inject_field(content, "model", model)
+        model = CLAUDE_MODEL_MAP.get(agent_name)
+        if model:
+            try:
+                output = inject_field(content, "model", model, after_field="tools")
+            except ValueError:
+                output = inject_field(content, "model", model)
+        else:
+            output = content
         return output
 
     def convert_skill(self, content: str, skill_name: str) -> str:

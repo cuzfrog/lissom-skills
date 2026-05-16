@@ -141,6 +141,7 @@ CLAUDE_TO_PI_TOOL_FLAG = {
     "Edit": "edit",
     "Glob": "find,ls",
     "Grep": "grep",
+    # "Agent": "Agent", # handled by https://github.com/tintinweb/pi-subagents
 }
 
 # Claude Code tool name → Pi body text name

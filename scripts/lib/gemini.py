@@ -26,7 +26,7 @@ class GeminiConverter(Converter):
         2. Build new frontmatter:
            - name, description (preserved)
            - temperature: 0.1 (always added, before model)
-           - model: <gemini model for agent_name> (always injected)
+           - model: <gemini model for agent_name> (only when mapped)
            - tools: as YAML list — for each Claude Code tool, emit "  - <gemini_name>"
              using CLAUDE_TO_GEMINI_TOOL map. AskUserQuestion IS included (→ ask_user).
         3. Rewrite body tool names using CLAUDE_TO_GEMINI_BODY map.
@@ -43,13 +43,14 @@ class GeminiConverter(Converter):
         # Parse tools: "Bash, Read, AskUserQuestion" → list
         tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-        model = GEMINI_MODEL_MAP.get(agent_name, "gemini-3-flash-preview")
+        model = GEMINI_MODEL_MAP.get(agent_name)
 
         lines = ["---"]
         lines.append(f"name: {name}")
         lines.append(f"description: {description}")
         lines.append("temperature: 0.1")
-        lines.append(f"model: {model}")
+        if model:
+            lines.append(f"model: {model}")
         lines.append("tools:")
         for tool in tool_list:
             gemini_tool = CLAUDE_TO_GEMINI_TOOL.get(tool)

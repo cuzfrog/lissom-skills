@@ -30,11 +30,12 @@ class TestClaudeCodeConverter:
         result = converter.convert_agent(content, "lissom-implementer")
         assert "model: sonnet" in result
 
-    def test_convert_agent_unknown_agent_falls_back_to_sonnet(self):
-        """Unknown agent name defaults to sonnet."""
+    def test_convert_agent_unknown_agent_no_model(self):
+        """Unknown agent name gets no model field injected."""
         content = "---\nname: unknown\ndescription: unknown\ntools: Bash\n---\nbody\n"
         result = converter.convert_agent(content, "unknown-agent")
-        assert "model: sonnet" in result
+        assert "model:" not in result
+        assert result == content  # passed through unchanged
 
     def test_convert_skill_passes_through(self):
         """Skill content returned verbatim."""

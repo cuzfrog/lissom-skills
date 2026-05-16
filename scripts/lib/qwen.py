@@ -25,7 +25,7 @@ class QwenConverter(Converter):
         1. Parse frontmatter → extract name, description, tools.
         2. Build new frontmatter:
            - name, description (preserved)
-           - model: <qwen model for agent_name> (always injected)
+           - model: <qwen model for agent_name> (only when mapped)
            - tools: as YAML list — for each Claude Code tool, emit "  - <qwen_name>"
              using CLAUDE_TO_QWEN_TOOL map. Skip AskUserQuestion (NOT in map).
         3. Rewrite body tool names using CLAUDE_TO_QWEN_BODY map.
@@ -42,12 +42,13 @@ class QwenConverter(Converter):
         # Parse tools: "Bash, Read, AskUserQuestion" → list
         tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-        model = QWEN_MODEL_MAP.get(agent_name, "qwen3.6-plus")
+        model = QWEN_MODEL_MAP.get(agent_name)
 
         lines = ["---"]
         lines.append(f"name: {name}")
         lines.append(f"description: {description}")
-        lines.append(f"model: {model}")
+        if model:
+            lines.append(f"model: {model}")
         lines.append("tools:")
         for tool in tool_list:
             qwen_tool = CLAUDE_TO_QWEN_TOOL.get(tool)
