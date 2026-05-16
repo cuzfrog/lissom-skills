@@ -69,6 +69,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 - `.opencode/` [OpenCode](https://opencode.ai)。
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
 - `.gemini/` [Gemini CLI](https://geminicli.com/)。
+- `.pi/` [Pi CLI](https://github.com/earendil-works/pi) — [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents) が必要です。
 
 ### アンインストール
 
@@ -116,6 +117,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 | `fix_threshold` | `warning` — 致命的および警告を修正；`critical` — 致命的のみ；`suggestion` — すべての指摘 |
 | `spec_review_required` | `yes` — リサーチ前に仕様をレビュー・改善；`no` — 仕様レビューをスキップ |
 | `research_required` | `yes` — 実装前にリサーチを実施；`no` — 仕様が十分な場合はリサーチをスキップ |
+| `impl_delegation` | `single` — 1つのサブエージェントで実装を実行（ほとんどの場合で高速）；`multiple` — 複数のサブエージェントで実装を実行（実装範囲が広い場合；通常は不要） |
 
 ---
 
