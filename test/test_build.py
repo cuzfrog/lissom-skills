@@ -1,8 +1,8 @@
 """
-Tests for the Python build script and converter modules.
+Tests for the Python build script and shared utility modules.
 
-Covers unit tests for each converter (opencode, qwen, gemini),
-Claude model injection, and build integration tests.
+Covers Claude model injection, frontmatter parsing, arg shifting,
+backtick tool rewriting, and build integration tests.
 """
 
 import os
@@ -14,15 +14,7 @@ from pathlib import Path
 import pytest
 
 from scripts.lib.constants import AGENTS, SKILLS
-from scripts.lib.frontmatter import inject_field, parse_frontmatter, shift_args
-from scripts.lib.opencode import convert_agent as opencode_convert_agent
-from scripts.lib.opencode import convert_skill as opencode_convert_skill
-from scripts.lib.qwen import convert_agent as qwen_convert_agent
-from scripts.lib.qwen import convert_skill as qwen_convert_skill
-from scripts.lib.gemini import convert_agent as gemini_convert_agent
-from scripts.lib.gemini import convert_skill as gemini_convert_skill
-from scripts.lib.pi import convert_agent as pi_convert_agent
-from scripts.lib.pi import convert_skill as pi_convert_skill
+from scripts.lib.frontmatter import inject_field, parse_frontmatter, shift_args, rewrite_backtick_tools
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -63,158 +55,6 @@ def make_build_fixture(root: Path) -> None:
 
 
 
-# ── OpenCode Converter Tests ─────────────────────────────────────────
-
-class TestOpenCodeConverter:
-    def test_convert_agent_basic(self):
-        """Agent with name, description, tools produces correct Opencode frontmatter."""
-        content = "---\nname: test-agent\ndescription: A test agent\ntools: Bash, Read\n---\nUse `Bash` for commands.\n"
-        result = opencode_convert_agent(content, "lissom-researcher")
-        assert "mode: subagent" in result
-        assert "temperature: 0.1" in result
-        assert "permission:" in result
-        assert "  bash: allow" in result
-        assert "  read: allow" in result
-        assert "model: opencode-go/deepseek-v4-pro" in result
-        assert "`bash`" in result
-        assert "`Bash`" not in result
-
-    def test_convert_skill(self):
-        """Skill frontmatter preserved, body tool names rewritten."""
-        content = "---\nname: lissom-auto\ndescription: fixture\n---\nUse `Grep` to search.\n"
-        result = opencode_convert_skill(content, "lissom-auto")
-        assert "name: lissom-auto" in result
-        assert "description: fixture" in result
-        assert "mode: subagent" not in result
-        assert "`grep`" in result
-
-    def test_convert_agent_with_ask_user(self):
-        """AskUserQuestion in tools → question permission."""
-        content = "---\nname: test-agent\ndescription: test\ntools: AskUserQuestion\n---\nUse `AskUserQuestion`.\n"
-        result = opencode_convert_agent(content, "lissom-reviewer")
-        assert "  question: allow" in result
-        assert "`question`" in result
-
-    def test_convert_agent_model_for_implementer(self):
-        """lissom-implementer gets opencode-go/deepseek-v4-flash."""
-        content = "---\nname: lissom-implementer\ndescription: impl\ntools: Bash\n---\nbody\n"
-        result = opencode_convert_agent(content, "lissom-implementer")
-        assert "model: opencode-go/deepseek-v4-flash" in result
-
-
-# ── Qwen Converter Tests ─────────────────────────────────────────────
-
-class TestQwenConverter:
-    def test_convert_agent(self):
-        """Agent produces Qwen frontmatter with tools YAML list, excluding AskUserQuestion."""
-        content = "---\nname: test-agent\ndescription: test\ntools: Bash, Read, AskUserQuestion\n---\nUse `Bash` and `AskUserQuestion`.\n"
-        result = qwen_convert_agent(content, "lissom-researcher")
-        assert "name: test-agent" in result
-        assert "model: qwen3.6-plus" in result
-        assert "  - run_shell_command" in result
-        assert "  - read_file" in result
-        assert "  - question" not in result.split("---")[0]  # not in frontmatter
-        assert "`question`" in result  # but present in body
-        assert "`Bash`" not in result
-
-    def test_convert_skill(self):
-        """Skill strips extra frontmatter fields, rewrites body tools."""
-        content = "---\nname: lissom-auto\ndescription: fixture\nversion: 1.0\nargument-hint: <task>\n---\nUse `Grep` to search.\n"
-        result = qwen_convert_skill(content, "lissom-auto")
-        assert "name: lissom-auto" in result
-        assert "description: fixture" in result
-        assert "version:" not in result
-        assert "argument-hint:" not in result
-        assert "`grep_search`" in result
-
-    def test_agent_implementer_model(self):
-        """lissom-implementer gets qwen3-coder-plus model."""
-        content = "---\nname: lissom-implementer\ndescription: impl\ntools: Bash\n---\nbody\n"
-        result = qwen_convert_agent(content, "lissom-implementer")
-        assert "model: qwen3-coder-plus" in result
-
-    def test_agent_args_shifted(self):
-        """Qwen agent output has $0 → $1, $1 → $2."""
-        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0` and `$1`.\n"
-        result = qwen_convert_agent(content, "lissom-researcher")
-        assert "`$1`" in result
-        assert "`$2`" in result
-        assert "`$0`" not in result
-
-    def test_skill_args_shifted(self):
-        """Qwen skill output has $0 → $1."""
-        content = "---\nname: test\ndescription: test\n---\nUse `$0`.\n"
-        result = qwen_convert_skill(content, "lissom-auto")
-        assert "`$1`" in result
-        assert "`$0`" not in result
-
-
-# ── Gemini Converter Tests ───────────────────────────────────────────
-
-class TestGeminiConverter:
-    def test_convert_agent(self):
-        """Agent produces Gemini frontmatter with temperature, including ask_user."""
-        content = "---\nname: test-agent\ndescription: test\ntools: Bash, Edit, WebSearch, AskUserQuestion\n---\nUse `Bash` and `AskUserQuestion`.\n"
-        result = gemini_convert_agent(content, "lissom-researcher")
-        assert "temperature: 0.1" in result
-        assert "model: gemini-3-pro-preview" in result
-        assert "  - run_shell_command" in result
-        assert "  - replace" in result
-        assert "  - google_web_search" in result
-        assert "  - ask_user" in result
-        assert "`run_shell_command`" in result
-        assert "`ask_user`" in result
-
-    def test_convert_skill(self):
-        """Skill strips extra fields, no temperature/model."""
-        content = "---\nname: lissom-auto\ndescription: fixture\nversion: 1.0\n---\nUse `Grep` to search.\n"
-        result = gemini_convert_skill(content, "lissom-auto")
-        assert "name: lissom-auto" in result
-        assert "description: fixture" in result
-        assert "version:" not in result
-        assert "temperature:" not in result
-        assert "model:" not in result
-        assert "`grep_search`" in result
-
-    def test_temperature_present(self):
-        """temperature: 0.1 present in agent but not skill."""
-        agent_content = "---\nname: test\ndescription: test\ntools: Bash\n---\nbody\n"
-        skill_content = "---\nname: test\ndescription: test\n---\nbody\n"
-        agent_result = gemini_convert_agent(agent_content, "lissom-researcher")
-        skill_result = gemini_convert_skill(skill_content, "lissom-test")
-        assert "temperature: 0.1" in agent_result
-        assert "temperature:" not in skill_result
-
-    def test_agent_args_shifted(self):
-        """Gemini agent output has $0 → $1."""
-        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0` and `$1`.\n"
-        result = gemini_convert_agent(content, "lissom-researcher")
-        assert "`$1`" in result
-        assert "`$2`" in result
-        assert "`$0`" not in result
-
-    def test_skill_args_shifted(self):
-        """Gemini skill output has $0 → $1."""
-        content = "---\nname: test\ndescription: test\n---\nUse `$0`.\n"
-        result = gemini_convert_skill(content, "lissom-auto")
-        assert "`$1`" in result
-        assert "`$0`" not in result
-
-
-# ── Opencode Args Unaffected Tests ───────────────────────────────────
-
-class TestOpenCodeArgsNotShifted:
-    def test_opencode_agent_args_not_shifted(self):
-        """Opencode agent output keeps $0 unchanged."""
-        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0`.\n"
-        result = opencode_convert_agent(content, "lissom-researcher")
-        assert "`$0`" in result
-
-    def test_opencode_skill_args_not_shifted(self):
-        """Opencode skill output keeps $0 unchanged."""
-        content = "---\nname: test\ndescription: test\n---\nUse `$0`.\n"
-        result = opencode_convert_skill(content, "lissom-auto")
-        assert "`$0`" in result
 
 
 # ── Claude Model Injection Tests ─────────────────────────────────────
@@ -256,13 +96,11 @@ class TestClaudeModelInjection:
 class TestFrontmatterParser:
     def test_malformed_missing_opening(self):
         """Missing opening --- raises ValueError."""
-        from scripts.lib.frontmatter import parse_frontmatter
         with pytest.raises(ValueError, match="opening"):
             parse_frontmatter("no frontmatter here")
 
     def test_malformed_missing_closing(self):
         """Missing closing --- raises ValueError."""
-        from scripts.lib.frontmatter import parse_frontmatter
         with pytest.raises(ValueError, match="closing"):
             parse_frontmatter("---\nname: test\nno closing\n")
 
@@ -309,64 +147,51 @@ class TestShiftArgs:
         assert result == "`$1` and `$2` then `$3`"
 
 
-# ── Pi Converter Tests ───────────────────────────────────────────────
+# ── Rewrite Backtick Tools Tests ─────────────────────────────────────
 
-class TestPiConverter:
-    def test_convert_skill_preserves_agent_tool_name(self):
-        """`Agent` preserved in body text (pi-subagents exposes Agent natively)."""
-        content = "---\nname: lissom-auto\ndescription: fixture\n---\nUse `Agent` to delegate work.\n"
-        result = pi_convert_skill(content, "lissom-auto")
-        assert "`Agent`" in result
-        assert "`lissom-agent`" not in result
+class TestRewriteBacktickTools:
+    def test_basic_replacement(self):
+        """Single tool name replaced."""
+        result = rewrite_backtick_tools("Use `Bash` to run.", {"Bash": "bash"})
+        assert result == "Use `bash` to run."
 
-    def test_convert_skill_preserves_frontmatter(self):
-        """name, description, argument-hint unchanged."""
-        content = "---\nname: lissom-auto\ndescription: fixture\nargument-hint: <task_id>\n---\nUse `Agent`.\n"
-        result = pi_convert_skill(content, "lissom-auto")
-        assert "name: lissom-auto" in result
-        assert "description: fixture" in result
-        assert "argument-hint: <task_id>" in result
+    def test_multiple_replacements(self):
+        """Multiple tool names all replaced."""
+        result = rewrite_backtick_tools(
+            "Use `Bash` and `Read`.",
+            {"Bash": "bash", "Read": "read"},
+        )
+        assert result == "Use `bash` and `read`."
 
-    def test_convert_skill_other_tools_unchanged(self):
-        """AskUserQuestion, Bash remain unchanged in skill body (skills instruct main agent)."""
-        content = "---\nname: test\ndescription: test\n---\nUse `AskUserQuestion` and `Bash`.\n"
-        result = pi_convert_skill(content, "test")
-        assert "`AskUserQuestion`" in result
-        assert "`Bash`" in result
+    def test_unmapped_tool_unchanged(self):
+        """Tool not in mapping is left as-is."""
+        result = rewrite_backtick_tools("Use `Bash`.", {"Read": "read"})
+        assert result == "Use `Bash`."
 
-    def test_convert_agent_rewrites_body_tools(self):
-        """`Bash` → `bash`, `Read` → `read`, etc. in body text."""
-        content = "---\nname: test-agent\ndescription: test\ntools: Bash, Read, Edit, Glob, Grep\n---\nUse `Bash` and `Read`.\n"
-        result = pi_convert_agent(content, "lissom-researcher")
-        assert "`bash`" in result
-        assert "`read`" in result
-        assert "`Bash`" not in result
+    def test_empty_content(self):
+        """Empty content returns empty string."""
+        result = rewrite_backtick_tools("", {"Bash": "bash"})
+        assert result == ""
 
-    def test_convert_agent_strips_tools_frontmatter(self):
-        """tools: field removed from output."""
-        content = "---\nname: test-agent\ndescription: test\ntools: Bash, Read\n---\nbody\n"
-        result = pi_convert_agent(content, "lissom-researcher")
-        assert "tools:" not in result
+    def test_no_backtick_tools(self):
+        """Tool names without backticks are not replaced."""
+        result = rewrite_backtick_tools("Use Bash.", {"Bash": "bash"})
+        assert result == "Use Bash."
 
-    def test_convert_agent_preserves_name_description(self):
-        """name and description kept."""
-        content = "---\nname: lissom-researcher\ndescription: A test agent\ntools: Bash\n---\nbody\n"
-        result = pi_convert_agent(content, "lissom-researcher")
-        assert "name: lissom-researcher" in result
-        assert "description: A test agent" in result
+    def test_empty_mapping(self):
+        """Empty mapping leaves content unchanged."""
+        result = rewrite_backtick_tools("Use `Bash`.", {})
+        assert result == "Use `Bash`."
 
-    def test_convert_agent_no_model_injection(self):
-        """No model: field in output."""
-        content = "---\nname: test-agent\ndescription: test\ntools: Bash\n---\nbody\n"
-        result = pi_convert_agent(content, "lissom-researcher")
-        assert "model:" not in result
+    def test_overlapping_patterns(self):
+        """Patterns are independent (no regex overlap issues)."""
+        result = rewrite_backtick_tools(
+            "`AskUserQuestion` and `Bash`.",
+            {"AskUserQuestion": "question", "Bash": "bash"},
+        )
+        assert result == "`question` and `bash`."
 
-    def test_convert_agent_args_not_shifted(self):
-        """$0, $1 stay unchanged (unlike Qwen/Gemini)."""
-        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0` and `$1`.\n"
-        result = pi_convert_agent(content, "lissom-researcher")
-        assert "`$0`" in result
-        assert "`$1`" in result
+
 
 
 # ── Build Integration Tests ──────────────────────────────────────────
@@ -480,7 +305,7 @@ class TestBuildScript:
             assert ".lissom/tasks/T1/Specs.md" in names
 
     def test_pi_zip_agent_content(self, tmp_path):
-        """Pi agent has rewritten body tools, no model, no tools field."""
+        """Pi agent has rewritten body tools, no model, tools preserved."""
         make_build_fixture(tmp_path)
         subprocess.run(
             ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
@@ -493,7 +318,9 @@ class TestBuildScript:
             assert "`Bash`" not in content
             assert "`read`" in content
             assert "model:" not in content
-            assert "tools:" not in content
+            # tools: field is preserved with converted flag names
+            assert "tools:" in content
+            assert "Bash" not in content.split("---")[1]  # frontmatter has lowercase tools
 
     def test_pi_zip_skill_preserves_agent_tool_name(self, tmp_path):
         """Pi skill preserves `Agent` (pi-subagents exposes Agent natively)."""

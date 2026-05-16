@@ -10,80 +10,86 @@ from scripts.lib.constants import (
     CLAUDE_TO_QWEN_TOOL,
     QWEN_MODEL_MAP,
 )
+from scripts.lib.converter import Converter
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools, shift_args
 
 
-def convert_agent(content: str, agent_name: str) -> str:
-    """
-    Convert a Claude Code agent .md file to Qwen Code format.
+class QwenConverter(Converter):
+    """Converter for the Qwen Code target — model, YAML tools list, arg shift."""
 
-    Transformations:
-    1. Parse frontmatter → extract name, description, tools.
-    2. Build new frontmatter:
-       - name, description (preserved)
-       - model: <qwen model for agent_name> (always injected)
-       - tools: as YAML list — for each Claude Code tool, emit "  - <qwen_name>"
-         using CLAUDE_TO_QWEN_TOOL map. Skip AskUserQuestion (NOT in map).
-    3. Rewrite body tool names using CLAUDE_TO_QWEN_BODY map.
+    def convert_agent(self, content: str, agent_name: str) -> str:
+        """
+        Convert a Claude Code agent .md file to Qwen Code format.
 
-    Returns: fully converted content string.
-    """
-    fields, body = parse_frontmatter(content)
+        Transformations:
+        1. Parse frontmatter → extract name, description, tools.
+        2. Build new frontmatter:
+           - name, description (preserved)
+           - model: <qwen model for agent_name> (always injected)
+           - tools: as YAML list — for each Claude Code tool, emit "  - <qwen_name>"
+             using CLAUDE_TO_QWEN_TOOL map. Skip AskUserQuestion (NOT in map).
+        3. Rewrite body tool names using CLAUDE_TO_QWEN_BODY map.
+        4. Shift $N args forward by 1.
 
-    name = fields.get("name", agent_name)
-    description = fields.get("description", "")
-    tools_str = fields.get("tools", "")
+        Returns: fully converted content string.
+        """
+        fields, body = parse_frontmatter(content)
 
-    # Parse tools: "Bash, Read, AskUserQuestion" → list
-    tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
+        name = fields.get("name", agent_name)
+        description = fields.get("description", "")
+        tools_str = fields.get("tools", "")
 
-    model = QWEN_MODEL_MAP.get(agent_name, "qwen3.6-plus")
+        # Parse tools: "Bash, Read, AskUserQuestion" → list
+        tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-    lines = ["---"]
-    lines.append(f"name: {name}")
-    lines.append(f"description: {description}")
-    lines.append(f"model: {model}")
-    lines.append("tools:")
-    for tool in tool_list:
-        qwen_tool = CLAUDE_TO_QWEN_TOOL.get(tool)
-        if qwen_tool:
-            lines.append(f"  - {qwen_tool}")
-    lines.append("---")
+        model = QWEN_MODEL_MAP.get(agent_name, "qwen3.6-plus")
 
-    new_content = "\n".join(lines) + "\n"
-    if body:
-        body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
-        body = shift_args(body)
-        new_content += body
+        lines = ["---"]
+        lines.append(f"name: {name}")
+        lines.append(f"description: {description}")
+        lines.append(f"model: {model}")
+        lines.append("tools:")
+        for tool in tool_list:
+            qwen_tool = CLAUDE_TO_QWEN_TOOL.get(tool)
+            if qwen_tool:
+                lines.append(f"  - {qwen_tool}")
+        lines.append("---")
 
-    return new_content
+        new_content = "\n".join(lines) + "\n"
+        if body:
+            body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
+            body = shift_args(body)
+            new_content += body
 
+        return new_content
 
-def convert_skill(content: str, skill_name: str) -> str:
-    """
-    Convert a Claude Code skill SKILL.md to Qwen Code format.
+    def convert_skill(self, content: str, skill_name: str) -> str:
+        """
+        Convert a Claude Code skill SKILL.md to Qwen Code format.
 
-    Transformations:
-    1. Parse frontmatter → extract name, description only (drop all other fields).
-    2. Build new frontmatter with only name and description.
-    3. Rewrite body tool names (same mapping as agent).
+        Transformations:
+        1. Parse frontmatter → extract name, description only (drop all other fields).
+        2. Build new frontmatter with only name and description.
+        3. Rewrite body tool names (same mapping as agent).
+        4. Shift $N args forward by 1.
 
-    Returns: converted content string.
-    """
-    fields, body = parse_frontmatter(content)
+        Returns: converted content string.
+        """
+        fields, body = parse_frontmatter(content)
 
-    name = fields.get("name", skill_name)
-    description = fields.get("description", "")
+        name = fields.get("name", skill_name)
+        description = fields.get("description", "")
 
-    lines = ["---"]
-    lines.append(f"name: {name}")
-    lines.append(f"description: {description}")
-    lines.append("---")
+        lines = ["---"]
+        lines.append(f"name: {name}")
+        lines.append(f"description: {description}")
+        lines.append("---")
 
-    new_content = "\n".join(lines) + "\n"
-    if body:
-        body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
-        body = shift_args(body)
-        new_content += body
+        new_content = "\n".join(lines) + "\n"
+        if body:
+            body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
+            body = shift_args(body)
+            new_content += body
 
-    return new_content
+        return new_content
+

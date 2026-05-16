@@ -23,34 +23,10 @@ if str(_project_root) not in sys.path:
 
 from scripts.lib.constants import (
     AGENTS,
-    CLAUDE_MODEL_MAP,
     SKILLS,
     TARGET_CONFIG,
 )
-from scripts.lib.frontmatter import inject_field
-from scripts.lib.opencode import convert_agent as opencode_convert_agent
-from scripts.lib.opencode import convert_skill as opencode_convert_skill
-from scripts.lib.qwen import convert_agent as qwen_convert_agent
-from scripts.lib.qwen import convert_skill as qwen_convert_skill
-from scripts.lib.gemini import convert_agent as gemini_convert_agent
-from scripts.lib.gemini import convert_skill as gemini_convert_skill
-from scripts.lib.pi import convert_agent as pi_convert_agent
-from scripts.lib.pi import convert_skill as pi_convert_skill
-
-# Converter dispatch tables
-AGENT_CONVERTERS = {
-    "opencode": opencode_convert_agent,
-    "qwen": qwen_convert_agent,
-    "gemini": gemini_convert_agent,
-    "pi": pi_convert_agent,
-}
-
-SKILL_CONVERTERS = {
-    "opencode": opencode_convert_skill,
-    "qwen": qwen_convert_skill,
-    "gemini": gemini_convert_skill,
-    "pi": pi_convert_skill,
-}
+from scripts.lib.converter_factory import get_converter
 
 
 def read_source(path: Path) -> str:
@@ -102,32 +78,16 @@ def build(root: Path) -> None:
             agents_dst.mkdir(parents=True)
             skills_dst.mkdir(parents=True)
 
-            # Convert agents
+            # Convert agents and skills via the shared Converter interface
+            converter = get_converter(shortname)
             for agent_name, source_content in agent_contents.items():
-                if shortname == "claude":
-                    # Claude Code: inject model field only
-                    model = CLAUDE_MODEL_MAP.get(agent_name, "sonnet")
-                    try:
-                        output = inject_field(
-                            source_content, "model", model, after_field="tools"
-                        )
-                    except ValueError:
-                        output = inject_field(source_content, "model", model)
-                else:
-                    converter = AGENT_CONVERTERS[shortname]
-                    output = converter(source_content, agent_name)
-
+                output = converter.convert_agent(source_content, agent_name)
                 (agents_dst / f"{agent_name}.md").write_text(
                     output, encoding="utf-8"
                 )
 
-            # Convert skills
             for skill_name, source_content in skill_contents.items():
-                if shortname == "claude":
-                    output = source_content  # verbatim
-                else:
-                    converter = SKILL_CONVERTERS[shortname]
-                    output = converter(source_content, skill_name)
+                output = converter.convert_skill(source_content, skill_name)
 
                 skill_dir = skills_dst / skill_name
                 skill_dir.mkdir(parents=True, exist_ok=True)
