@@ -8,9 +8,10 @@ A Claude Code skill and agent set designed to be specific and reliable.
 
 ### Production contents (edit these)
 
-- `skills/` — skill definitions (thin dispatchers)
-- `agents/` — agent definitions (rich domain logic)
-- `templates/` — files installed into a client project (`Specs.md`)
+- `src/skills/` — skill definitions (thin dispatchers)
+- `src/agents/` — agent definitions (rich domain logic)
+- `src/templates/` — files installed into a client project (`Specs.md`)
+- `src/pi-extensions/` — Pi CLI extension source (`lissom-agent.ts`, `package.json`)
 - `scripts/` — client install/remove scripts with helpers in `scripts/lib/`
 
 ### Development workspace
@@ -28,4 +29,4 @@ A Claude Code skill and agent set designed to be specific and reliable.
 
 ## Rules
 
-- When touching `skills/` or `agents/`, follow @Guidelines.md.
+- When touching `src/skills/` or `src/agents/`, follow @Guidelines.md.

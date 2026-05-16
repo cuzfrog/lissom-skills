@@ -30,23 +30,27 @@ def make_install_zip(root: Path, target: str = ".claude") -> Path:
         ".opencode": "opencode",
         ".qwen": "qwen",
         ".gemini": "gemini",
+        ".pi": "pi",
     }
     shortname = target_map[target]
     zip_path = dist_dir / f"lissom-skills-{shortname}.zip"
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        agents_prefix = f"{target}/agents"
+        skills_prefix = f"{target}/skills"
+
         for agent in AGENTS:
             content = (
                 f"---\nname: {agent}\ndescription: fixture\ntools: Bash, Read\n"
                 f"model: sonnet\n---\nBody for {agent}.\n"
             )
-            zf.writestr(f"{target}/agents/{agent}.md", content)
+            zf.writestr(f"{agents_prefix}/{agent}.md", content)
 
         for skill in SKILLS:
             content = (
                 f"---\nname: {skill}\ndescription: fixture\n---\nBody for {skill}.\n"
             )
-            zf.writestr(f"{target}/skills/{skill}/SKILL.md", content)
+            zf.writestr(f"{skills_prefix}/{skill}/SKILL.md", content)
 
         zf.writestr(f"{target}/templates/Specs.md", "# Sample Specs\n")
         zf.writestr(".lissom/tasks/T1/Specs.md", "# Sample Specs\n")
@@ -76,11 +80,11 @@ def _start_server(root: Path = REPO_ROOT):
 
 @pytest.fixture(scope="module")
 def install_server():
-    """Pre-build all 4 zips and start HTTP server once for all e2e tests."""
+    """Pre-build all 5 zips and start HTTP server once for all e2e tests."""
     dist_dir = REPO_ROOT / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
 
-    for target in (".claude", ".opencode", ".qwen", ".gemini"):
+    for target in (".claude", ".opencode", ".qwen", ".gemini", ".pi"):
         make_install_zip(REPO_ROOT, target)
 
     server, port = _start_server()
@@ -102,7 +106,7 @@ def test_fresh_install_creates_target_tree(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -131,7 +135,7 @@ def test_overwrite_confirmation_accepted(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -157,7 +161,7 @@ def test_overwrite_declined_exits(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
         },
         capture_output=True, text=True, timeout=30,
@@ -180,7 +184,7 @@ def test_install_samples_specs(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -205,7 +209,7 @@ def test_install_adds_gitignore(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -227,7 +231,7 @@ def test_install_cleans_up_zip(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -238,7 +242,7 @@ def test_install_cleans_up_zip(tmp_path, install_server):
     assert not any(work.glob("*.zip"))
 
 
-@pytest.mark.parametrize("target", [".claude", ".opencode", ".qwen", ".gemini"])
+@pytest.mark.parametrize("target", [".claude", ".opencode", ".qwen", ".gemini", ".pi"])
 def test_install_target(tmp_path, install_server, target):
     """LISSOM_TARGET=<target> creates correct directory with agents."""
     work = tmp_path / "work"
@@ -250,7 +254,7 @@ def test_install_target(tmp_path, install_server, target):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": target,
             "LISSOM_YES": "1",
         },
@@ -274,7 +278,7 @@ def test_empty_target_dir_preserved(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -296,7 +300,7 @@ def test_print_agent_models_shows_models_on_fresh_install(tmp_path, install_serv
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -332,7 +336,7 @@ def test_frontmatter_fields_preserved_on_overwrite(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },
@@ -361,7 +365,7 @@ def test_remote_install_via_curl(tmp_path, install_server):
         cwd=str(work),
         env={
             **os.environ,
-            "LISSOM_REPO": f"http://127.0.0.1:{port}",
+            "LISSOM_DOWNLOAD_PATH": f"http://127.0.0.1:{port}/releases/latest/download",
             "LISSOM_TARGET": ".claude",
             "LISSOM_YES": "1",
         },

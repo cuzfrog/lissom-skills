@@ -1,6 +1,6 @@
 ---
 name: lissom-plan
-description: Dispatches to lissom-planner to produce Plan.md for a given task_dir.
+description: Dispatches to lissom-planner agent to produce an implementation plan given an explicit task_dir, which contains a specification or research document.
 argument-hint: <task_dir> [fix_cycle] [fix_threshold]
 ---
 

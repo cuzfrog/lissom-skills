@@ -10,83 +10,90 @@ from scripts.lib.constants import (
     CLAUDE_TO_GEMINI_TOOL,
     GEMINI_MODEL_MAP,
 )
+from scripts.lib.converter import Converter
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools, shift_args
 
 
-def convert_agent(content: str, agent_name: str) -> str:
-    """
-    Convert a Claude Code agent .md file to Gemini CLI format.
+class GeminiConverter(Converter):
+    """Converter for the Gemini CLI target — temperature, model, YAML tools list, arg shift."""
 
-    Transformations:
-    1. Parse frontmatter → extract name, description, tools.
-    2. Build new frontmatter:
-       - name, description (preserved)
-       - temperature: 0.1 (always added, before model)
-       - model: <gemini model for agent_name> (always injected)
-       - tools: as YAML list — for each Claude Code tool, emit "  - <gemini_name>"
-         using CLAUDE_TO_GEMINI_TOOL map. AskUserQuestion IS included (→ ask_user).
-    3. Rewrite body tool names using CLAUDE_TO_GEMINI_BODY map.
+    def convert_agent(self, content: str, agent_name: str) -> str:
+        """
+        Convert a Claude Code agent .md file to Gemini CLI format.
 
-    Returns: fully converted content string.
-    """
-    fields, body = parse_frontmatter(content)
+        Transformations:
+        1. Parse frontmatter → extract name, description, tools.
+        2. Build new frontmatter:
+           - name, description (preserved)
+           - temperature: 0.1 (always added, before model)
+           - model: <gemini model for agent_name> (only when mapped)
+           - tools: as YAML list — for each Claude Code tool, emit "  - <gemini_name>"
+             using CLAUDE_TO_GEMINI_TOOL map. AskUserQuestion IS included (→ ask_user).
+        3. Rewrite body tool names using CLAUDE_TO_GEMINI_BODY map.
+        4. Shift $N args forward by 1.
 
-    name = fields.get("name", agent_name)
-    description = fields.get("description", "")
-    tools_str = fields.get("tools", "")
+        Returns: fully converted content string.
+        """
+        fields, body = parse_frontmatter(content)
 
-    # Parse tools: "Bash, Read, AskUserQuestion" → list
-    tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
+        name = fields.get("name", agent_name)
+        description = fields.get("description", "")
+        tools_str = fields.get("tools", "")
 
-    model = GEMINI_MODEL_MAP.get(agent_name, "gemini-3-flash-preview")
+        # Parse tools: "Bash, Read, AskUserQuestion" → list
+        tool_list = [t.strip() for t in tools_str.split(",") if t.strip()]
 
-    lines = ["---"]
-    lines.append(f"name: {name}")
-    lines.append(f"description: {description}")
-    lines.append("temperature: 0.1")
-    lines.append(f"model: {model}")
-    lines.append("tools:")
-    for tool in tool_list:
-        gemini_tool = CLAUDE_TO_GEMINI_TOOL.get(tool)
-        if gemini_tool:
-            lines.append(f"  - {gemini_tool}")
-    lines.append("---")
+        model = GEMINI_MODEL_MAP.get(agent_name)
 
-    new_content = "\n".join(lines) + "\n"
-    if body:
-        body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
-        body = shift_args(body)
-        new_content += body
+        lines = ["---"]
+        lines.append(f"name: {name}")
+        lines.append(f"description: {description}")
+        lines.append("temperature: 0.1")
+        if model:
+            lines.append(f"model: {model}")
+        lines.append("tools:")
+        for tool in tool_list:
+            gemini_tool = CLAUDE_TO_GEMINI_TOOL.get(tool)
+            if gemini_tool:
+                lines.append(f"  - {gemini_tool}")
+        lines.append("---")
 
-    return new_content
+        new_content = "\n".join(lines) + "\n"
+        if body:
+            body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
+            body = shift_args(body)
+            new_content += body
 
+        return new_content
 
-def convert_skill(content: str, skill_name: str) -> str:
-    """
-    Convert a Claude Code skill SKILL.md to Gemini CLI format.
+    def convert_skill(self, content: str, skill_name: str) -> str:
+        """
+        Convert a Claude Code skill SKILL.md to Gemini CLI format.
 
-    Transformations:
-    1. Parse frontmatter → extract name, description only (drop all other fields).
-    2. Build new frontmatter with only name and description.
-       (No temperature, no model, no tools).
-    3. Rewrite body tool names (same mapping as agent).
+        Transformations:
+        1. Parse frontmatter → extract name, description only (drop all other fields).
+        2. Build new frontmatter with only name and description.
+           (No temperature, no model, no tools).
+        3. Rewrite body tool names (same mapping as agent).
+        4. Shift $N args forward by 1.
 
-    Returns: converted content string.
-    """
-    fields, body = parse_frontmatter(content)
+        Returns: converted content string.
+        """
+        fields, body = parse_frontmatter(content)
 
-    name = fields.get("name", skill_name)
-    description = fields.get("description", "")
+        name = fields.get("name", skill_name)
+        description = fields.get("description", "")
 
-    lines = ["---"]
-    lines.append(f"name: {name}")
-    lines.append(f"description: {description}")
-    lines.append("---")
+        lines = ["---"]
+        lines.append(f"name: {name}")
+        lines.append(f"description: {description}")
+        lines.append("---")
 
-    new_content = "\n".join(lines) + "\n"
-    if body:
-        body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
-        body = shift_args(body)
-        new_content += body
+        new_content = "\n".join(lines) + "\n"
+        if body:
+            body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
+            body = shift_args(body)
+            new_content += body
 
-    return new_content
+        return new_content
+

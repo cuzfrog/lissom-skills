@@ -1,6 +1,6 @@
 ---
 name: lissom-review
-description: Dispatches to lissom-reviewer and relays the verdict to the caller.
+description: Dispatches to lissom-reviewer agent to review the implementation given an explicit task_dir, which contains the related documents.
 argument-hint: <task_dir>
 ---
 

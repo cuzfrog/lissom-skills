@@ -1,9 +1,14 @@
 #!/bin/bash
 
-export ANTHROPIC_API_KEY="" # must be explicitly set to empty
-export ANTHROPIC_BASE_URL=http://localhost:4000
-export ANTHROPIC_AUTH_TOKEN=dummy
-export ANTHROPIC_DEFAULT_OPUS_MODEL="tencent/hy3-preview:free"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="qwen/qwen3.5-9b"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-super-120b-a12b:free"
-export CLAUDE_CODE_SUBAGENT_MODEL="qwen/qwen3.5-9b"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-${(%):-%x}}")" &> /dev/null && pwd)
+
+# Check if 'which python' returns a path inside .venv; if so, skip venv setup
+PYTHON_PATH=$(which python)
+if [[ "$PYTHON_PATH" == "$SCRIPT_DIR/venv"* ]]; then
+        echo "Python in .venv already active: $PYTHON_PATH"
+else
+        python3 -m venv "$SCRIPT_DIR/venv"
+        source "$SCRIPT_DIR/venv/bin/activate"
+        echo "Python virtual environment activated."
+        echo "---"
+fi

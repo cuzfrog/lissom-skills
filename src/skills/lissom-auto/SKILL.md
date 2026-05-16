@@ -1,6 +1,6 @@
 ---
 name: lissom-auto
-description: Runs the full dev cycle (research → plan → impl → review + fix loop) for a task.
+description: Runs the full dev cycle (research → plan → impl → review + fix loop) given an explicit task_id.
 argument-hint: <task_id> [extra_info]
 ---
 
@@ -37,7 +37,6 @@ argument-hint: <task_id> [extra_info]
 - Prefer read files directly or list dir instead of file search. Because file search tools may respect exclusion rules, such as `.gitignore`, that hide the artifacts.
 
 ## Execution
-0. Use Tool `TodoWrite` to track progress.
 1. Invoke `lissom-research` with `task_dir`, `user_attention`, `spec_review_required`, and `research_required`. Wait for completion. If `spec_review_required` and `research_required` are both `false`, skip this step.
 2. Invoke `lissom-plan` with `task_dir`. Verify `Plan.md` exists; retry once on missing.
 3. Invoke `lissom-impl` with `task_dir` and `impl_delegation`. Verify `Impl-summary.md` exists; retry once on missing.

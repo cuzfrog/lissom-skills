@@ -69,6 +69,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 - `.opencode/` [OpenCode](https://opencode.ai)。
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
 - `.gemini/` [Gemini CLI](https://geminicli.com/)。
+- `.pi/` [Pi CLI](https://github.com/earendil-works/pi) — 需要 [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents)。
 
 ### 卸载
 
@@ -116,6 +117,7 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 | `fix_threshold` | `warning` — 修复关键和警告问题；`critical` — 仅关键问题；`suggestion` — 全部问题 |
 | `spec_review_required` | `yes` — 在研究前评审和完善规范；`no` — 跳过规范评审 |
 | `research_required` | `yes` — 实现前进行研究；`no` — 若规范已足够则跳过研究 |
+| `impl_delegation` | `single` — 在单个子代理中执行实现（大多数情况下更快）；`multiple` — 在多个子代理中执行实现（如果实现范围较大；通常不需要） |
 
 ---
 

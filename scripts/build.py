@@ -5,13 +5,12 @@ Build orchestrator: reads agent/skill sources, converts per target, produces zip
 Usage:
     python scripts/build.py [--root <project_root>]
 
-No CLI arguments by default — always builds all four targets.
+No CLI arguments by default — always builds all targets (claude, opencode, qwen, gemini, pi).
 Output goes to dist/ (created if missing).
 """
 
 import argparse
 import os
-import shutil
 import sys
 import tempfile
 import zipfile
@@ -24,30 +23,10 @@ if str(_project_root) not in sys.path:
 
 from scripts.lib.constants import (
     AGENTS,
-    CLAUDE_MODEL_MAP,
     SKILLS,
     TARGET_CONFIG,
 )
-from scripts.lib.frontmatter import inject_field
-from scripts.lib.opencode import convert_agent as opencode_convert_agent
-from scripts.lib.opencode import convert_skill as opencode_convert_skill
-from scripts.lib.qwen import convert_agent as qwen_convert_agent
-from scripts.lib.qwen import convert_skill as qwen_convert_skill
-from scripts.lib.gemini import convert_agent as gemini_convert_agent
-from scripts.lib.gemini import convert_skill as gemini_convert_skill
-
-# Converter dispatch tables
-AGENT_CONVERTERS = {
-    "opencode": opencode_convert_agent,
-    "qwen": qwen_convert_agent,
-    "gemini": gemini_convert_agent,
-}
-
-SKILL_CONVERTERS = {
-    "opencode": opencode_convert_skill,
-    "qwen": qwen_convert_skill,
-    "gemini": gemini_convert_skill,
-}
+from scripts.lib.converter_factory import get_converter
 
 
 def read_source(path: Path) -> str:
@@ -60,9 +39,9 @@ def read_source(path: Path) -> str:
 def build(root: Path) -> None:
     """Run the full build: enumerate sources, convert per target, zip."""
     # ── 1. Locate source directories ──────────────────────────────
-    agents_src = root / "agents"
-    skills_src = root / "skills"
-    templates_src = root / "templates"
+    agents_src = root / "src" / "agents"
+    skills_src = root / "src" / "skills"
+    templates_src = root / "src" / "templates"
     dist_dir = root / "dist"
 
     # ── 2. Enumerate source contents ──────────────────────────────
@@ -94,39 +73,23 @@ def build(root: Path) -> None:
 
         with tempfile.TemporaryDirectory(prefix=f"build-{shortname}-") as tmpdir:
             staging = Path(tmpdir)
+            agents_dst = staging / target_dir / "agents"
+            skills_dst = staging / target_dir / "skills"
+            agents_dst.mkdir(parents=True)
+            skills_dst.mkdir(parents=True)
 
-            # Create directory structure
-            (staging / target_dir / "agents").mkdir(parents=True)
-            (staging / target_dir / "skills").mkdir(parents=True)
-
-            # Convert agents
+            # Convert agents and skills via the shared Converter interface
+            converter = get_converter(shortname)
             for agent_name, source_content in agent_contents.items():
-                if shortname == "claude":
-                    # Claude Code: inject model field only
-                    model = CLAUDE_MODEL_MAP.get(agent_name, "sonnet")
-                    try:
-                        output = inject_field(
-                            source_content, "model", model, after_field="tools"
-                        )
-                    except ValueError:
-                        output = inject_field(source_content, "model", model)
-                else:
-                    converter = AGENT_CONVERTERS[shortname]
-                    output = converter(source_content, agent_name)
-
-                (staging / target_dir / "agents" / f"{agent_name}.md").write_text(
+                output = converter.convert_agent(source_content, agent_name)
+                (agents_dst / f"{agent_name}.md").write_text(
                     output, encoding="utf-8"
                 )
 
-            # Convert skills
             for skill_name, source_content in skill_contents.items():
-                if shortname == "claude":
-                    output = source_content  # verbatim
-                else:
-                    converter = SKILL_CONVERTERS[shortname]
-                    output = converter(source_content, skill_name)
+                output = converter.convert_skill(source_content, skill_name)
 
-                skill_dir = staging / target_dir / "skills" / skill_name
+                skill_dir = skills_dst / skill_name
                 skill_dir.mkdir(parents=True, exist_ok=True)
                 (skill_dir / "SKILL.md").write_text(output, encoding="utf-8")
 
@@ -138,7 +101,7 @@ def build(root: Path) -> None:
 
             # Copy preferences (optional)
             if preferences_content is not None:
-                auto_dir = staging / target_dir / "skills" / "lissom-auto"
+                auto_dir = skills_dst / "lissom-auto"
                 auto_dir.mkdir(parents=True, exist_ok=True)
                 (auto_dir / "user_preference_questions.json").write_text(
                     preferences_content, encoding="utf-8"

@@ -2,7 +2,7 @@
 
 set -e
 
-TARGET_DIRS=(".claude" ".opencode" ".qwen" ".gemini")
+TARGET_DIRS=(".claude" ".opencode" ".qwen" ".gemini" ".pi")
 
 parse_no_args() {
     if [[ -n "$1" ]]; then

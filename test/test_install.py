@@ -41,7 +41,7 @@ def test_prompt_overwrite_non_tty_declines():
 
 def test_prompt_target_directory_stdout_clean():
     """Regression: prompt_target_directory outputs only the target name to stdout."""
-    for target in (".claude", ".opencode", ".qwen", ".gemini"):
+    for target in (".claude", ".opencode", ".qwen", ".gemini", ".pi"):
         result = subprocess.run(
             ["bash", "-c", f"""
                 source scripts/install.sh --source-only
