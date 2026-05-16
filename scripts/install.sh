@@ -20,12 +20,13 @@ prompt_target_directory() {
 
     if [[ -t 0 ]]; then
         echo "Select installation target:" >&2
-        select _ in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)" ".qwen (Qwen Code)" ".gemini (Gemini CLI)"; do
+        select _ in ".claude (Claude Code and most CLIs)" ".opencode (Opencode)" ".qwen (Qwen Code)" ".gemini (Gemini CLI)" ".pi (Pi CLI)"; do
             case "$REPLY" in
                 1) echo ".claude"; return 0 ;;
                 2) echo ".opencode"; return 0 ;;
                 3) echo ".qwen"; return 0 ;;
                 4) echo ".gemini"; return 0 ;;
+                5) echo ".pi"; return 0 ;;
                 *) echo "Invalid choice. Try again." >&2 ;;
             esac
         done
@@ -37,6 +38,7 @@ prompt_target_directory() {
         echo "2) .opencode (Opencode)" >&2
         echo "3) .qwen (Qwen Code)" >&2
         echo "4) .gemini (Gemini CLI)" >&2
+        echo "5) .pi (Pi CLI)" >&2
         echo -n "Choice: " >&2
         read -r _ui_reply </dev/tty
         case "${_ui_reply:-1}" in
@@ -44,6 +46,7 @@ prompt_target_directory() {
             2) echo ".opencode" ;;
             3) echo ".qwen" ;;
             4) echo ".gemini" ;;
+            5) echo ".pi" ;;
             *) echo "Invalid choice, defaulting to .claude." >&2; echo ".claude" ;;
         esac
         return 0
@@ -80,6 +83,7 @@ case "$INSTALL_TARGET" in
     .opencode) ZIP="lissom-skills-opencode.zip" ;;
     .qwen)     ZIP="lissom-skills-qwen.zip" ;;
     .gemini)   ZIP="lissom-skills-gemini.zip" ;;
+    .pi)       ZIP="lissom-skills-pi.zip" ;;
     *) echo "Error: Unknown target $INSTALL_TARGET" >&2; exit 1 ;;
 esac
 
@@ -144,6 +148,10 @@ restore_frontmatter_fields() {
 
 print_agent_models() {
     local agents_dir="$TARGET/agents"
+    # Pi target stores agents in .pi/extensions/agents/
+    if [[ "$INSTALL_TARGET" == ".pi" ]]; then
+        agents_dir="$TARGET/extensions/agents"
+    fi
     [[ -d "$agents_dir" ]] || return 0
 
     local -a names models

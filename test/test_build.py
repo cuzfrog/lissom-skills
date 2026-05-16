@@ -21,6 +21,8 @@ from scripts.lib.qwen import convert_agent as qwen_convert_agent
 from scripts.lib.qwen import convert_skill as qwen_convert_skill
 from scripts.lib.gemini import convert_agent as gemini_convert_agent
 from scripts.lib.gemini import convert_skill as gemini_convert_skill
+from scripts.lib.pi import convert_agent as pi_convert_agent
+from scripts.lib.pi import convert_skill as pi_convert_skill
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -29,22 +31,22 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def make_build_fixture(root: Path) -> None:
     """Create a minimal project tree for build testing."""
-    agents_dir = root / "agents"
+    agents_dir = root / "src" / "agents"
     agents_dir.mkdir(parents=True)
     for agent in AGENTS:
         (agents_dir / f"{agent}.md").write_text(
             f"---\nname: {agent}\ndescription: fixture\ntools: Bash, Read, Write, AskUserQuestion\n---\nBody for {agent} using `Bash` and `Read`.\n"
         )
 
-    skills_dir = root / "skills"
+    skills_dir = root / "src" / "skills"
     for skill in SKILLS:
         (skills_dir / skill).mkdir(parents=True)
         (skills_dir / skill / "SKILL.md").write_text(
             f"---\nname: {skill}\ndescription: fixture\n---\nBody for {skill} using `Grep`.\n"
         )
 
-    (root / "templates").mkdir(parents=True)
-    (root / "templates" / "Specs.md").write_text("# Sample Specs\n")
+    (root / "src" / "templates").mkdir(parents=True)
+    (root / "src" / "templates" / "Specs.md").write_text("# Sample Specs\n")
 
     # Add optional preferences file
     auto_dir = skills_dir / "lissom-auto"
@@ -57,6 +59,13 @@ def make_build_fixture(root: Path) -> None:
     for py_file in (REPO_ROOT / "scripts" / "lib").glob("*.py"):
         shutil.copy2(py_file, scripts_dest / py_file.name)
     shutil.copy2(REPO_ROOT / "scripts" / "build.py", root / "scripts" / "build.py")
+
+    # Copy Pi extension source files
+    pi_ext_dest = root / "src" / "pi-extensions"
+    pi_ext_dest.mkdir(parents=True, exist_ok=True)
+    for f in (REPO_ROOT / "src" / "pi-extensions").glob("*"):
+        if f.is_file():
+            shutil.copy2(f, pi_ext_dest / f.name)
 
 
 # ── OpenCode Converter Tests ─────────────────────────────────────────
@@ -264,7 +273,7 @@ class TestFrontmatterParser:
 
     def test_parse_real_file(self):
         """Parse a real agent file successfully."""
-        content = (REPO_ROOT / "agents" / "lissom-researcher.md").read_text()
+        content = (REPO_ROOT / "src" / "agents" / "lissom-researcher.md").read_text()
         fields, body = parse_frontmatter(content)
         assert "name" in fields
         assert "description" in fields
@@ -305,11 +314,71 @@ class TestShiftArgs:
         assert result == "`$1` and `$2` then `$3`"
 
 
+# ── Pi Converter Tests ───────────────────────────────────────────────
+
+class TestPiConverter:
+    def test_convert_skill_rewrites_agent_tool(self):
+        """`Agent` → `lissom-agent` in body text."""
+        content = "---\nname: lissom-auto\ndescription: fixture\n---\nUse `Agent` to delegate work.\n"
+        result = pi_convert_skill(content, "lissom-auto")
+        assert "`lissom-agent`" in result
+        assert "`Agent`" not in result
+
+    def test_convert_skill_preserves_frontmatter(self):
+        """name, description, argument-hint unchanged."""
+        content = "---\nname: lissom-auto\ndescription: fixture\nargument-hint: <task_id>\n---\nUse `Agent`.\n"
+        result = pi_convert_skill(content, "lissom-auto")
+        assert "name: lissom-auto" in result
+        assert "description: fixture" in result
+        assert "argument-hint: <task_id>" in result
+
+    def test_convert_skill_other_tools_unchanged(self):
+        """AskUserQuestion, Bash remain unchanged in skill body (skills instruct main agent)."""
+        content = "---\nname: test\ndescription: test\n---\nUse `AskUserQuestion` and `Bash`.\n"
+        result = pi_convert_skill(content, "test")
+        assert "`AskUserQuestion`" in result
+        assert "`Bash`" in result
+
+    def test_convert_agent_rewrites_body_tools(self):
+        """`Bash` → `bash`, `Read` → `read`, etc. in body text."""
+        content = "---\nname: test-agent\ndescription: test\ntools: Bash, Read, Edit, Glob, Grep\n---\nUse `Bash` and `Read`.\n"
+        result = pi_convert_agent(content, "lissom-researcher")
+        assert "`bash`" in result
+        assert "`read`" in result
+        assert "`Bash`" not in result
+
+    def test_convert_agent_strips_tools_frontmatter(self):
+        """tools: field removed from output."""
+        content = "---\nname: test-agent\ndescription: test\ntools: Bash, Read\n---\nbody\n"
+        result = pi_convert_agent(content, "lissom-researcher")
+        assert "tools:" not in result
+
+    def test_convert_agent_preserves_name_description(self):
+        """name and description kept."""
+        content = "---\nname: lissom-researcher\ndescription: A test agent\ntools: Bash\n---\nbody\n"
+        result = pi_convert_agent(content, "lissom-researcher")
+        assert "name: lissom-researcher" in result
+        assert "description: A test agent" in result
+
+    def test_convert_agent_no_model_injection(self):
+        """No model: field in output."""
+        content = "---\nname: test-agent\ndescription: test\ntools: Bash\n---\nbody\n"
+        result = pi_convert_agent(content, "lissom-researcher")
+        assert "model:" not in result
+
+    def test_convert_agent_args_not_shifted(self):
+        """$0, $1 stay unchanged (unlike Qwen/Gemini)."""
+        content = "---\nname: test\ndescription: test\ntools: Bash\n---\nUse `$0` and `$1`.\n"
+        result = pi_convert_agent(content, "lissom-researcher")
+        assert "`$0`" in result
+        assert "`$1`" in result
+
+
 # ── Build Integration Tests ──────────────────────────────────────────
 
 class TestBuildScript:
-    def test_build_creates_all_four_zips(self, tmp_path):
-        """Running build.py produces 4 zip files."""
+    def test_build_creates_all_five_zips(self, tmp_path):
+        """Running build.py produces 5 zip files."""
         make_build_fixture(tmp_path)
         result = subprocess.run(
             ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
@@ -320,7 +389,7 @@ class TestBuildScript:
         dist_dir = tmp_path / "dist"
         assert dist_dir.exists()
         zips = sorted(dist_dir.glob("*.zip"))
-        assert len(zips) == 4
+        assert len(zips) == 5
         assert all(z.name.startswith("lissom-skills-") for z in zips)
 
     def test_claude_zip_contents(self, tmp_path):
@@ -389,12 +458,81 @@ class TestBuildScript:
             check=True, capture_output=True,
         )
 
-        for shortname in ("claude", "opencode", "qwen", "gemini"):
+        for shortname in ("claude", "opencode", "qwen", "gemini", "pi"):
             zip_path = tmp_path / "dist" / f"lissom-skills-{shortname}.zip"
             with zipfile.ZipFile(zip_path) as zf:
                 names = zf.namelist()
                 assert ".lissom/tasks/T1/Specs.md" in names, f"missing Specs.md in {shortname}"
-                assert f".{shortname}/skills/lissom-auto/user_preference_questions.json" in names, f"missing prefs in {shortname}"
+                # Preferences path differs for pi target
+                if shortname == "pi":
+                    prefs_path = ".pi/skills/lissom-auto/user_preference_questions.json"
+                else:
+                    prefs_path = f".{shortname}/skills/lissom-auto/user_preference_questions.json"
+                assert prefs_path in names, f"missing prefs in {shortname}"
+
+    def test_pi_zip_structure(self, tmp_path):
+        """Pi zip has correct directory layout with extension files."""
+        make_build_fixture(tmp_path)
+        subprocess.run(
+            ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
+            check=True, capture_output=True,
+        )
+
+        with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
+            names = zf.namelist()
+            assert ".pi/extensions/lissom-agent.ts" in names
+            assert ".pi/extensions/package.json" in names
+            assert ".pi/extensions/agents/lissom-researcher.md" in names
+            assert ".pi/skills/lissom-auto/SKILL.md" in names
+            assert ".lissom/tasks/T1/Specs.md" in names
+
+    def test_pi_zip_agent_content(self, tmp_path):
+        """Pi agent has rewritten body tools, no model, no tools field."""
+        make_build_fixture(tmp_path)
+        subprocess.run(
+            ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
+            check=True, capture_output=True,
+        )
+
+        with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
+            content = zf.read(".pi/extensions/agents/lissom-researcher.md").decode()
+            assert "`bash`" in content
+            assert "`Bash`" not in content
+            assert "`read`" in content
+            assert "model:" not in content
+            assert "tools:" not in content
+
+    def test_pi_zip_skill_content(self, tmp_path):
+        """Pi skill has lissom-agent tool name (when present in source)."""
+        # Create a skill with Agent reference to verify conversion
+        make_build_fixture(tmp_path)
+        # Overwrite one skill with an Agent reference
+        skill_path = tmp_path / "src" / "skills" / "lissom-plan" / "SKILL.md"
+        skill_path.write_text(
+            "---\nname: lissom-plan\ndescription: fixture\n---\nUse `Agent` to delegate.\n"
+        )
+
+        subprocess.run(
+            ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
+            check=True, capture_output=True,
+        )
+
+        with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
+            content = zf.read(".pi/skills/lissom-plan/SKILL.md").decode()
+            assert "`lissom-agent`" in content
+            assert "`Agent`" not in content
+
+    def test_pi_zip_extension_files(self, tmp_path):
+        """package.json has name 'lissom-skills'."""
+        make_build_fixture(tmp_path)
+        subprocess.run(
+            ["python3", str(tmp_path / "scripts" / "build.py"), "--root", str(tmp_path)],
+            check=True, capture_output=True,
+        )
+
+        with zipfile.ZipFile(tmp_path / "dist" / "lissom-skills-pi.zip") as zf:
+            pkg = zf.read(".pi/extensions/package.json").decode()
+            assert '"name": "lissom-skills"' in pkg
 
     def test_build_idempotent(self, tmp_path):
         """Running build.py twice succeeds (overwrites zips)."""
@@ -415,7 +553,7 @@ class TestBuildScript:
         """Missing optional user_preference_questions.json does not crash build."""
         make_build_fixture(tmp_path)
         # Remove the preferences file
-        prefs = tmp_path / "skills" / "lissom-auto" / "user_preference_questions.json"
+        prefs = tmp_path / "src" / "skills" / "lissom-auto" / "user_preference_questions.json"
         prefs.unlink()
 
         result = subprocess.run(

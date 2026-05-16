@@ -30,25 +30,35 @@ def make_install_zip(root: Path, target: str = ".claude") -> Path:
         ".opencode": "opencode",
         ".qwen": "qwen",
         ".gemini": "gemini",
+        ".pi": "pi",
     }
     shortname = target_map[target]
     zip_path = dist_dir / f"lissom-skills-{shortname}.zip"
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Pi target uses a different directory layout
+        if target == ".pi":
+            agents_prefix = ".pi/extensions/agents"
+            skills_prefix = ".pi/skills"
+        else:
+            agents_prefix = f"{target}/agents"
+            skills_prefix = f"{target}/skills"
+
         for agent in AGENTS:
             content = (
                 f"---\nname: {agent}\ndescription: fixture\ntools: Bash, Read\n"
                 f"model: sonnet\n---\nBody for {agent}.\n"
             )
-            zf.writestr(f"{target}/agents/{agent}.md", content)
+            zf.writestr(f"{agents_prefix}/{agent}.md", content)
 
         for skill in SKILLS:
             content = (
                 f"---\nname: {skill}\ndescription: fixture\n---\nBody for {skill}.\n"
             )
-            zf.writestr(f"{target}/skills/{skill}/SKILL.md", content)
+            zf.writestr(f"{skills_prefix}/{skill}/SKILL.md", content)
 
-        zf.writestr(f"{target}/templates/Specs.md", "# Sample Specs\n")
+        if target != ".pi":
+            zf.writestr(f"{target}/templates/Specs.md", "# Sample Specs\n")
         zf.writestr(".lissom/tasks/T1/Specs.md", "# Sample Specs\n")
 
     return zip_path
@@ -76,11 +86,11 @@ def _start_server(root: Path = REPO_ROOT):
 
 @pytest.fixture(scope="module")
 def install_server():
-    """Pre-build all 4 zips and start HTTP server once for all e2e tests."""
+    """Pre-build all 5 zips and start HTTP server once for all e2e tests."""
     dist_dir = REPO_ROOT / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
 
-    for target in (".claude", ".opencode", ".qwen", ".gemini"):
+    for target in (".claude", ".opencode", ".qwen", ".gemini", ".pi"):
         make_install_zip(REPO_ROOT, target)
 
     server, port = _start_server()
@@ -238,7 +248,7 @@ def test_install_cleans_up_zip(tmp_path, install_server):
     assert not any(work.glob("*.zip"))
 
 
-@pytest.mark.parametrize("target", [".claude", ".opencode", ".qwen", ".gemini"])
+@pytest.mark.parametrize("target", [".claude", ".opencode", ".qwen", ".gemini", ".pi"])
 def test_install_target(tmp_path, install_server, target):
     """LISSOM_TARGET=<target> creates correct directory with agents."""
     work = tmp_path / "work"
@@ -258,7 +268,11 @@ def test_install_target(tmp_path, install_server, target):
     )
 
     assert result.returncode == 0
-    assert (work / target / "agents" / "lissom-researcher.md").is_file()
+    # Pi target stores agents in extensions/ subdirectory
+    if target == ".pi":
+        assert (work / target / "extensions" / "agents" / "lissom-researcher.md").is_file()
+    else:
+        assert (work / target / "agents" / "lissom-researcher.md").is_file()
 
 
 def test_empty_target_dir_preserved(tmp_path, install_server):

@@ -35,18 +35,22 @@ from scripts.lib.qwen import convert_agent as qwen_convert_agent
 from scripts.lib.qwen import convert_skill as qwen_convert_skill
 from scripts.lib.gemini import convert_agent as gemini_convert_agent
 from scripts.lib.gemini import convert_skill as gemini_convert_skill
+from scripts.lib.pi import convert_agent as pi_convert_agent
+from scripts.lib.pi import convert_skill as pi_convert_skill
 
 # Converter dispatch tables
 AGENT_CONVERTERS = {
     "opencode": opencode_convert_agent,
     "qwen": qwen_convert_agent,
     "gemini": gemini_convert_agent,
+    "pi": pi_convert_agent,
 }
 
 SKILL_CONVERTERS = {
     "opencode": opencode_convert_skill,
     "qwen": qwen_convert_skill,
     "gemini": gemini_convert_skill,
+    "pi": pi_convert_skill,
 }
 
 
@@ -60,9 +64,9 @@ def read_source(path: Path) -> str:
 def build(root: Path) -> None:
     """Run the full build: enumerate sources, convert per target, zip."""
     # ── 1. Locate source directories ──────────────────────────────
-    agents_src = root / "agents"
-    skills_src = root / "skills"
-    templates_src = root / "templates"
+    agents_src = root / "src" / "agents"
+    skills_src = root / "src" / "skills"
+    templates_src = root / "src" / "templates"
     dist_dir = root / "dist"
 
     # ── 2. Enumerate source contents ──────────────────────────────
@@ -89,15 +93,36 @@ def build(root: Path) -> None:
     # ── 3. Build per target ───────────────────────────────────────
     os.makedirs(dist_dir, exist_ok=True)
 
+    pi_extensions_src = root / "src" / "pi-extensions"
+
     for target_dir, shortname in TARGET_CONFIG.items():
         print(f"Building {target_dir} ({shortname})...")
 
         with tempfile.TemporaryDirectory(prefix=f"build-{shortname}-") as tmpdir:
             staging = Path(tmpdir)
 
-            # Create directory structure
-            (staging / target_dir / "agents").mkdir(parents=True)
-            (staging / target_dir / "skills").mkdir(parents=True)
+            if shortname == "pi":
+                # Pi-specific layout
+                agents_dst = staging / ".pi" / "extensions" / "agents"
+                skills_dst = staging / ".pi" / "skills"
+                agents_dst.mkdir(parents=True)
+                skills_dst.mkdir(parents=True)
+
+                # Copy extension files
+                extensions_dst = staging / ".pi" / "extensions"
+                shutil.copy2(
+                    pi_extensions_src / "lissom-agent.ts",
+                    extensions_dst / "lissom-agent.ts",
+                )
+                shutil.copy2(
+                    pi_extensions_src / "package.json",
+                    extensions_dst / "package.json",
+                )
+            else:
+                agents_dst = staging / target_dir / "agents"
+                skills_dst = staging / target_dir / "skills"
+                agents_dst.mkdir(parents=True)
+                skills_dst.mkdir(parents=True)
 
             # Convert agents
             for agent_name, source_content in agent_contents.items():
@@ -114,7 +139,7 @@ def build(root: Path) -> None:
                     converter = AGENT_CONVERTERS[shortname]
                     output = converter(source_content, agent_name)
 
-                (staging / target_dir / "agents" / f"{agent_name}.md").write_text(
+                (agents_dst / f"{agent_name}.md").write_text(
                     output, encoding="utf-8"
                 )
 
@@ -126,7 +151,7 @@ def build(root: Path) -> None:
                     converter = SKILL_CONVERTERS[shortname]
                     output = converter(source_content, skill_name)
 
-                skill_dir = staging / target_dir / "skills" / skill_name
+                skill_dir = skills_dst / skill_name
                 skill_dir.mkdir(parents=True, exist_ok=True)
                 (skill_dir / "SKILL.md").write_text(output, encoding="utf-8")
 
@@ -138,7 +163,7 @@ def build(root: Path) -> None:
 
             # Copy preferences (optional)
             if preferences_content is not None:
-                auto_dir = staging / target_dir / "skills" / "lissom-auto"
+                auto_dir = skills_dst / "lissom-auto"
                 auto_dir.mkdir(parents=True, exist_ok=True)
                 (auto_dir / "user_preference_questions.json").write_text(
                     preferences_content, encoding="utf-8"

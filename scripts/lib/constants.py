@@ -29,6 +29,7 @@ TARGET_CONFIG = {
     ".opencode": "opencode",
     ".qwen": "qwen",
     ".gemini": "gemini",
+    ".pi": "pi",
 }
 
 # Claude Code agent filename (basename without .md) → default model
@@ -130,6 +131,29 @@ CLAUDE_TO_GEMINI_TOOL = {
     "WebFetch": "web_fetch",
     "WebSearch": "google_web_search",
     "AskUserQuestion": "ask_user",
+}
+
+# Claude Code tool name → Pi body text name
+CLAUDE_TO_PI_BODY = {
+    "Bash": "bash",
+    "Read": "read",
+    "Write": "write",
+    "Edit": "edit",
+    "Glob": "find/ls",
+    "Grep": "grep",
+    "WebFetch": "web_fetch",
+    "WebSearch": "web_search",
+    "AskUserQuestion": "ask_user",
+}
+
+# Claude Code tool name → Pi --tools flag name (for extension runtime)
+CLAUDE_TO_PI_TOOL_FLAG = {
+    "Bash": "bash",
+    "Read": "read",
+    "Write": "write",
+    "Edit": "edit",
+    "Glob": "find,ls",
+    "Grep": "grep",
 }
 
 # Claude Code tool name → Gemini CLI body text name
