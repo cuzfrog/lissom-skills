@@ -65,11 +65,11 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 Supported:
-- `.claude/` [Claude Code](https://code.claude.com/) and compatible agents.
+- `.claude/` [Claude Code](https://code.claude.com) and compatible agents.
 - `.opencode/` [OpenCode](https://opencode.ai).
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode).
-- `.gemini/` [Gemini CLI](https://geminicli.com/).
-- `.pi/` [Pi CLI](https://github.com/earendil-works/pi) — requires [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents).
+- `.gemini/` [Gemini CLI](https://geminicli.com).
+- `.pi/` [Pi CLI](https://pi.dev) — requires [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents).
 
 ### Uninstallation
 

@@ -12,3 +12,5 @@ venv/
 .automation/
 dist/
 src/pi-extensions/node_modules/
+
+.pi/

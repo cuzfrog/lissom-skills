@@ -65,11 +65,11 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 支持的平台：
-- `.claude/` [Claude Code](https://code.claude.com/) 及兼容代理。
+- `.claude/` [Claude Code](https://code.claude.com) 及兼容代理。
 - `.opencode/` [OpenCode](https://opencode.ai)。
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
-- `.gemini/` [Gemini CLI](https://geminicli.com/)。
-- `.pi/` [Pi CLI](https://github.com/earendil-works/pi) — 需要 [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents)。
+- `.gemini/` [Gemini CLI](https://geminicli.com)。
+- `.pi/` [Pi CLI](https://pi.dev) — 需要 [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents)。
 
 ### 卸载
 

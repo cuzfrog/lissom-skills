@@ -65,11 +65,11 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 ```
 
 対応プラットフォーム：
-- `.claude/` [Claude Code](https://code.claude.com/) および互換エージェント。
+- `.claude/` [Claude Code](https://code.claude.com) および互換エージェント。
 - `.opencode/` [OpenCode](https://opencode.ai)。
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
-- `.gemini/` [Gemini CLI](https://geminicli.com/)。
-- `.pi/` [Pi CLI](https://github.com/earendil-works/pi) — [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents) が必要です。
+- `.gemini/` [Gemini CLI](https://geminicli.com)。
+- `.pi/` [Pi CLI](https://pi.dev) — [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents) が必要です。
 
 ### アンインストール
 
