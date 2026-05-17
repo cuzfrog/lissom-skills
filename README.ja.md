@@ -92,9 +92,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 
 ### ベストプラクティス
 
-- 簡単な [grill-me](doc/grill-me.md) スキルを使って `Specs.md` を構築する。
-- テスト方法（開発サイクル）を明確に定義する（例：`CLAUDE.md` に記載）。
+- 簡単な [grill-me](doc/grill-me.md) スキルを使って `Specs.md` を構築する。([mattpocock/skills](https://github.com/mattpocock/skills))
 - 動作の制御：`/lissom-auto <task_id> 直接計画フェーズに進んでください。仕様はすでに十分に書かれています。`
+- テスト方法（開発サイクル）を明確に定義する（例：`CLAUDE.md` に記載）。
+- アーキテクチャとコード構造をレビューする。自分のコードを理解すべきです。
 
 ---
 
@@ -106,8 +107,8 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 {
   "user_attention": "default",
   "fix_threshold": "warning",
-  "spec_review_required": "yes",
-  "research_required": "yes"
+  "spec_review_required": false,
+  "impl_delegation": "single"
 }
 ```
 
@@ -115,8 +116,8 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 |---|---|
 | `user_attention` | `default` — 主要な懸念事項をインタビュー；`auto` — 自動運転（ベストエフォート）；`focused` — 網羅的な質問 |
 | `fix_threshold` | `warning` — 致命的および警告を修正；`critical` — 致命的のみ；`suggestion` — すべての指摘 |
-| `spec_review_required` | `yes` — リサーチ前に仕様をレビュー・改善；`no` — 仕様レビューをスキップ |
-| `research_required` | `yes` — 実装前にリサーチを実施；`no` — 仕様が十分な場合はリサーチをスキップ |
+| `spec_review_required` | `false` — 仕様レビューをスキップ；`true` — リサーチ前に仕様をレビュー・改善 |
+| `research_required` | `true` — 実装前にリサーチを実施；`false` — 仕様が十分な場合はリサーチをスキップ |
 | `impl_delegation` | `single` — 1つのサブエージェントで実装を実行（ほとんどの場合で高速）；`multiple` — 複数のサブエージェントで実装を実行（実装範囲が広い場合；通常は不要） |
 
 ---
