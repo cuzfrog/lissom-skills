@@ -23,6 +23,7 @@ Use these only as reference for intent — do not review them as code.
 
 ## Review criteria
 
+- **Module boundary violation** - if a module client can directly see a module's internals instead of going through the interface. This type of violation is "Critical". 
 - **Correctness** – logic errors, off-by-one bugs, wrong assumptions.
 - **Security** – exposed secrets, missing input validation, injection vectors.
 - **Error handling** – unhandled exceptions, silent failures, missing edge cases.
@@ -33,13 +34,6 @@ Use these only as reference for intent — do not review them as code.
 - **Refactoring** – does new code miss an opportunity to extract shared logic from near-duplicates, or does it duplicate an existing abstraction instead of reusing it?
 - **Performance** – slow algorithms, unnecessary IO access, etc.
 - **Maintainability** – is code loosely coupled? Are concerns separated? Do types and modules have minimal surface area? Will future changes be easily made?
-
-### SOLID principles:
-- **Single Responsibility Principle**: A function, class, or module should have one, and only one, reason to change.
-- **Open/Closed Principle**: Hide implementations behind interfaces. So that modifications happen without the client code needing to know.
-- **Liskov Substitution Principle**: Switching implementation should not violate the interface's contract, including implicit ones like side effects and error handling.
-- **Interface Segregation Principle**: A client should not be forced to depend on interfaces it does not use.
-- **Dependency Inversion Principle**: High-level modules should not depend on low-level modules. Abstractions should not depend on detailed implementations.
 
 ## Output
 
