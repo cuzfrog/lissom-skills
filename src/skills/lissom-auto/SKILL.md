@@ -1,6 +1,7 @@
 ---
 name: lissom-auto
 description: Runs the full dev cycle (research → plan → impl → review + fix loop) given an explicit task_id.
+disable-model-invocation: true
 argument-hint: <task_id> [extra_info]
 ---
 

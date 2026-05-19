@@ -22,12 +22,12 @@ class TestGeminiConverter:
         assert "`ask_user`" in result
 
     def test_convert_skill(self):
-        """Skill strips extra fields, no temperature/model."""
+        """Skill preserves extra frontmatter fields, no temperature/model."""
         content = "---\nname: lissom-auto\ndescription: fixture\nversion: 1.0\n---\nUse `Grep` to search.\n"
         result = converter.convert_skill(content, "lissom-auto")
         assert "name: lissom-auto" in result
         assert "description: fixture" in result
-        assert "version:" not in result
+        assert "version: 1.0" in result
         assert "temperature:" not in result
         assert "model:" not in result
         assert "`grep_search`" in result

@@ -21,13 +21,13 @@ class TestQwenConverter:
         assert "`Bash`" not in result
 
     def test_convert_skill(self):
-        """Skill strips extra frontmatter fields, rewrites body tools."""
+        """Skill preserves all frontmatter fields, rewrites body tools."""
         content = "---\nname: lissom-auto\ndescription: fixture\nversion: 1.0\nargument-hint: <task>\n---\nUse `Grep` to search.\n"
         result = converter.convert_skill(content, "lissom-auto")
         assert "name: lissom-auto" in result
         assert "description: fixture" in result
-        assert "version:" not in result
-        assert "argument-hint:" not in result
+        assert "version: 1.0" in result
+        assert "argument-hint: <task>" in result
         assert "`grep_search`" in result
 
     def test_agent_implementer_model(self):
