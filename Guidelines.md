@@ -40,4 +40,4 @@ Agents: Inputs → Idempotency → Process → Output → Constraints.
 3. Are input and output contracts specific and accurate?
 4. Is `AskUserQuestion` used for all user interaction?
 5. Can a tool, hook, or non-LLM mechanism replace an LLM call?
-
+6. Is old MacOS compatible?

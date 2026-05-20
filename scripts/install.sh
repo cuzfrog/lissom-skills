@@ -70,35 +70,8 @@ prompt_overwrite() {
     echo "false"
 }
 
-if [[ "$1" == "--source-only" ]]; then
-    [[ "${BASH_SOURCE[0]}" != "${0}" ]] && return || exit 0
-fi
 
-parse_no_args "$@"
 
-INSTALL_TARGET=$(prompt_target_directory)
-TARGET="./$INSTALL_TARGET"
-
-case "$INSTALL_TARGET" in
-    .claude)   ZIP="lissom-skills-claude.zip" ;;
-    .opencode) ZIP="lissom-skills-opencode.zip" ;;
-    .qwen)     ZIP="lissom-skills-qwen.zip" ;;
-    .gemini)   ZIP="lissom-skills-gemini.zip" ;;
-    .pi)       ZIP="lissom-skills-pi.zip" ;;
-    *) echo "Error: Unknown target $INSTALL_TARGET" >&2; exit 1 ;;
-esac
-
-if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
-    if [[ "$(prompt_overwrite "$TARGET")" != "true" ]]; then
-        echo "Installation cancelled."
-        exit 0
-    fi
-fi
-
-ZIP_URL="$DOWNLOAD_PATH/$ZIP"
-ZIP_FILE="lissom-skills-tmp.zip"
-echo "Downloading $ZIP..."
-curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"
 
 SAVED_KEYS=()
 SAVED_VALUES=()
@@ -137,7 +110,7 @@ restore_frontmatter_fields() {
         field="${SAVED_KEYS[$i]##*|}"
         value="${SAVED_VALUES[$i]}"
         if grep -q "^${field}:" "$path"; then
-            sed -i "s|^${field}:.*|${field}: ${value}|" "$path"
+            sed "s|^${field}:.*|${field}: ${value}|" "$path" > "$path.tmp" && mv "$path.tmp" "$path"
         else
             awk -v line="${field}: ${value}" '
                 /^---$/ { c++; if(c==2) { print line } }
@@ -186,6 +159,36 @@ print_agent_models() {
     echo ""
 }
 
+if [[ "$1" == "--source-only" ]]; then
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]] && return || exit 0
+fi
+
+
+parse_no_args "$@"
+
+INSTALL_TARGET=$(prompt_target_directory)
+TARGET="./$INSTALL_TARGET"
+
+case "$INSTALL_TARGET" in
+    .claude)   ZIP="lissom-skills-claude.zip" ;;
+    .opencode) ZIP="lissom-skills-opencode.zip" ;;
+    .qwen)     ZIP="lissom-skills-qwen.zip" ;;
+    .gemini)   ZIP="lissom-skills-gemini.zip" ;;
+    .pi)       ZIP="lissom-skills-pi.zip" ;;
+    *) echo "Error: Unknown target $INSTALL_TARGET" >&2; exit 1 ;;
+esac
+
+if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
+    if [[ "$(prompt_overwrite "$TARGET")" != "true" ]]; then
+        echo "Installation cancelled."
+        exit 0
+    fi
+fi
+
+ZIP_URL="$DOWNLOAD_PATH/$ZIP"
+ZIP_FILE="lissom-skills-tmp.zip"
+echo "Downloading $ZIP..."
+curl -fsSL "$ZIP_URL" -o "$ZIP_FILE"
 if [[ -d "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then
     save_frontmatter_fields "$TARGET"
 fi
