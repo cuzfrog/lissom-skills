@@ -7,8 +7,7 @@ Ports logic from the backed-up opencode.sh.
 
 from scripts.lib.constants import (
     OPENCODE_MODEL_MAP,
-    TOOL_NAME_MAPPING,
-    TOOL_TO_PERMISSION,
+    OPENCODE_TOOL_NAME_MAPPING,
 )
 from scripts.lib.converter import Converter
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
@@ -54,14 +53,14 @@ class OpencodeConverter(Converter):
         lines.append("temperature: 0.1")
         lines.append("permission:")
         for tool in tool_list:
-            perm = TOOL_TO_PERMISSION.get(tool, tool.lower())
+            perm = OPENCODE_TOOL_NAME_MAPPING.get(tool, tool.lower())
             lines.append(f"  {perm}: allow")
         lines.append("---")
 
         new_content = "\n".join(lines) + "\n"
         if body:
             # Rewrite body tool names
-            body = rewrite_backtick_tools(body, TOOL_NAME_MAPPING)
+            body = rewrite_backtick_tools(body, OPENCODE_TOOL_NAME_MAPPING)
             new_content += body
 
         return new_content
@@ -77,5 +76,5 @@ class OpencodeConverter(Converter):
         Returns: converted content string.
         """
         # Only rewrite body tool names — frontmatter preserved
-        return rewrite_backtick_tools(content, TOOL_NAME_MAPPING)
+        return rewrite_backtick_tools(content, OPENCODE_TOOL_NAME_MAPPING)
 

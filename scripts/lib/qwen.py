@@ -6,9 +6,8 @@ Ports logic from the backed-up qwen.sh.
 """
 
 from scripts.lib.constants import (
-    CLAUDE_TO_QWEN_BODY,
-    CLAUDE_TO_QWEN_TOOL,
     QWEN_MODEL_MAP,
+    QWEN_TOOL_NAME_MAPPING,
 )
 from scripts.lib.converter import Converter
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools, shift_args
@@ -27,8 +26,8 @@ class QwenConverter(Converter):
            - name, description (preserved)
            - model: <qwen model for agent_name> (only when mapped)
            - tools: as YAML list — for each Claude Code tool, emit "  - <qwen_name>"
-             using CLAUDE_TO_QWEN_TOOL map. Skip AskUserQuestion (NOT in map).
-        3. Rewrite body tool names using CLAUDE_TO_QWEN_BODY map.
+             using QWEN_TOOL_NAME_MAPPING map.
+        3. Rewrite body tool names using QWEN_TOOL_NAME_MAPPING map.
         4. Shift $N args forward by 1.
 
         Returns: fully converted content string.
@@ -51,14 +50,14 @@ class QwenConverter(Converter):
             lines.append(f"model: {model}")
         lines.append("tools:")
         for tool in tool_list:
-            qwen_tool = CLAUDE_TO_QWEN_TOOL.get(tool)
+            qwen_tool = QWEN_TOOL_NAME_MAPPING.get(tool)
             if qwen_tool:
                 lines.append(f"  - {qwen_tool}")
         lines.append("---")
 
         new_content = "\n".join(lines) + "\n"
         if body:
-            body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
+            body = rewrite_backtick_tools(body, QWEN_TOOL_NAME_MAPPING)
             body = shift_args(body)
             new_content += body
 
@@ -99,7 +98,7 @@ class QwenConverter(Converter):
 
         new_content = "\n".join(lines) + "\n"
         if body:
-            body = rewrite_backtick_tools(body, CLAUDE_TO_QWEN_BODY)
+            body = rewrite_backtick_tools(body, QWEN_TOOL_NAME_MAPPING)
             body = shift_args(body)
             new_content += body
 

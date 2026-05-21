@@ -69,7 +69,7 @@ Supported:
 - `.opencode/` [OpenCode](https://opencode.ai).
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode).
 - `.gemini/` [Gemini CLI](https://geminicli.com).
-- `.pi/` [Pi CLI](https://pi.dev) — requires [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents).
+- `.pi/` [Pi CLI](https://pi.dev) — requires [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents), [`ghoseb/pi-askuserquestion`](https://github.com/ghoseb/pi-askuserquestion)
 
 ### Uninstallation
 
@@ -91,11 +91,10 @@ Only files originally installed by this bundle are removed — any custom files 
 2. If not found, it tries to locate with tools (e.g. JIRA MCP)
 
 ### Best practices
-
+- Don't outsource your thinking. Review architecture and code structure. You should understand your code.
 - Use a simple [grill-me](doc/grill-me.md) skill to build the `Specs.md`. ([mattpocock/skills](https://github.com/mattpocock/skills))
 - Steer the behavior: `/lissom-auto <task_id> Directly go to plan phase, I have a well-written spec already.`
 - Define test methods (development cycle) clearly (e.g. in `CLAUDE.md`)
-- Review architecture and code structure. You should understand your code.
 
 ---
 

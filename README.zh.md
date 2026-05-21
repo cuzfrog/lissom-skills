@@ -39,7 +39,7 @@
 - 我有一个想法，帮我完善规范并自动化实现。
 
 #### 何时不使用？
-- 简单任务 — 直接在一个代理中完成。
+- 琐碎或小型任务。
 - 探索性任务 — 使用 `/explore`。
 
 ### 基本工作流
@@ -69,11 +69,11 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 - `.opencode/` [OpenCode](https://opencode.ai)。
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
 - `.gemini/` [Gemini CLI](https://geminicli.com)。
-- `.pi/` [Pi CLI](https://pi.dev) — 需要 [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents)。
+- `.pi/` [Pi CLI](https://pi.dev) — 需要 [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents)、[`ghoseb/pi-askuserquestion`](https://github.com/ghoseb/pi-askuserquestion)。
 
 ### 卸载
 
-删除当前项目中 `.claude/` 和 `.opencode/` 目录中的所有已安装文件：
+从当前项目中删除所有已安装文件：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
@@ -91,11 +91,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 2. 如果未找到，会尝试通过外部工具定位（例如 JIRA MCP）
 
 ### 最佳实践
-
+- 不要外包你的思考。审查架构和代码结构。你应该了解自己的代码。
 - 使用简单的 [grill-me](doc/grill-me.md) 技能来构建 `Specs.md`。([mattpocock/skills](https://github.com/mattpocock/skills))
 - 引导行为：`/lissom-auto <task_id> 直接进入规划阶段，我已写好完善的规范。`
 - 明确定义测试方法（开发周期）（例如在 `CLAUDE.md` 中）。
-- 审查架构和代码结构。你应该了解自己的代码。
 
 ---
 

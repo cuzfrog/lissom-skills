@@ -6,9 +6,8 @@ Ports logic from the backed-up gemini.sh.
 """
 
 from scripts.lib.constants import (
-    CLAUDE_TO_GEMINI_BODY,
-    CLAUDE_TO_GEMINI_TOOL,
     GEMINI_MODEL_MAP,
+    GEMINI_TOOL_NAME_MAPPING,
 )
 from scripts.lib.converter import Converter
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools, shift_args
@@ -28,8 +27,8 @@ class GeminiConverter(Converter):
            - temperature: 0.1 (always added, before model)
            - model: <gemini model for agent_name> (only when mapped)
            - tools: as YAML list — for each Claude Code tool, emit "  - <gemini_name>"
-             using CLAUDE_TO_GEMINI_TOOL map. AskUserQuestion IS included (→ ask_user).
-        3. Rewrite body tool names using CLAUDE_TO_GEMINI_BODY map.
+             using GEMINI_TOOL_NAME_MAPPING map.
+        3. Rewrite body tool names using GEMINI_TOOL_NAME_MAPPING.
         4. Shift $N args forward by 1.
 
         Returns: fully converted content string.
@@ -53,14 +52,14 @@ class GeminiConverter(Converter):
             lines.append(f"model: {model}")
         lines.append("tools:")
         for tool in tool_list:
-            gemini_tool = CLAUDE_TO_GEMINI_TOOL.get(tool)
+            gemini_tool = GEMINI_TOOL_NAME_MAPPING.get(tool)
             if gemini_tool:
                 lines.append(f"  - {gemini_tool}")
         lines.append("---")
 
         new_content = "\n".join(lines) + "\n"
         if body:
-            body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
+            body = rewrite_backtick_tools(body, GEMINI_TOOL_NAME_MAPPING)
             body = shift_args(body)
             new_content += body
 
@@ -100,7 +99,7 @@ class GeminiConverter(Converter):
 
         new_content = "\n".join(lines) + "\n"
         if body:
-            body = rewrite_backtick_tools(body, CLAUDE_TO_GEMINI_BODY)
+            body = rewrite_backtick_tools(body, GEMINI_TOOL_NAME_MAPPING)
             body = shift_args(body)
             new_content += body
 

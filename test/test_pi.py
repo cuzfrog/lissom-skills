@@ -64,3 +64,16 @@ class TestPiConverter:
         result = converter.convert_agent(content, "lissom-researcher")
         assert "`$0`" in result
         assert "`$1`" in result
+
+    def test_convert_agent_ask_user_question_in_tools(self):
+        """AskUserQuestion maps to ask_user_question in tools frontmatter."""
+        content = "---\nname: test\ndescription: test\ntools: Bash, AskUserQuestion\n---\nbody\n"
+        result = converter.convert_agent(content, "lissom-researcher")
+        assert "tools: bash, ask_user_question" in result
+
+    def test_convert_agent_ask_user_question_in_body(self):
+        """`AskUserQuestion` → `ask_user_question` in body text."""
+        content = "---\nname: test\ndescription: test\ntools: AskUserQuestion\n---\nUse `AskUserQuestion` to ask.\n"
+        result = converter.convert_agent(content, "lissom-researcher")
+        assert "`ask_user_question`" in result
+        assert "`AskUserQuestion`" not in result

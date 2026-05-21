@@ -4,7 +4,7 @@ Pi CLI format converter.
 Converts Claude Code agent/skill .md files to Pi format.
 """
 
-from scripts.lib.constants import CLAUDE_TO_PI_BODY, CLAUDE_TO_PI_TOOL_FLAG
+from scripts.lib.constants import PI_TOOL_NAME_MAPPING
 from scripts.lib.converter import Converter
 from scripts.lib.frontmatter import parse_frontmatter, rewrite_backtick_tools
 
@@ -21,10 +21,10 @@ class PiConverter(Converter):
         2. Build new frontmatter:
            - name, description (preserved)
            - tools: field preserved with tool names converted to Pi --tools
-             flag names via CLAUDE_TO_PI_TOOL_FLAG
+             flag names via PI_TOOL_NAME_MAPPING
              (the LLM reads the frontmatter naturally at runtime)
            - No model, no temperature (subagent inherits Pi defaults).
-        3. Rewrite body tool names using CLAUDE_TO_PI_BODY map.
+        3. Rewrite body tool names using PI_TOOL_NAME_MAPPING.
         4. $0, $1, etc. argument references stay unchanged.
 
         Returns: fully converted content string.
@@ -34,14 +34,16 @@ class PiConverter(Converter):
         name = fields.get("name", agent_name)
         description = fields.get("description", "")
 
+        mapping = PI_TOOL_NAME_MAPPING
+
         # Convert tools field to Pi --tools flag names so the LLM can read them from frontmatter
         tools_raw = fields.get("tools", "")
         if tools_raw:
             pi_tools = []
             for t in tools_raw.split(","):
                 t = t.strip()
-                if t in CLAUDE_TO_PI_TOOL_FLAG:
-                    mapped = CLAUDE_TO_PI_TOOL_FLAG[t]
+                if t in mapping:
+                    mapped = mapping[t]
                     # Some entries (Glob) map to comma-separated multiple flags
                     pi_tools.extend(p.strip() for p in mapped.split(","))
                 else:
@@ -59,7 +61,7 @@ class PiConverter(Converter):
 
         new_content = "\n".join(lines) + "\n"
         if body:
-            body = rewrite_backtick_tools(body, CLAUDE_TO_PI_BODY)
+            body = rewrite_backtick_tools(body, mapping)
             new_content += body
 
         return new_content

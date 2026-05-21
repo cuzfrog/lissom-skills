@@ -39,7 +39,7 @@
 - アイデアがある。仕様を詰めて実装を自動化したい。
 
 #### いつ使わないのか？
-- 簡単なタスク — 1つのエージェントで完結。
+- 簡単なタスク。
 - 探索的なタスク — `/explore` を使用。
 
 ### 基本ワークフロー
@@ -69,11 +69,11 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 - `.opencode/` [OpenCode](https://opencode.ai)。
 - `.qwen/` [Qwen Code](https://qwen.ai/qwencode)。
 - `.gemini/` [Gemini CLI](https://geminicli.com)。
-- `.pi/` [Pi CLI](https://pi.dev) — [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents) が必要です。
+- `.pi/` [Pi CLI](https://pi.dev) — [`tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents)、[`ghoseb/pi-askuserquestion`](https://github.com/ghoseb/pi-askuserquestion) が必要です。
 
 ### アンインストール
 
-カレントプロジェクトの `.claude/` および `.opencode/` ディレクトリからインストール済みファイルをすべて削除：
+カレントプロジェクトからインストール済みファイルをすべて削除：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/uninstall.sh | bash
@@ -91,11 +91,10 @@ curl -fsSL https://raw.githubusercontent.com/cuzfrog/lissom-skills/main/scripts/
 2. 見つからない場合、外部ツール（JIRA MCP など）で特定を試みる
 
 ### ベストプラクティス
-
+- 思考を外注しないでください。アーキテクチャとコード構造をレビューしてください。自分のコードを理解すべきです。
 - 簡単な [grill-me](doc/grill-me.md) スキルを使って `Specs.md` を構築する。([mattpocock/skills](https://github.com/mattpocock/skills))
 - 動作の制御：`/lissom-auto <task_id> 直接計画フェーズに進んでください。仕様はすでに十分に書かれています。`
 - テスト方法（開発サイクル）を明確に定義する（例：`CLAUDE.md` に記載）。
-- アーキテクチャとコード構造をレビューする。自分のコードを理解すべきです。
 
 ---
 
